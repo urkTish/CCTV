@@ -53,6 +53,7 @@ import { JumpPalette, type JumpTarget } from './JumpPalette.tsx';
 import { LocationDetail, LocationList } from './LocationsSection.tsx';
 import { OverviewSection } from './OverviewSection.tsx';
 import { collectWarnings, SECTIONS, sectionDef, sectionStatuses, type SectionId } from './sections.ts';
+import { ReportSection } from './ReportSection.tsx';
 import { SettingsSection } from './SettingsSection.tsx';
 
 const NAV_PREF_KEY = 'contractech-cctv.nav-collapsed';
@@ -173,7 +174,7 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
   const statuses = useMemo(() => sectionStatuses(statusInputs, warnings), [warnings]); // eslint-disable-line react-hooks/exhaustive-deps
   const autosave = useAutosave(project, units, extras);
 
-  const navSections = SECTIONS.filter((s) => s.id !== 'report');
+  const navSections = SECTIONS;
 
   // --- actions ------------------------------------------------------------------
   const navigate = useCallback((id: SectionId) => {
@@ -455,6 +456,19 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
     case 'bom':
       content = <BomSection bom={bom} extras={extras} onExtras={setExtras} />;
       break;
+    case 'report':
+      content = (
+        <ReportSection
+          project={project}
+          extras={extras}
+          profile={profile}
+          bom={bom}
+          assumedLeft={toConfirmTotal}
+          onExtras={setExtras}
+          onNavigate={navigate}
+        />
+      );
+      break;
     case 'settings':
       content = <SettingsSection profile={profile} onProfile={setProfile} />;
       break;
@@ -504,9 +518,9 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
           }}
           sections={navSections}
         />
-        <main id="main" className="min-w-0 flex-1 px-4 py-5 lg:px-6">
+        <main id="main" className="min-w-0 flex-1 px-4 py-5 lg:px-6 print:p-0">
           {banner && (
-            <div className="mb-4">
+            <div className="mb-4 print:hidden">
               <Notice
                 kind={banner.kind}
                 role="alert"
@@ -523,7 +537,7 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
           <SectionFrame def={sectionDef(section)} status={section === 'settings' ? null : statuses[section]} actions={actions} headingRef={headingRef} prev={section === 'settings' ? null : prev} next={section === 'settings' ? null : next} onNavigate={navigate}>
             {content}
           </SectionFrame>
-          <footer className="mt-10 border-t border-[var(--color-border)] pt-4 text-xs text-[var(--color-ink-3)]">
+          <footer className="mt-10 border-t print:hidden border-[var(--color-border)] pt-4 text-xs text-[var(--color-ink-3)]">
             <p>
               Pixel-density thresholds from IEC 62676-4:2014 as reproduced in the Axis white paper &ldquo;Pixel density based on IEC
               62676-4:2014&rdquo;. &ldquo;

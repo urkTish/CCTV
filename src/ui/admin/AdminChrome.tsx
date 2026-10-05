@@ -93,7 +93,7 @@ export function AdminHeader({
   navOpen: boolean;
 }) {
   return (
-    <header className="sticky top-0 z-30 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <header className="sticky top-0 z-30 border-b print:hidden border-[var(--color-border)] bg-[var(--color-surface)]">
       <div className="flex items-center gap-2 px-3 py-2 sm:gap-3 sm:px-4">
         <button
           type="button"
@@ -216,7 +216,7 @@ export function AdminNav({
         onKeyDown={(e) => {
           if (e.key === 'Escape' && drawerOpen) onCloseDrawer();
         }}
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)] transition-transform duration-[var(--duration-base)] ease-[var(--ease-standard)] lg:sticky lg:top-[3.25rem] lg:z-10 lg:h-[calc(100vh-3.25rem)] lg:translate-x-0 lg:visible ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col print:hidden border-r border-[var(--color-border)] bg-[var(--color-surface)] transition-transform duration-[var(--duration-base)] ease-[var(--ease-standard)] lg:sticky lg:top-[3.25rem] lg:z-10 lg:h-[calc(100vh-3.25rem)] lg:translate-x-0 lg:visible ${
           drawerOpen ? 'translate-x-0 visible shadow-[var(--shadow-popover)]' : 'invisible -translate-x-full'
         } ${collapsed ? 'lg:w-16' : 'lg:w-58'}`}
       >
@@ -290,7 +290,7 @@ export function SectionFrame({
 }) {
   return (
     <div className="@container/section">
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3 print:hidden">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h2 ref={headingRef} tabIndex={-1} className="text-display font-semibold text-[var(--color-ink)] focus:outline-none">
@@ -304,7 +304,7 @@ export function SectionFrame({
       </div>
       {children}
       {(prev || next) && (
-        <nav aria-label="Workflow" className="mt-8 flex flex-wrap justify-between gap-3 border-t border-[var(--color-border)] pt-4">
+        <nav aria-label="Workflow" className="mt-8 flex print:hidden flex-wrap justify-between gap-3 border-t border-[var(--color-border)] pt-4">
           {prev ? (
             <button type="button" onClick={() => onNavigate(prev.id)} className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-accent)] hover:underline">
               <Icon name="arrow-left" size={16} />

@@ -13,8 +13,8 @@ Brief: `uiux-agent-prompt.md` (owner's explicit command given). Audit + IA:
   with optional prices, Settings (engineer profile), workspace envelope for
   extras, client-intake mapping module.
 - **Done since:** U13 client wizard (`src/client/ClientApp.tsx`), U14 handoff.
-- **Resume at:**
-  U15–U16 (report), U17 (close-out).
+- **Done since:** U15–U16 client report (`src/report/`), Admin → Report.
+- **Resume at:** U17 (close-out: README, ASSUMPTIONS, final checks).
 - Engine, data files, existing schemas and `buildBillOfMaterials` untouched.
 - Browser checks: scripts in the session scratchpad (`uiux/`), not in the repo.
 

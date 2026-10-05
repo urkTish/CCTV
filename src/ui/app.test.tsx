@@ -339,18 +339,18 @@ describe('ContracTech header branding', () => {
     expect(html).toContain(`<title>${APP_TITLE}</title>`);
   });
 
-  it('never uses the company stamp in the UI', () => {
-    const offenders: string[] = [];
+  it('uses the company stamp only in the report’s sign-off block (the stamp on a final report: report.test.tsx)', () => {
+    const users: string[] = [];
     const walk = (dir: string) => {
       for (const entry of readdirSync(dir)) {
         const p = join(dir, entry);
         if (statSync(p).isDirectory()) { walk(p); continue; }
         if (!/\.(tsx?|css|html)$/.test(entry) || /\.test\.tsx?$/.test(entry) || entry === 'brand.ts') continue;
-        if (/STAMP_URL|contractech-stamp|company-stamp/.test(readFileSync(p, 'utf8'))) offenders.push(p);
+        if (/STAMP_URL|contractech-stamp|company-stamp/.test(readFileSync(p, 'utf8'))) users.push(p.slice(root.length + 1).replace(/\\/g, '/'));
       }
     };
     walk(join(root, 'src'));
-    expect(offenders).toEqual([]);
+    expect(users).toEqual(['src/report/SignOff.tsx']);
   });
 });
 

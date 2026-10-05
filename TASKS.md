@@ -58,7 +58,7 @@ Order is dependencies-first, as the brief requires.
 |---|---|---|---|
 | K1 | Site-plan types: image, calibration, devices (camera/NVR/switch), routes, routing factor | Types compile | done |
 | K2 | Scale math: px → m from a calibration line; polyline length; straight-line × routing factor estimate | Worked-example tests | done |
-| K3 | Project file save/open (.json with image data URI) with schema validation | Round-trip test; corrupt file rejected with reason | pending |
+| K3 | Project file save/open (.json with image data URI) with schema validation | Round-trip test; corrupt file rejected with reason | done |
 
 ### L. CAT6 cable math (pure)
 

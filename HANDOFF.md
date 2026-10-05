@@ -1,5 +1,14 @@
 # Handoff — where phase 2 stopped
 
+## CURRENT STATE (cloud session 2, keep this section current)
+
+- **Done this session:** K3 (project file save/open: `src/state/projectFile.ts` + test).
+- **Resume at:** M1 (site map UI), then M2–M6 → N1–N2 → O1–O5.
+- Tooling in this Linux container: run `node node_modules/vitest/vitest.mjs run`,
+  `node node_modules/typescript/bin/tsc -b`, `node node_modules/eslint/bin/eslint.js .`
+  (the `.bin` shims are not executable). Never stage `node_modules/` or `dist/`.
+
+
 **Stopped:** 2026-10-05, on the owner's instruction ("stop all"). The agent was
 stopped mid-task, not at a planned checkpoint.
 

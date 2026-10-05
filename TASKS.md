@@ -109,3 +109,35 @@ Source folder `C:\Users\Admin\Desktop\Contractech\Files\` is read-only: only the
 | O3 | Build clean (TS strict, no `any`) | Real output in report | done — `tsc -b` exit 0, `vite build` ok (chunk-size advisory only) |
 | O4 | Update ASSUMPTIONS.md and README.md | Files current, no mojibake | done — ASSUMPTIONS 10 and 11 added |
 | O5 | Review own diff as a reviewer; report honestly | Final report | done — fixes listed in HANDOFF |
+
+---
+
+## UI/UX redesign — Admin, Client, client report
+
+Brief: `uiux-agent-prompt.md`. Audit and information architecture:
+`docs/uiux-audit-and-ia.md` (written before any code). Owner decisions: the PoE
+choice and the recorder form factor are the client's options — asked in plain
+language in the intake with a sensible default, and always reachable in Admin.
+The engine, data files, schemas and `buildBillOfMaterials` are not changed.
+Every visual task is checked in real Chromium at 1440 px and 380 px, light and
+dark.
+
+| # | Task | Verification | Status |
+|---|---|---|---|
+| U1 | Audit the phase-2 app in a real browser; write the audit and the IA for both versions | `docs/uiux-audit-and-ia.md` committed before code | done |
+| U2 | Design tokens: brand blue + derived accessible shades, type scale, spacing, radius, elevation, motion, light/dark | Contrast unit test computes WCAG ratios for every token pair used; browser check | pending |
+| U3 | Shared components: icons, status badge, tabs, Advanced disclosure with changed count, dialog, empty state, field flag slot | jsdom tests (keyboard on tabs, dialog focus) | pending |
+| U4 | Routing (`#/client`, `#/intake/…`, project hash) and the Admin shell: header, collapsible left nav / phone drawer, per-section status | Pure tests for route parsing and section status; jsdom nav test; browser check | pending |
+| U5 | Overview dashboard: project name, totals, cameras by model, every open warning linked to where it is fixed | jsdom test; browser check | pending |
+| U6 | Locations list → detail; input tabs with Advanced disclosure; results tabs (recommendation, spec sheet, calculation, sketch, alternatives, excluded) | Existing UI assertions kept (15-field order, Not specified, derived, Unverified, no-result path); browser check | pending |
+| U7 | Recording & storage, Network and Cabling sections (settings beside their results, advanced allowances behind a disclosure; PoE and form factor kept as primary inputs) | Existing design tests kept; browser check | pending |
+| U8 | Site map as a workspace: toolbar, canvas, side panel for the selected device, device list | Existing site-map tests kept; browser check | pending |
+| U9 | Search / jump palette (Ctrl/⌘ K) | jsdom test | pending |
+| U10 | Workspace extras (client name, prices, report status, intake provenance) in a new envelope file + autosave; engineer Settings | Round-trip tests; old project files still open | pending |
+| U11 | Bill of materials section with optional prices | jsdom test; browser check | pending |
+| U12 | Client-to-engine mapping module with documented defaults | Unit tests for every answer and default | pending |
+| U13 | Client intake wizard (mobile-first), indicative summary, send as file / link | jsdom test of the whole flow; browser check on a phone | pending |
+| U14 | Handoff: open an intake file / link as a draft; "assumed from client intake — please confirm" on every defaulted value; confirm or edit to clear | jsdom test | pending |
+| U15 | Report model (pure, from `buildBillOfMaterials`) and an offline QR encoder | Unit tests; QR output decoded by an independent decoder | pending |
+| U16 | Report view + A4 print CSS: cover, summary, map, areas, system, BOM, datasheets, assumptions, sign-off; draft watermark; Final behind confirmation with the stamp | jsdom tests per section; Chromium print-to-PDF checked page by page | pending |
+| U17 | Close-out: README, ASSUMPTIONS, HANDOFF; lint, test, build; review own diff | Real output in the report | pending |

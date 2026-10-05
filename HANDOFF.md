@@ -25,7 +25,18 @@ stopped mid-task, not at a planned checkpoint.
 | O. Close-out | all 5 pending |
 | P. ContracTech branding | done |
 
-## Resume here
+## Update — 2026-10-05, cloud session
+
+- The pinned-NVR edit in `recommendNvr` was reviewed: complete, and covered by
+  three tests (fails, fits, stale id). Nothing to change.
+- **J1–J3 done.** The switch engine code already existed; this session added
+  `groupingInputsFromTopology` (site plan → switch groups, using the same
+  installed run length as the cable plan) and `src/engine/switchEngine.test.ts`
+  (24 tests: grouping, one test per check, selection). No engine bugs found.
+- Tests **283 / 283**, `tsc -b` clean, lint clean.
+- **Next: K3**, then M1–M6 → N1–N2 → O1–O5.
+
+## Resume here (original notes)
 
 1. **Check first.** The agent was stopped while editing `recommendNvr` in
    `src/engine/nvrEngine.ts`, adding engineer "pinning" of a chosen NVR via

@@ -48,9 +48,9 @@ Order is dependencies-first, as the brief requires.
 
 | # | Task | Verification | Status |
 |---|---|---|---|
-| J1 | Group cameras per switch from the site plan (or a single default group when no map) | Test | in progress |
-| J2 | Checks: port count + spare %, PoE budget + headroom, per-port standard (at/bt for PTZ/heated), uplink bandwidth, long-range PoE for 100–250 m runs | One test per check | pending |
-| J3 | Managed/unmanaged default rule, uplink type, select model per switch, list cameras per switch | Engine test | pending |
+| J1 | Group cameras per switch from the site plan (or a single default group when no map) | Test | done |
+| J2 | Checks: port count + spare %, PoE budget + headroom, per-port standard (at/bt for PTZ/heated), uplink bandwidth, long-range PoE for 100–250 m runs | One test per check | done |
+| J3 | Managed/unmanaged default rule, uplink type, select model per switch, list cameras per switch | Engine test | done |
 
 ### K. Site plan data model and scale math (pure)
 

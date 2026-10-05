@@ -10,9 +10,11 @@
 
 import type { PoeSwitch } from '../data/products.ts';
 import type { PriceTier } from '../data/shared.ts';
-import type { SwitchSettings } from '../domain/designSettings.ts';
+import { computeRun } from '../domain/cabling.ts';
+import type { CableSettings, SwitchSettings } from '../domain/designSettings.ts';
 import { poeStandard, type PoeStandard } from '../domain/power.ts';
 import { HIKVISION_EXTEND_MODE, TIA568 } from '../domain/standards.ts';
+import type { Topology } from './topology.ts';
 
 export interface SwitchCamera {
   readonly key: string;
@@ -433,4 +435,53 @@ export function groupCameras(
     }
   }
   return [...groups.entries()].map(([id, g]) => ({ id, label: g.label, atRack: g.atRack, cameras: g.cameras, uplinkMetres: g.uplink }));
+}
+
+/**
+ * The grouping inputs for a project, read off its topology: each camera's
+ * endpoint (a placed switch, or the rack) and its INSTALLED run length — the
+ * same route + camera drop + rack drop + service loop that the cable plan
+ * uses, so the long-range check and the TIA check see the same metres.
+ * Uplink lengths are installed lengths too (a rack drop at both ends).
+ */
+export function groupingInputsFromTopology(
+  topology: Topology,
+  cabling: CableSettings,
+): { readonly inputs: readonly GroupingInput[]; readonly uplinkMetresBySwitch: ReadonlyMap<string, number> } {
+  const inputs = topology.links.map<GroupingInput>((l) => {
+    const run = computeRun(
+      {
+        id: l.instance.key,
+        label: l.instance.label,
+        kind: 'camera',
+        horizontalMetres: l.horizontalMetres,
+        cameraDropMetres: l.instance.mountHeightMetres,
+        basis: l.basis,
+        isEstimate: l.isEstimate,
+      },
+      cabling,
+    );
+    return {
+      camera: {
+        key: l.instance.key,
+        label: l.instance.label,
+        poeStandard: l.instance.poeStandard,
+        drawWatts: l.instance.poeDrawWatts,
+        peakKbps: l.instance.peakKbps,
+        runMetres: run.installedMetres,
+      },
+      switchId: l.endpoint.kind === 'switch' ? l.endpoint.switchId : null,
+      switchLabel: l.endpoint.kind === 'switch' ? l.endpoint.label : null,
+    };
+  });
+  const uplinkMetresBySwitch = new Map(
+    topology.uplinks.map((u) => [
+      u.switchId,
+      computeRun(
+        { id: u.switchId, label: u.label, kind: 'uplink', horizontalMetres: u.horizontalMetres, cameraDropMetres: 0, basis: u.basis, isEstimate: u.isEstimate },
+        cabling,
+      ).installedMetres,
+    ]),
+  );
+  return { inputs, uplinkMetresBySwitch };
 }

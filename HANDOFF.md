@@ -2,8 +2,11 @@
 
 ## CURRENT STATE (cloud session 2, keep this section current)
 
-- **Done this session:** K3 (project file save/open: `src/state/projectFile.ts` + test).
-- **Resume at:** M1 (site map UI), then M2–M6 → N1–N2 → O1–O5.
+- **Done this session:** K3 (project file save/open), M1–M4 and M6 (site map editor
+  `src/ui/SiteMapPanel.tsx`, edits in `src/domain/sitePlanEdit.ts`, view model in
+  `src/engine/siteMapView.ts`, upload in `src/domain/planImage.ts`, Save/Open +
+  IndexedDB autosave). **M5 (OSM/Leaflet) deferred** — see ASSUMPTIONS 11.6.
+- **Resume at:** N1 (wire storage/NVR/switch/cable into totals + results section), then N2 → O1–O5.
 - Tooling in this Linux container: run `node node_modules/vitest/vitest.mjs run`,
   `node node_modules/typescript/bin/tsc -b`, `node node_modules/eslint/bin/eslint.js .`
   (the `.bin` shims are not executable). Never stage `node_modules/` or `dist/`.

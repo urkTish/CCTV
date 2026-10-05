@@ -1,6 +1,6 @@
 # Task list — CCTV Camera Specification & Recommendation Platform
 
-Status key: `pending` / `in progress` / `done` / `blocked`
+Status key: `pending` / `in progress` / `done` / `blocked` / `deferred` (not built, reason given)
 
 ## Phase 1 — complete
 
@@ -73,12 +73,12 @@ Order is dependencies-first, as the brief requires.
 
 | # | Task | Verification | Status |
 |---|---|---|---|
-| M1 | Image upload (PNG/JPG; PDF first page if feasible, otherwise stated as unsupported) | jsdom test of upload path / clear message | pending |
-| M2 | Calibrate scale by drawing a line + entering its length; show scale; recalibrate | Test via the list alternative + pure math tests | pending |
-| M3 | Place/drag cameras (FOV cone, rotatable), NVR, switches; draw route polylines; estimated routes marked | Rendered in jsdom; pure math tested | pending |
-| M4 | Keyboard/list alternative: table of devices with editable x/y, rotation, route length | jsdom test edits a device without a pointer | pending |
-| M5 | Optional OSM mode via Leaflet, tile-policy compliant (attribution, no bulk); off by default | Policy checked and cited | pending |
-| M6 | Persistence: Save/Open .json, IndexedDB autosave in try/catch; UI says URL sharing excludes the map | Tests | pending |
+| M1 | Image upload (PNG/JPG; PDF first page if feasible, otherwise stated as unsupported) | jsdom test of upload path / clear message | done — PNG/JPG only; PDF refused with a stated reason (no PDF renderer shipped, ASSUMPTIONS 11.1) |
+| M2 | Calibrate scale by drawing a line + entering its length; show scale; recalibrate | Test via the list alternative + pure math tests | done |
+| M3 | Place/drag cameras (FOV cone, rotatable), NVR, switches; draw route polylines; estimated routes marked | Rendered in jsdom; pure math tested | done |
+| M4 | Keyboard/list alternative: table of devices with editable x/y, rotation, route length | jsdom test edits a device without a pointer | done |
+| M5 | Optional OSM mode via Leaflet, tile-policy compliant (attribution, no bulk); off by default | Policy checked and cited | deferred — needs the `leaflet` package (not installed; no new dependencies this phase) and the policy page could not be fetched from this environment to re-verify. Requirements recorded in ASSUMPTIONS 11.6 |
+| M6 | Persistence: Save/Open .json, IndexedDB autosave in try/catch; UI says URL sharing excludes the map | Tests | done |
 
 ### N. Integration
 

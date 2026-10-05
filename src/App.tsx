@@ -12,6 +12,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { recommend } from './engine/recommend.ts';
+import { recommendAll } from './engine/projectDesign.ts';
 import { cameraDataset } from './data/cameras.ts';
 import { PURPOSES } from './domain/dori.ts';
 import {
@@ -19,6 +20,7 @@ import {
   replaceLocation,
   nextLocationId,
   projectTotals,
+  pruneSitePlan,
   defaultLocation,
   type Project,
   type UnitSystemState,
@@ -26,6 +28,9 @@ import {
 import { encodeProject, readStateFromHash } from './state/urlState.ts';
 import { InputPanel } from './ui/InputPanel.tsx';
 import { ResultsPanel } from './ui/ResultsPanel.tsx';
+import { SiteMapPanel } from './ui/SiteMapPanel.tsx';
+import { ProjectFileBar } from './ui/ProjectFileBar.tsx';
+import { useAutosave } from './ui/useAutosave.ts';
 import { Button, Card } from './ui/primitives.tsx';
 import { COMPANY_NAME, LOGO_LIGHT_URL, LOGO_DARK_URL, LOGO_INTRINSIC } from './brand.ts';
 
@@ -54,6 +59,9 @@ export default function App() {
   const location = activeLocation(project);
   const result = useMemo(() => recommend(location), [location]);
   const totals = useMemo(() => projectTotals(project), [project]);
+  const locations = project.locations;
+  const results = useMemo(() => recommendAll({ locations }), [locations]);
+  const autosave = useAutosave(project, units);
 
   const addLocation = useCallback(() => {
     setProject((p) => {
@@ -72,11 +80,11 @@ export default function App() {
       const locations = p.locations.filter((l) => l.id !== id);
       const first = locations[0];
       if (!first) return p;
-      return {
+      return pruneSitePlan({
         ...p,
         locations,
         activeLocationId: p.activeLocationId === id ? first.id : p.activeLocationId,
-      };
+      });
     });
   }, []);
 
@@ -263,10 +271,42 @@ export default function App() {
               Not counted, no model satisfies them yet: {totals.unresolvedLocations.join(', ')}.
             </p>
           )}
-          <p className="mt-2 text-xs text-[var(--color-ink-3)]">
-            Recorder, storage hardware, PoE switch and bill of materials are a later phase and are
-            deliberately not sized here.
-          </p>
+          <ProjectFileBar
+            project={project}
+            units={units}
+            autosaveStatus={autosave.status}
+            onOpen={(opened) => {
+              setProject(opened.project);
+              setUnits(opened.units);
+            }}
+          />
+          {autosave.offer && (
+            <div
+              role="alert"
+              className="mt-3 flex flex-wrap items-center gap-2 rounded-control border-l-4 px-3 py-2 text-sm"
+              style={{ borderColor: 'var(--color-accent)', background: 'var(--color-accent-soft)' }}
+            >
+              <span className="text-[var(--color-ink)]">
+                This browser holds an autosaved project, &ldquo;{autosave.offer.project.name}&rdquo;, with a site map.
+                Restoring it replaces the project on screen.
+              </span>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  const o = autosave.accept();
+                  if (o) {
+                    setProject(o.project);
+                    setUnits(o.units);
+                  }
+                }}
+              >
+                Restore autosave
+              </Button>
+              <Button variant="ghost" onClick={autosave.dismiss}>
+                Dismiss
+              </Button>
+            </div>
+          )}
         </Card>
       </div>
 
@@ -276,13 +316,23 @@ export default function App() {
           <InputPanel
             location={location}
             units={units}
-            onChange={(updated) => setProject((p) => replaceLocation(p, updated))}
+            onChange={(updated) => setProject((p) => pruneSitePlan(replaceLocation(p, updated)))}
           />
         </div>
         <div id="results" className="min-w-0">
           <ResultsPanel result={result} location={location} units={units} />
         </div>
       </main>
+
+      {/* --- site map ------------------------------------------------------- */}
+      <div className="mx-auto max-w-[1600px] px-4 pb-4">
+        <SiteMapPanel
+          project={project}
+          units={units}
+          results={results}
+          onPlanChange={(sitePlan) => setProject((p) => ({ ...p, sitePlan }))}
+        />
+      </div>
 
       <footer className="border-t border-[var(--color-border)] bg-[var(--color-surface)]">
         <div className="mx-auto max-w-[1600px] px-4 py-4 text-xs text-[var(--color-ink-3)]">

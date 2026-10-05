@@ -13,6 +13,7 @@ import type { PoeStandard } from '../domain/power.ts';
 import {
   cameraKey,
   deviceById,
+  enteredRun,
   horizontalRunBetween,
   primaryNvr,
   type PlacedCamera,
@@ -53,6 +54,11 @@ export function labelledMegapixels(camera: Camera): number {
   return Math.round((camera.maxResolutionWidthPx * camera.maxResolutionHeightPx) / 1e6);
 }
 
+/** "Gate" for a single camera, "Gate #2" when the location has several. */
+export function cameraLabel(loc: Location, index: number): string {
+  return loc.requirements.cameraCount > 1 ? `${loc.name} #${index}` : loc.name;
+}
+
 export function expandCameras(
   project: Project,
   results: ReadonlyMap<string, RecommendationResult>,
@@ -77,7 +83,7 @@ export function expandCameras(
         locationId: loc.id,
         locationName: loc.name,
         index: i,
-        label: loc.requirements.cameraCount > 1 ? `${loc.name} #${i}` : loc.name,
+        label: cameraLabel(loc, i),
         camera: calc.camera,
         lensLabel: calc.lens.label,
         targetKbps: calc.bitrate.targetKbps,
@@ -162,6 +168,11 @@ export function buildTopology(
       links.push({ instance: inst, endpoint, ...placeholder('Not placed on the site plan.') });
       continue;
     }
+    if (cam.runMetresOverride !== null) {
+      const run = enteredRun(cam.runMetresOverride);
+      links.push({ instance: inst, endpoint, horizontalMetres: cam.runMetresOverride, basis: run.basis, isEstimate: false, explanation: run.explanation });
+      continue;
+    }
     const endDevice = endpoint.kind === 'switch' ? target : nvr;
     if (!endDevice) {
       links.push({ instance: inst, endpoint, ...placeholder('The NVR/rack is not placed on the site plan.') });
@@ -177,7 +188,7 @@ export function buildTopology(
       endpoint,
       horizontalMetres: run.metres,
       basis: run.basis,
-      isEstimate: run.basis !== 'drawn',
+      isEstimate: run.basis === 'estimated',
       explanation: run.explanation,
     });
   }
@@ -192,6 +203,11 @@ export function buildTopology(
   for (const id of usedSwitchIds) {
     const sw = deviceById(plan, id);
     if (!sw || sw.kind !== 'switch') continue;
+    if (sw.runMetresOverride !== null) {
+      const run = enteredRun(sw.runMetresOverride);
+      uplinks.push({ switchId: id, label: sw.label, horizontalMetres: sw.runMetresOverride, basis: run.basis, isEstimate: false, explanation: run.explanation });
+      continue;
+    }
     if (!nvr) {
       uplinks.push({ switchId: id, label: sw.label, ...placeholder('The NVR/rack is not placed, so the switch uplink cannot be measured.') });
       continue;
@@ -206,7 +222,7 @@ export function buildTopology(
       label: sw.label,
       horizontalMetres: run.metres,
       basis: run.basis,
-      isEstimate: run.basis !== 'drawn',
+      isEstimate: run.basis === 'estimated',
       explanation: run.explanation,
     });
   }

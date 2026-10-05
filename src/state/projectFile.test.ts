@@ -20,8 +20,8 @@ function projectWithMap(): Project {
     calibration: { a: { x: 0, y: 0 }, b: { x: 300, y: 400 }, metres: 25 },
     devices: [
       { kind: 'nvr', id: 'nvr-1', label: 'Comms room', x: 10, y: 20 },
-      { kind: 'switch', id: 'sw-1', label: 'IDF east', x: 200, y: 20 },
-      { kind: 'camera', id: 'cam-1', locationId: 'loc-1', index: 1, x: 250, y: 300, rotationDeg: 135, connectTo: 'sw-1' },
+      { kind: 'switch', id: 'sw-1', label: 'IDF east', x: 200, y: 20, runMetresOverride: null },
+      { kind: 'camera', id: 'cam-1', locationId: 'loc-1', index: 1, x: 250, y: 300, rotationDeg: 135, connectTo: 'sw-1', runMetresOverride: null },
     ],
     routes: [{ id: 'r-1', fromId: 'cam-1', toId: 'sw-1', waypoints: [{ x: 250, y: 20 }] }],
   };

@@ -12,31 +12,70 @@
     ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', 'Roboto Mono', Menlo, monospace;
 
+  /* Type scale (Tailwind's text-xs … text-2xl stay; these are the named steps
+     the layout uses). */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-title: 1.125rem;
+  --text-title--line-height: 1.625rem;
+  --text-display: 1.5rem;
+  --text-display--line-height: 2rem;
+
   /* Spacing scale: Tailwind's default 4px step is kept; these are the named
      rhythm values the layout uses so gutters stay consistent. */
   --spacing-gutter: 1rem;
   --spacing-section: 1.5rem;
+  --spacing-nav: 14.5rem;
+  --spacing-nav-collapsed: 4rem;
 
   --radius-card: 0.75rem;
   --radius-control: 0.5rem;
+  --radius-pill: 999px;
+
+  /* Elevation. */
+  --shadow-card: 0 1px 2px rgb(16 21 28 / 0.05), 0 1px 3px rgb(16 21 28 / 0.07);
+  --shadow-raised: 0 4px 12px rgb(16 21 28 / 0.1), 0 1px 3px rgb(16 21 28 / 0.08);
+  --shadow-popover: 0 16px 40px rgb(16 21 28 / 0.22), 0 2px 6px rgb(16 21 28 / 0.12);
+
+  /* Motion. Reduced-motion users get none (rule at the end of this file). */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
 }
 
+/*
+ * Colour tokens. Every pair the UI draws text or a control boundary with is
+ * checked by a real WCAG 2.x contrast computation in src/ui/tokens.test.ts
+ * (4.5:1 for text, 3:1 for control boundaries and non-text indicators), in both
+ * themes.
+ *
+ * Brand: --color-brand is the ContracTech blue sampled from the logo (#536FFC,
+ * src/brand.ts). It is 4.16:1 on white — enough for fills, borders, focus rings
+ * and indicators (3:1), not for body text or white button labels (4.5:1). So
+ * text, links and primary-button fills use --color-accent, a darker shade of the
+ * same blue in the light theme and a lighter one in the dark theme. The brand
+ * blue is never used for pass/fail status.
+ */
 :root {
   color-scheme: light dark;
 
-  --color-canvas: #f6f7f9;
+  --color-canvas: #f5f6f8;
   --color-surface: #ffffff;
   --color-surface-2: #eef1f5;
+  --color-surface-3: #e3e8ef;
   --color-border: #d4dae2;
-  --color-border-strong: #9aa5b4;
+  --color-border-strong: #7d8a9b;
 
   --color-ink: #10151c;
   --color-ink-2: #41505f;
-  --color-ink-3: #64748b;
+  --color-ink-3: #5b6878;
 
-  --color-accent: #0b5cad;
+  --color-brand: #536ffc;
+  --color-brand-soft: #eef1ff;
+  --color-accent: #3d56d1;
+  --color-accent-hover: #3249b8;
   --color-accent-ink: #ffffff;
-  --color-accent-soft: #e3eefa;
+  --color-accent-soft: #e9edff;
 
   --color-pass: #1d6f42;
   --color-pass-soft: #e2f3e9;
@@ -47,6 +86,8 @@
 
   --color-estimate: #6b4ea8;
   --color-estimate-soft: #eee8f8;
+
+  --color-scrim: rgb(16 21 28 / 0.45);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -54,16 +95,20 @@
     --color-canvas: #0d1117;
     --color-surface: #151b23;
     --color-surface-2: #1d252f;
+    --color-surface-3: #26303c;
     --color-border: #2c3642;
-    --color-border-strong: #5b6878;
+    --color-border-strong: #6b7889;
 
     --color-ink: #eef2f6;
     --color-ink-2: #bcc7d4;
     --color-ink-3: #93a1b1;
 
-    --color-accent: #5aa7f0;
-    --color-accent-ink: #06121f;
-    --color-accent-soft: #15283c;
+    --color-brand: #536ffc;
+    --color-brand-soft: #161d3a;
+    --color-accent: #8fa1fd;
+    --color-accent-hover: #a7b5fd;
+    --color-accent-ink: #0b1020;
+    --color-accent-soft: #1a2147;
 
     --color-pass: #64d08d;
     --color-pass-soft: #11291c;
@@ -74,6 +119,8 @@
 
     --color-estimate: #b79df0;
     --color-estimate-soft: #211a33;
+
+    --color-scrim: rgb(0 0 0 / 0.6);
   }
 }
 
@@ -81,16 +128,20 @@
   --color-canvas: #0d1117;
   --color-surface: #151b23;
   --color-surface-2: #1d252f;
+  --color-surface-3: #26303c;
   --color-border: #2c3642;
-  --color-border-strong: #5b6878;
+  --color-border-strong: #6b7889;
 
   --color-ink: #eef2f6;
   --color-ink-2: #bcc7d4;
   --color-ink-3: #93a1b1;
 
-  --color-accent: #5aa7f0;
-  --color-accent-ink: #06121f;
-  --color-accent-soft: #15283c;
+  --color-brand: #536ffc;
+  --color-brand-soft: #161d3a;
+  --color-accent: #8fa1fd;
+  --color-accent-hover: #a7b5fd;
+  --color-accent-ink: #0b1020;
+  --color-accent-soft: #1a2147;
 
   --color-pass: #64d08d;
   --color-pass-soft: #11291c;
@@ -101,6 +152,8 @@
 
   --color-estimate: #b79df0;
   --color-estimate-soft: #211a33;
+
+  --color-scrim: rgb(0 0 0 / 0.6);
 }
 
 html,
@@ -137,10 +190,10 @@ body {
   }
 }
 
-/* A single, visible focus ring everywhere. Keyboard users must never have to
-   guess where they are. */
+/* A single, visible focus ring everywhere, in the brand blue (3:1 or better on
+   every surface). Keyboard users must never have to guess where they are. */
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-brand);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -183,8 +236,9 @@ body {
   --color-surface: #ffffff;
   --color-surface-2: #eef1f5;
   --color-ink: #10151c;
-  --color-ink-3: #64748b;
-  --color-accent: #0b5cad;
+  --color-ink-3: #5b6878;
+  --color-accent: #3d56d1;
+  --color-brand: #536ffc;
   --color-pass: #1d6f42;
   --color-marginal: #8a5300;
   --color-estimate: #6b4ea8;

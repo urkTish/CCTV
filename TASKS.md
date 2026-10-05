@@ -125,8 +125,8 @@ dark.
 | # | Task | Verification | Status |
 |---|---|---|---|
 | U1 | Audit the phase-2 app in a real browser; write the audit and the IA for both versions | `docs/uiux-audit-and-ia.md` committed before code | done |
-| U2 | Design tokens: brand blue + derived accessible shades, type scale, spacing, radius, elevation, motion, light/dark | Contrast unit test computes WCAG ratios for every token pair used; browser check | pending |
-| U3 | Shared components: icons, status badge, tabs, Advanced disclosure with changed count, dialog, empty state, field flag slot | jsdom tests (keyboard on tabs, dialog focus) | pending |
+| U2 | Design tokens: brand blue + derived accessible shades, type scale, spacing, radius, elevation, motion, light/dark | Contrast unit test computes WCAG ratios for every token pair used; browser check | done — 71 contrast checks; fixed two old failures (ink-3 on canvas 4.44:1, input border 2.5:1) |
+| U3 | Shared components: icons, status badge, tabs, Advanced disclosure with changed count, dialog, empty state, field flag slot | jsdom tests (keyboard on tabs, dialog focus) | done |
 | U4 | Routing (`#/client`, `#/intake/…`, project hash) and the Admin shell: header, collapsible left nav / phone drawer, per-section status | Pure tests for route parsing and section status; jsdom nav test; browser check | pending |
 | U5 | Overview dashboard: project name, totals, cameras by model, every open warning linked to where it is fixed | jsdom test; browser check | pending |
 | U6 | Locations list → detail; input tabs with Advanced disclosure; results tabs (recommendation, spec sheet, calculation, sketch, alternatives, excluded) | Existing UI assertions kept (15-field order, Not specified, derived, Unverified, no-result path); browser check | pending |

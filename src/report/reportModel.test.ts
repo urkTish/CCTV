@@ -45,6 +45,16 @@ describe('report model', () => {
     expect(r.areas[0]!.asked).toMatch(/^“Clearly identify faces” · 1 camera · outdoors/);
   });
 
+  it('writes the summary in the proposal’s voice, not the client’s', () => {
+    const withRecognise: Project = {
+      ...project,
+      locations: [...project.locations, { ...defaultLocation('loc-3', 'Reception'), purpose: 'recognise' }],
+    };
+    const r = buildReport(withRecognise, DEFAULT_EXTRAS, profile, '2026-10-05');
+    expect(r.summary).toContain('recognise known people at Reception');
+    expect(r.summary).not.toMatch(/\bI know\b/i);
+  });
+
   it('lists each datasheet once, product lines only', () => {
     const r = buildReport(project, DEFAULT_EXTRAS, profile, '2026-10-05');
     const urls = r.datasheets.map((d) => d.url);

@@ -85,6 +85,8 @@ export interface ReportModel {
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
+/** The intake's first-person wording, recast for the proposal's third-person summary. */
+const inReportVoice = (s: string) => s.replace(/\bpeople I know\b/, 'known people');
 
 /** Plain words for a purpose, reusing the client intake's language. */
 export function purposeInWords(p: Purpose): string {
@@ -181,7 +183,7 @@ export function buildReport(project: Project, extras: ProjectExtras, profile: En
   const areaPhrases = areas
     .filter((a) => a.camera)
     .slice(0, 4)
-    .map((a) => `${lowerFirst(purposeInWords(project.locations.find((l) => l.id === a.locationId)!.purpose))} at ${a.name}`);
+    .map((a) => `${lowerFirst(inReportVoice(purposeInWords(project.locations.find((l) => l.id === a.locationId)!.purpose)))} at ${a.name}`);
   const summaryParts = [
     `ContracTech proposes ${plural(designed, 'Hikvision camera')} covering ${plural(project.locations.length, 'area')}${extras.clientName ? ` for ${extras.clientName}` : ''}.`,
     areaPhrases.length

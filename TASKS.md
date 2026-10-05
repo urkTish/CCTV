@@ -85,7 +85,7 @@ Order is dependencies-first, as the brief requires.
 | # | Task | Verification | Status |
 |---|---|---|---|
 | N1 | Wire storage, NVR, switch and cable results into project totals and a functional results section | jsdom test renders them | done |
-| N2 | `buildBillOfMaterials(project)` — pure, typed, every hardware line with datasheet URL, all warnings | Tested on a realistic multi-location project | pending |
+| N2 | `buildBillOfMaterials(project)` — pure, typed, every hardware line with datasheet URL, all warnings | Tested on a realistic multi-location project | done |
 
 ### P. ContracTech branding (add-on; slotted after G so the phase-2 order is undisturbed)
 

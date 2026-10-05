@@ -1,5 +1,40 @@
 # Handoff — where phase 2 stopped
 
+## Browser check (cloud session 4, 2026-10-05)
+
+Checked in real Chromium (Playwright, headless) on the Vite dev server, at
+1440×900 and 390×844, light and dark. **Tests 383 / 383 (23 files), `tsc -b`
+clean, `eslint .` clean, `vite build` ok.** Fixes in commit 8f42b8e;
+regression tests in `src/ui/browserCheck.test.tsx`.
+
+| Check | Result |
+|---|---|
+| Loads with no console errors / failed requests | Pass (both widths) |
+| Phase 1 recommendation, add location | Pass |
+| Upload PNG plan, two-click calibration | Pass (20 m over 1000 px → "1 px = 0.02 m · 100 px = 2 m") |
+| Place cameras / NVR / switch, mouse drag, touch tap | Pass |
+| FOV cones, `[` / `]` rotate, arrow-key nudge | Pass |
+| Drawn route (length checked by hand) and dashed "estimated route" | Pass |
+| Device table: x/y, facing, cabled-to, typed run | Pass after fix 1 |
+| Design settings / System design / BOM numbers (3 locations, 7 cameras) | Pass, checked by hand |
+| No horizontal page scroll | Pass after fixes 2 and 3 |
+| OSM view: attribution, scale bar, measuring, failure and offline messages | Pass after fix 5; **tiles not verified** — this container's proxy refuses tile.openstreetmap.org (`ERR_TUNNEL_CONNECTION_FAILED`) |
+| Save .json → open (byte-identical re-save), autosave restore prompt after reload | Pass |
+| Dark mode: logo variant, readability | Pass after fix 4 |
+
+Bugs fixed: (1) number fields snapped back when emptied, so clearing "305" and
+typing "3" gave "3053" — new `NumberInput` primitive keeps the typed text while
+focused, shows the stored value on blur; (2) Design settings / System design
+widened the phone page to 754 px; (3) the device table's sr-only header widened
+it to 710 px; (4) in dark mode, routes and the NVR marker were near-white on the
+white plan; (5) on a phone the OSM attribution covered the scale bar.
+
+Still to see on a machine with internet: OSM tiles loading, pan/zoom over real
+tiles. Cosmetic notes (not acted on): device labels overlap when cameras are
+close; a drawn route is black like the plan's walls; on a phone the map labels
+are tiny and the Verdict column of the check tables needs a sideways scroll;
+the "Cabled to" select is clipped to "NVR / r" on desktop.
+
 ## CURRENT STATE (cloud session 3) — phase 2 complete, M5 included
 
 - **Tests 379 / 379 (22 files), `tsc -b` clean, `eslint .` clean, `vite build` ok.**

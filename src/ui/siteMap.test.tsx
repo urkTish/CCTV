@@ -27,6 +27,12 @@ function pngFile(w: number, h: number, name = 'plan.png'): File {
   return new File([b], name, { type: 'image/png' });
 }
 
+/** The Main gate row of the site map's device table (other tables list the camera too). */
+function deviceRow(label: string): HTMLElement {
+  const table = screen.getByRole('table', { name: /Placed devices/ });
+  return within(table).getByRole('rowheader', { name: new RegExp(`^${label}`) }).closest('tr')!;
+}
+
 function calibrateViaForm() {
   fireEvent.click(screen.getByRole('button', { name: 'Calibrate scale' }));
   // 300-400-500 px line declared as 25 m → 0.05 m/px.
@@ -95,7 +101,7 @@ describe('site map: devices, cones and routes (M3–M4)', () => {
 
     // No route drawn → dashed straight line, labelled, and the run is flagged.
     expect(within(svg as HTMLElement).getByText('estimated route')).toBeTruthy();
-    const row = screen.getByRole('rowheader', { name: /Main gate/ }).closest('tr')!;
+    const row = deviceRow('Main gate');
     expect(within(row).getByText('estimated route')).toBeTruthy();
     // 400 px × 0.05 m/px × 1.3 routing factor = 26 m.
     expect(within(row).getByText('26 m')).toBeTruthy();
@@ -110,7 +116,7 @@ describe('site map: devices, cones and routes (M3–M4)', () => {
     expect((screen.getByLabelText(/Facing of Main gate/) as HTMLInputElement).value).toBe('270');
 
     fireEvent.change(screen.getByLabelText('Typed run length for Main gate'), { target: { value: '55' } });
-    const row = screen.getByRole('rowheader', { name: /Main gate/ }).closest('tr')!;
+    const row = deviceRow('Main gate');
     expect(within(row).getByText('55 m')).toBeTruthy();
     expect(within(row).getByText('typed in')).toBeTruthy();
     expect(within(row).queryByText('Unverified')).toBeNull();

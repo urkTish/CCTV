@@ -6,7 +6,10 @@
   `src/ui/SiteMapPanel.tsx`, edits in `src/domain/sitePlanEdit.ts`, view model in
   `src/engine/siteMapView.ts`, upload in `src/domain/planImage.ts`, Save/Open +
   IndexedDB autosave). **M5 (OSM/Leaflet) deferred** — see ASSUMPTIONS 11.6.
-- **Resume at:** N1 (wire storage/NVR/switch/cable into totals + results section), then N2 → O1–O5.
+- **N1 done:** `designProject()` in `src/engine/projectDesign.ts` chains storage →
+  PoE-mode rule → recorder → switches → cable plan; UI in `src/ui/DesignSettingsPanel.tsx`
+  (all phase-2 inputs) and `src/ui/DesignPanel.tsx` (results), totals in the Project card.
+- **Resume at:** N2 (`buildBillOfMaterials`), then O1–O5.
 - Tooling in this Linux container: run `node node_modules/vitest/vitest.mjs run`,
   `node node_modules/typescript/bin/tsc -b`, `node node_modules/eslint/bin/eslint.js .`
   (the `.bin` shims are not executable). Never stage `node_modules/` or `dist/`.

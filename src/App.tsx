@@ -12,7 +12,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { recommend } from './engine/recommend.ts';
-import { recommendAll } from './engine/projectDesign.ts';
+import { designProject, inheritedProjectAnalytics, recommendAll, SHIPPED_CATALOGUE } from './engine/projectDesign.ts';
 import { cameraDataset } from './data/cameras.ts';
 import { PURPOSES } from './domain/dori.ts';
 import {
@@ -29,6 +29,8 @@ import { encodeProject, readStateFromHash } from './state/urlState.ts';
 import { InputPanel } from './ui/InputPanel.tsx';
 import { ResultsPanel } from './ui/ResultsPanel.tsx';
 import { SiteMapPanel } from './ui/SiteMapPanel.tsx';
+import { DesignPanel } from './ui/DesignPanel.tsx';
+import { DesignSettingsPanel } from './ui/DesignSettingsPanel.tsx';
 import { ProjectFileBar } from './ui/ProjectFileBar.tsx';
 import { useAutosave } from './ui/useAutosave.ts';
 import { Button, Card } from './ui/primitives.tsx';
@@ -61,6 +63,11 @@ export default function App() {
   const totals = useMemo(() => projectTotals(project), [project]);
   const locations = project.locations;
   const results = useMemo(() => recommendAll({ locations }), [locations]);
+  const design = useMemo(() => designProject(project, SHIPPED_CATALOGUE, results), [project, results]);
+  const inheritedAnalytics = useMemo(
+    () => inheritedProjectAnalytics({ locations }, new Set(design.instances.map((i) => i.locationId))),
+    [locations, design.instances],
+  );
   const autosave = useAutosave(project, units);
 
   const addLocation = useCallback(() => {
@@ -209,7 +216,7 @@ export default function App() {
       <div className="mx-auto max-w-[1600px] px-4 pt-4">
         <Card
           title="Project"
-          subtitle="Add a location per camera position. The totals below are what the later NVR, storage and switch modules will consume."
+          subtitle="Add a location per camera position. The totals cover every location; the system design below sizes the recorder, drives, switches and cable for all of them."
           actions={<Button onClick={addLocation}>Add location</Button>}
         >
           <div className="flex flex-wrap gap-2" role="tablist" aria-label="Locations">
@@ -260,9 +267,26 @@ export default function App() {
               value={`${totals.aggregateBitrateMbps.toFixed(1)} Mbps`}
             />
             <Total
-              label="Storage"
-              value={`${(totals.storageGb / 1000).toFixed(2)} TB`}
-              note={`${totals.storageGb.toFixed(0)} GB total`}
+              label="Storage needed"
+              value={design.storage ? `${design.storage.requiredUsableTb.toFixed(2)} TB` : '—'}
+              note="usable, after headroom and formatting"
+            />
+            <Total
+              label="Recorder"
+              value={design.nvr?.primary?.evaluation.nvr.model ?? '—'}
+              note={
+                design.nvr?.primary?.evaluation.drivePlan.ok
+                  ? `${design.nvr.primary.evaluation.drivePlan.config.totalDrives} × ${design.nvr.primary.evaluation.drivePlan.config.drive.capacityTb} TB ${design.nvr.primary.evaluation.drivePlan.config.drive.model}`
+                  : design.nvr && !design.nvr.primary
+                    ? 'no recorder passes every check'
+                    : undefined
+              }
+            />
+            <Total label="PoE switches" value={design.switches ? String(design.switches.switchCount) : '—'} />
+            <Total
+              label="CAT6 boxes"
+              value={design.cables ? `${design.cables.packing.boxes.length} × ${design.cables.boxMetres} m` : '—'}
+              note={design.cables?.isEstimate ? 'some runs estimated' : undefined}
             />
           </dl>
           <p className="mt-2 text-xs text-[var(--color-ink-3)]">{totals.poeExplanation}</p>
@@ -323,6 +347,17 @@ export default function App() {
           <ResultsPanel result={result} location={location} units={units} />
         </div>
       </main>
+
+      {/* --- project-wide design ---------------------------------------------- */}
+      <div className="mx-auto grid max-w-[1600px] gap-4 px-4 pb-4">
+        <DesignSettingsPanel
+          settings={project.settings}
+          units={units}
+          inheritedAnalytics={inheritedAnalytics}
+          onChange={(settings) => setProject((p) => ({ ...p, settings }))}
+        />
+        <DesignPanel design={design} units={units} />
+      </div>
 
       {/* --- site map ------------------------------------------------------- */}
       <div className="mx-auto max-w-[1600px] px-4 pb-4">

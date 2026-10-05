@@ -77,7 +77,7 @@ Order is dependencies-first, as the brief requires.
 | M2 | Calibrate scale by drawing a line + entering its length; show scale; recalibrate | Test via the list alternative + pure math tests | done |
 | M3 | Place/drag cameras (FOV cone, rotatable), NVR, switches; draw route polylines; estimated routes marked | Rendered in jsdom; pure math tested | done |
 | M4 | Keyboard/list alternative: table of devices with editable x/y, rotation, route length | jsdom test edits a device without a pointer | done |
-| M5 | Optional OSM mode via Leaflet, tile-policy compliant (attribution, no bulk); off by default | Policy checked and cited | deferred — needs the `leaflet` package (not installed; no new dependencies this phase) and the policy page could not be fetched from this environment to re-verify. Requirements recorded in ASSUMPTIONS 11.6 |
+| M5 | Optional OSM mode via Leaflet, tile-policy compliant (attribution, no bulk); off by default | Policy checked and cited | done — reference view with a measuring tool that feeds the calibration length; Leaflet 1.9.4 lazy-loaded in its own chunk. OSMF tile usage policy checked 2026-10-05 from its published source (live page blocked here) and cited in `src/domain/osmMap.ts` and ASSUMPTIONS 11.6 |
 | M6 | Persistence: Save/Open .json, IndexedDB autosave in try/catch; UI says URL sharing excludes the map | Tests | done |
 
 ### N. Integration
@@ -105,7 +105,7 @@ Source folder `C:\Users\Admin\Desktop\Contractech\Files\` is read-only: only the
 | # | Task | Verification | Status |
 |---|---|---|---|
 | O1 | Lint clean | Real output in report | done — `eslint .` exit 0 |
-| O2 | All tests green | Real output in report | done — 20 files, 358 / 358 |
+| O2 | All tests green | Real output in report | done — 20 files, 358 / 358 (22 files, 379 / 379 after M5) |
 | O3 | Build clean (TS strict, no `any`) | Real output in report | done — `tsc -b` exit 0, `vite build` ok (chunk-size advisory only) |
 | O4 | Update ASSUMPTIONS.md and README.md | Files current, no mojibake | done — ASSUMPTIONS 10 and 11 added |
 | O5 | Review own diff as a reviewer; report honestly | Final report | done — fixes listed in HANDOFF |

@@ -9,7 +9,8 @@ Phase 2 sizes the rest of the system for the whole project: storage and drives,
 the recorder (NVR), PoE switches, the CAT6 plan with real box counts, a site-map
 editor to place it all on a floor plan, and a bill of materials function.
 
-Runs offline. No backend, no runtime network calls.
+Runs offline. No backend, and no runtime network calls unless the engineer turns
+on the optional OpenStreetMap view on the site map (off by default).
 
 ## Running it
 
@@ -83,7 +84,10 @@ NVR and switches, draw cable routes. Each camera shows its FOV cone from the
 recommended lens. A camera with no drawn route gets straight line × routing
 factor, drawn dashed and labelled "estimated route". The device table below the
 map does everything without a pointer: x/y, facing, which switch, a typed run
-length.
+length. An optional OpenStreetMap view (off by default, needs internet) shows the
+site with the required attribution; two clicks on it measure a distance that can
+be used as the plan's calibration length. Leaflet loads only when it is turned on
+(ASSUMPTIONS 11.6).
 
 **Saving**: the shareable link carries every location and setting but **not the
 map** (the image is too big for a URL; the UI says so). *Save project* writes a
@@ -120,6 +124,7 @@ src/
     sitePlan.ts     site-plan types and scale maths
     sitePlanEdit.ts pure edits to the plan + FOV-cone geometry
     planImage.ts    PNG/JPEG header reading for uploads
+    osmMap.ts       OpenStreetMap tile-policy constants, measuring maths
   data/
     schema.ts              zod schema — the camera data contract
     shared.ts, productSchemas.ts   schemas for NVRs, switches, drives
@@ -158,8 +163,6 @@ would block offline use, and may breach their terms.
 ## Not built (yet)
 
 - The client report / printable proposal (the BOM function it needs exists).
-- OpenStreetMap mode for the site map (needs the Leaflet package; see
-  ASSUMPTIONS 11.6).
 - PDF floor plans (needs a PDF renderer; export the page as PNG/JPG instead).
 - The Admin/Client UI redesign, which waits for the owner's command.
 

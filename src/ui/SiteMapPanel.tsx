@@ -1,7 +1,8 @@
 /**
- * Site map editor (M1–M4): upload a plan, calibrate its scale, place cameras,
+ * Site map editor (M1–M5): upload a plan, calibrate its scale, place cameras,
  * the NVR and switches, draw cable routes — and a table that does all of it
- * from the keyboard.
+ * from the keyboard. An optional OpenStreetMap view (off by default) can supply
+ * the calibration length.
  *
  * Every edit is a pure function from `domain/sitePlanEdit.ts`; everything drawn
  * comes from `engine/siteMapView.ts`. This component only renders and forwards
@@ -36,6 +37,7 @@ import type { RecommendationResult } from '../engine/recommend.ts';
 import { siteMapView, type DeviceView, type RunView } from '../engine/siteMapView.ts';
 import type { Project, UnitSystemState } from '../state/projectTypes.ts';
 import { readFileAsBytes } from './fileIo.ts';
+import { OsmReferenceMap } from './OsmReferenceMap.tsx';
 import { Button, Card, EstimateBadge } from './primitives.tsx';
 
 type Mode = 'select' | 'calibrate' | 'place-camera' | 'place-nvr' | 'place-switch' | 'route';
@@ -157,6 +159,16 @@ export function SiteMapPanel({
       setMessage({ kind: 'info', text: 'Scale set. Every distance on the plan now derives from it.' });
       setMode('select');
     }
+  };
+
+  // ---- M5: a length measured on the OpenStreetMap view ---------------------
+  const calibrateFromMap = (metres: number) => {
+    setCal((c) => (mode === 'calibrate' ? { ...c, metres } : { ...calDraft(plan.calibration), metres }));
+    setMode('calibrate');
+    setMessage({
+      kind: 'info',
+      text: `Real length set to ${round(lengthFromMetres(metres, units), 1)} ${u} from the OpenStreetMap measurement. Click the same two points on your plan, then Apply calibration.`,
+    });
   };
 
   // ---- pointer input -------------------------------------------------------
@@ -363,6 +375,9 @@ export function SiteMapPanel({
           </div>
         </fieldset>
       )}
+
+      {/* --- M5: optional online reference map (off by default) --------------- */}
+      <OsmReferenceMap units={units} onUseAsCalibrationLength={calibrateFromMap} />
 
       {/* --- tools ------------------------------------------------------------- */}
       <div className="mt-4 flex flex-wrap items-center gap-2" role="group" aria-label="Map tool">

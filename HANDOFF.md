@@ -1,10 +1,30 @@
 # Handoff — where phase 2 stopped
 
-## CURRENT STATE (cloud session 2) — phase 2 complete except M5
+## CURRENT STATE (cloud session 3) — phase 2 complete, M5 included
 
-- **Tests 358 / 358 (20 files), `tsc -b` clean, `eslint .` clean, `vite build` ok.**
-- **Done this session:** K3, M1–M4, M6, N1, N2, O1–O5. **M5 (OSM/Leaflet) deferred**:
-  it needs the `leaflet` package and no dependencies were added (ASSUMPTIONS 11.6).
+- **Tests 379 / 379 (22 files), `tsc -b` clean, `eslint .` clean, `vite build` ok.**
+- **M5 done this session (2026-10-05):** optional OpenStreetMap reference view in the
+  Site map card, off by default. Measure two points on it → *Use as calibration
+  length* fills the plan's calibration form. Code: `src/domain/osmMap.ts` (policy
+  citation, constants, pure maths), `src/ui/OsmReferenceMap.tsx`,
+  `src/ui/osmLeaflet.ts` (the only Leaflet importer, loaded by dynamic `import()`).
+  New dependencies: `leaflet` ^1.9.4, dev `@types/leaflet` ^1.9.22 (pulls in
+  `@types/geojson`); their folders are committed in `node_modules/` so the Windows
+  copy works after a pull. Leaflet is its own chunk (~150 kB JS + 16 kB CSS); the
+  main chunk grew only by the new UI code (622.8 → 629.5 kB).
+- **Tile policy** (ASSUMPTIONS 11.6): the live OSMF page was blocked by this
+  container's proxy, so it was read from its published source
+  (openstreetmap/owg-website `policies/tiles.md`, changed 2026-08-11) and cited.
+- **Needs eyes in a real browser:** turn the map on, pan/zoom, check tiles load,
+  the attribution sits bottom-right above the tiles, the scale bar, two-click
+  measuring, and the offline message (DevTools → Network → Offline). Serve the app
+  over http(s) (`npm run dev` / `npm run preview`): from `file:` no Referer is sent.
+
+## Previous state (cloud session 2)
+
+- Tests 358 / 358 (20 files) at the end of that session.
+- Done that session: K3, M1–M4, M6, N1, N2, O1–O5. M5 was deferred then (no new
+  dependencies that phase).
 - Where things are:
   - project file save/open `src/state/projectFile.ts`; IndexedDB autosave
     `src/state/autosave.ts` + `src/ui/useAutosave.ts`
@@ -23,12 +43,13 @@
 - **Needs eyes in a real browser** (no browser in this container): the site map
   (drag, click-to-calibrate, route drawing, cone size on a real plan), the two new
   cards' layout on desktop and mobile, and the IndexedDB restore prompt.
-- **Resume at:** nothing pending in TASKS.md except M5. The UI/UX redesign still
-  waits for the owner's explicit command.
+- **Resume at:** nothing pending in TASKS.md. The UI/UX redesign still waits for the
+  owner's explicit command.
 - Tooling in this Linux container: `node node_modules/vitest/vitest.mjs run`,
   `node node_modules/typescript/bin/tsc -b`, `node node_modules/eslint/bin/eslint.js .`,
   `node node_modules/vite/bin/vite.js build` (the `.bin` shims are not executable).
-  Never stage `node_modules/` or `dist/`; restore `dist/` after a build.
+  Never stage `dist/`; restore it after a build. Stage `node_modules/` only for a
+  newly added package folder (as done for leaflet), never caches or `.package-lock.json`.
 
 ## Update — 2026-10-05, cloud session
 

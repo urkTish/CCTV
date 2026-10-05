@@ -100,7 +100,12 @@ describe('Overview', () => {
 
   it('edits the project name', () => {
     render(<App />);
-    fireEvent.change(screen.getByLabelText('Project name'), { target: { value: 'Harbour depot' } });
+    const field = screen.getByLabelText('Project name') as HTMLInputElement;
+    // Cleared while retyping: the field stays empty, the project keeps a name.
+    fireEvent.change(field, { target: { value: '' } });
+    expect(field.value).toBe('');
+    expect(screen.getByText('New project', { selector: 'header p' })).toBeTruthy();
+    fireEvent.change(field, { target: { value: 'Harbour depot' } });
     expect(screen.getByText('Harbour depot', { selector: 'header p' })).toBeTruthy();
   });
 });

@@ -8,7 +8,7 @@
  * the project file and the autosave, not in the link.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { intakeToProject, recorderAnswersInWords } from '../../client/intakeMapping.ts';
 import { INTAKE_FILE_FORMAT, parseIntakeFile, parseIntakeLink, type Intake } from '../../client/intakeFile.ts';
@@ -161,8 +161,12 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
   const results = useMemo(() => recommendAll({ locations }), [locations]);
   const result = results.get(location.id)!;
   const design = useMemo(() => designProject(project, SHIPPED_CATALOGUE, results), [project, results]);
-  const bom = useMemo(() => buildBillOfMaterials(project), [project]);
-  const totals = useMemo(() => projectTotals(project), [project]);
+  // The BOM and the totals each re-run the recommendation pass (their APIs take
+  // only the project), so they follow a deferred copy: typing stays responsive and
+  // they catch up a frame later.
+  const deferredProject = useDeferredValue(project);
+  const bom = useMemo(() => buildBillOfMaterials(deferredProject), [deferredProject]);
+  const totals = useMemo(() => projectTotals(deferredProject), [deferredProject]);
   const mapView = useMemo(() => siteMapView(project, results), [project, results]);
   const inheritedAnalytics = useMemo(
     () => inheritedProjectAnalytics({ locations }, new Set(design.instances.map((i) => i.locationId))),
@@ -354,7 +358,7 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
           design={design}
           bom={bom}
           warnings={warnings}
-          onProjectName={(name) => setProject((p) => ({ ...p, name: name.trim() === '' ? p.name : name }))}
+          onProjectName={(name) => setProject((p) => ({ ...p, name }))}
           onExtras={setExtras}
           onNavigate={navigate}
           onOpenLocation={openLocation}

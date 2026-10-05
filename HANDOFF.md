@@ -1,22 +1,36 @@
 # Handoff — where the UI/UX redesign stands
 
-## UI/UX redesign (cloud session 5, 2026-10-05) — IN PROGRESS
+## UI/UX redesign (cloud session 5, 2026-10-05) — COMPLETE
 
-Brief: `uiux-agent-prompt.md` (owner's explicit command given). Audit + IA:
-`docs/uiux-audit-and-ia.md`. Task list: TASKS.md, section "UI/UX redesign" (U1–U17).
+Brief: `uiux-agent-prompt.md`. Audit + IA: `docs/uiux-audit-and-ia.md`. Tasks
+U1–U17 in TASKS.md, all done. **tsc 0, eslint 0, 523 / 523 tests (33 files),
+vite build ok.**
 
-- **Done:** U1–U12 — tokens with the ContracTech blue + contrast test; shared
-  components; one app with routes (`#/client`, `#/intake/…`, project hash); the
-  Admin shell (left nav with per-section status, drawer on phones, jump palette
-  Ctrl K), Overview, Locations list → detail with input/result tabs and Advanced
-  disclosures, Recording / Network / Cabling sections, Site map workspace, BOM
-  with optional prices, Settings (engineer profile), workspace envelope for
-  extras, client-intake mapping module.
-- **Done since:** U13 client wizard (`src/client/ClientApp.tsx`), U14 handoff.
-- **Done since:** U15–U16 client report (`src/report/`), Admin → Report.
-- **Resume at:** U17 (close-out: README, ASSUMPTIONS, final checks).
+- **Admin** (`src/ui/admin/`): sectioned workflow with per-section status,
+  Overview with linked warnings, Locations list → detail (input tabs + result
+  tabs, Advanced disclosures), Recording / Network / Cabling, Site map workspace
+  with a selected-device panel, BOM with optional prices, Report, Settings,
+  Ctrl K jump palette.
+- **Client** (`src/client/`): `#/client` six-step wizard; mapping module
+  `intakeMapping.ts`; intake file / `#/intake/…` link; Admin opens it as a draft
+  with every assumed value marked.
+- **Report** (`src/report/`): A4 print CSS, QR encoder, draft watermark, stamp
+  only after the Final confirmation.
+- **New persisted data** without touching schemas: `src/state/workspace.ts`
+  (envelope), `src/state/engineerProfile.ts` (localStorage).
 - Engine, data files, existing schemas and `buildBillOfMaterials` untouched.
-- Browser checks: scripts in the session scratchpad (`uiux/`), not in the repo.
+- **Checked in real Chromium** (Playwright, 1440 px and 380 px, light and dark):
+  every Admin section, the client wizard end to end, the handoff, the report
+  section, and Chromium print-to-PDF of the report (18 A4 pages, QR codes
+  decoded from the PDF). Not checked: other browsers' print output (page-number
+  margin boxes need Chromium 131+), OSM tiles (blocked here), a real person
+  timing the client wizard.
+- **Engine gaps noted (not patched):** no achieved-retention figure in the
+  design output (`retentionDaysThatFit` exists but is not wired), so the report
+  states the target retention; `projectTotals` and `buildBillOfMaterials` take
+  only a project, so the recommendation pass runs three times per change.
+- **Resume at:** nothing pending. Browser-check scripts are in the session
+  scratchpad (`uiux/`), not in the repo.
 
 ---
 

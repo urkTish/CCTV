@@ -36,6 +36,29 @@ function Tile({ label, value, note, go }: { label: string; value: string; note?:
   );
 }
 
+/**
+ * The project name may be cleared while retyping, but a project always has a
+ * name (the link and file schemas require one): an empty field is kept as typed
+ * while focused, and shows the stored name again on blur.
+ */
+function ProjectNameField({ name, onCommit }: { name: string; onCommit: (n: string) => void }) {
+  const [draft, setDraft] = useState<string | null>(null);
+  return (
+    <div onBlur={() => setDraft(null)}>
+      <TextField
+        label="Project name"
+        helper="Shown in the header, the file name and the report."
+        value={draft ?? name}
+        onChange={(v) => {
+          const next = v.slice(0, 160);
+          setDraft(next);
+          if (next.trim()) onCommit(next);
+        }}
+      />
+    </div>
+  );
+}
+
 /** The link an engineer sends a client: the plain-language intake wizard. */
 function ClientIntakeCard() {
   const [copied, setCopied] = useState<string | null>(null);
@@ -218,12 +241,7 @@ export function OverviewSection({
       <div className="grid gap-4 @4xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <Card title="Project">
           <div className="grid gap-3 sm:grid-cols-2">
-            <TextField
-              label="Project name"
-              helper="Shown in the header, the file name and the report."
-              value={project.name}
-              onChange={(name) => onProjectName(name.slice(0, 160))}
-            />
+            <ProjectNameField name={project.name} onCommit={onProjectName} />
             <TextField
               label="Client"
               helper="Who the report is prepared for."

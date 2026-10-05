@@ -99,7 +99,53 @@ offered for restore on the next visit.
 `src/engine/billOfMaterials.ts` returns typed lines — cameras by model and lens,
 the recorder, drives, switches, CAT6 boxes, connectors, patch cords, flagged
 fibre uplinks — each product line with its datasheet URL, plus every warning and
-a `complete` flag with reasons. There is deliberately no report UI yet.
+a `complete` flag with reasons.
+
+## The interface: Admin, Client, report
+
+One app, chosen by the URL hash (`src/ui/route.ts`); the design audit and the
+navigation plan are in `docs/uiux-audit-and-ia.md`.
+
+**Admin** (the default) is the engineer's tool. A left navigation (an icon rail
+when collapsed, a drawer on phones) walks the workflow — Overview, Site map,
+Locations & cameras, Recording & storage, Network, Cabling, Bill of materials,
+Report — with a status on each section (icon, text and colour). The Overview
+shows the totals and every open warning, each with a button to where it is
+fixed. Locations are a list (camera, verdict, warnings, values still to
+confirm) opening a detail where the four input groups are tabs beside the live
+result tabs (recommendation, the 15-field spec sheet, calculation with every
+formula, sketch, alternatives, excluded). Rarely changed inputs sit under
+"Advanced" disclosures that say how many differ from their defaults. Ctrl K (⌘ K)
+jumps to any section, location or placed device. Settings holds the engineer's
+name and contact for the report (stored in this browser only).
+
+**Client** (`#/client`) is a six-step, phone-first questionnaire in plain
+language for the end client: the premises; each area (how many cameras, what
+they need to see — six illustrated choices —, indoors or out, darkness at night,
+a rough distance range); how long to keep recordings, where the recorder goes
+and how the cameras get power; budget; an optional floor plan; then a review
+with an indicative, clearly preliminary summary. The client saves a file (with
+the plan) or copies a link (without) and sends it to the engineer. The mapping
+from answers to engine inputs is one module, `src/client/intakeMapping.ts`;
+everything the client is not asked is a documented default.
+
+**Handoff**: *Open project* in Admin also opens an intake file (and an
+`#/intake/…` link opens directly). The draft marks every assumed value
+"assumed from client intake — please confirm" on its input; Confirm, Confirm all
+or editing the value clears it.
+
+**Report** (Admin → Report) is the client proposal, built from
+`buildBillOfMaterials` with no new calculations: cover, summary, site map with a
+legend, one block per area (the client's words, the camera, its 15 fields, why),
+recording / network / cabling, the BOM (price columns only when the engineer
+typed prices), datasheet links with QR codes, assumptions and notes, and the
+approval block. Print → Save as PDF gives A4 pages with the logo header and page
+numbers on every page. A draft carries a "DRAFT — NOT FOR APPROVAL" watermark;
+only a report made Final, behind a confirmation, carries the company stamp.
+
+**Saving**: projects with client details, prices, a report state or intake marks
+are saved as a workspace file that wraps the unchanged project file; projects
+without them are saved exactly as before.
 
 ## Layout
 
@@ -141,8 +187,10 @@ src/
     projectDesign.ts  the whole-project pass that wires them together
     siteMapView.ts  what the map draws
     billOfMaterials.ts  buildBillOfMaterials(project)
-  state/            URL state, project file, IndexedDB autosave, schemas
-  ui/               components (no maths)
+  state/            URL state, project file, workspace extras, IndexedDB autosave, schemas
+  client/           client intake: answer types, mapping to engine inputs, wizard, intake file/link
+  report/           client report: model (from the BOM), A4 view and print CSS, QR encoder, sign-off
+  ui/               components (no maths); ui/admin/ is the Admin shell and its sections
 ```
 
 ## The data
@@ -162,9 +210,9 @@ would block offline use, and may breach their terms.
 
 ## Not built (yet)
 
-- The client report / printable proposal (the BOM function it needs exists).
 - PDF floor plans (needs a PDF renderer; export the page as PNG/JPG instead).
-- The Admin/Client UI redesign, which waits for the owner's command.
+- Sending the client intake to ContracTech automatically (there is no backend;
+  the client sends a file or a link).
 
 ## Read these too
 

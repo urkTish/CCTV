@@ -38,7 +38,7 @@ describe('scale maths (K2)', () => {
 });
 
 describe('run between two placed devices', () => {
-  const cam: PlacedCamera = { kind: 'camera', id: 'c1', locationId: 'loc-1', index: 1, x: 0, y: 0, rotationDeg: 0, connectTo: null };
+  const cam: PlacedCamera = { kind: 'camera', id: 'c1', locationId: 'loc-1', index: 1, x: 0, y: 0, rotationDeg: 0, connectTo: null, runMetresOverride: null };
   const nvr: PlacedNvr = { kind: 'nvr', id: 'n1', label: 'Rack', x: 300, y: 400 };
   const plan: SitePlan = { ...EMPTY_SITE_PLAN, calibration: cal, devices: [cam, nvr] };
 

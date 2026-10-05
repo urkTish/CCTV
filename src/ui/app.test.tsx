@@ -33,17 +33,38 @@ function setNumber(labelText: string | RegExp, value: string) {
   return input;
 }
 
+/** Open an Admin section from the navigation. */
+function goTo(section: string) {
+  const nav = screen.getByRole('navigation', { name: 'Project sections' });
+  fireEvent.click(within(nav).getByRole('button', { name: new RegExp(`^${section.replace(/[()&]/g, '\\$&')}`) }));
+}
+
+/** Render the app and open the active location's detail. */
+function renderLocation() {
+  const r = render(<App />);
+  goTo('Locations & cameras');
+  return r;
+}
+
+function tab(name: string | RegExp) {
+  fireEvent.click(screen.getByRole('tab', { name }));
+}
+
 describe('App renders and responds', () => {
   it('renders the shell, the dataset count and the requirement panel', () => {
     render(<App />);
-    expect(screen.getByRole('heading', { level: 1 }).textContent).toMatch(/CCTV camera sizing/);
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toMatch(/CCTV Design/);
     expect(screen.getByText(/models, every spec read from the manufacturer datasheet/)).toBeTruthy();
+    goTo('Locations & cameras');
+    expect(screen.getByText('Required pixel density')).toBeTruthy();
+    tab('Calculation');
     expect(screen.getByText('What this location requires')).toBeTruthy();
     expect(screen.getByText('Required pixel density')).toBeTruthy();
   });
 
   it('shows a recommendation for the default scenario with the fifteen fields in order', () => {
-    render(<App />);
+    renderLocation();
+    tab('Spec sheet');
     const tables = screen.getAllByRole('table');
     expect(tables.length).toBeGreaterThan(0);
     const firstCard = tables[0]!;
@@ -54,7 +75,8 @@ describe('App renders and responds', () => {
   });
 
   it('never leaves a card field blank', () => {
-    render(<App />);
+    renderLocation();
+    tab('Spec sheet');
     const table = screen.getAllByRole('table')[0]!;
     for (const cell of within(table).getAllByRole('cell')) {
       expect(cell.textContent?.trim().length ?? 0).toBeGreaterThan(0);
@@ -62,13 +84,15 @@ describe('App renders and responds', () => {
   });
 
   it('marks the three inferred fields as derived on screen', () => {
-    render(<App />);
+    renderLocation();
+    tab('Spec sheet');
     const table = screen.getAllByRole('table')[0]!;
     expect(within(table).getAllByText('derived')).toHaveLength(3);
   });
 
   it('shows the unverified badge against the non-standard "monitor" level', () => {
-    render(<App />);
+    renderLocation();
+    tab('Purpose');
     fireEvent.change(screen.getByLabelText(/What must be possible at that distance/), {
       target: { value: 'monitor' },
     });
@@ -76,13 +100,14 @@ describe('App renders and responds', () => {
   });
 
   it('recomputes live: tightening the purpose changes the achieved-density verdict', () => {
-    render(<App />);
+    renderLocation();
     // Default is recognise over 6 m at 10 m — comfortable.
     expect(screen.getAllByText(/px\/m ·\s*(Pass|Marginal)/).length).toBeGreaterThan(0);
 
     // Now ask to identify across 30 m of scene at 60 m, which nothing can do.
     setNumber(/Distance to the furthest point of interest/, '60');
     setNumber(/Required scene width at that distance/, '30');
+    tab('Purpose');
     fireEvent.change(screen.getByLabelText(/What must be possible at that distance/), {
       target: { value: 'identify' },
     });
@@ -93,14 +118,14 @@ describe('App renders and responds', () => {
   });
 
   it('reports an invalid input inline rather than crashing', () => {
-    render(<App />);
+    renderLocation();
     setNumber(/Mounting height/, '0');
     expect(screen.getByText(/Mounting height must be a positive number/)).toBeTruthy();
     expect(screen.getByText('Check the inputs')).toBeTruthy();
   });
 
   it('switches to room dimensions and derives the scene width', () => {
-    render(<App />);
+    renderLocation();
     fireEvent.change(screen.getByLabelText(/Specify the coverage as/), {
       target: { value: 'room' },
     });
@@ -110,7 +135,7 @@ describe('App renders and responds', () => {
   });
 
   it('switches units without changing the scenario', () => {
-    render(<App />);
+    renderLocation();
     const metricDistance = screen.getByLabelText(/Distance to the furthest point of interest/, {
       selector: 'input',
     }) as HTMLInputElement;
@@ -125,18 +150,21 @@ describe('App renders and responds', () => {
   });
 
   it('applies a required capability as a hard filter and says what it filtered on', () => {
-    render(<App />);
+    renderLocation();
+    tab('Client requirements');
     fireEvent.click(screen.getByRole('checkbox', { name: /ANPR \/ licence-plate recognition/ }));
+    tab(/^Excluded/);
     expect(screen.getByText(/Hard-filtered on: ANPR/)).toBeTruthy();
   });
 
   it('adds and removes locations, keeping at least one', () => {
-    render(<App />);
-    expect(screen.getAllByRole('tab')).toHaveLength(1);
+    renderLocation();
+    const items = () => within(screen.getByRole('list', { name: 'Locations' })).getAllByRole('listitem');
+    expect(items()).toHaveLength(1);
     fireEvent.click(screen.getByRole('button', { name: 'Add location' }));
-    expect(screen.getAllByRole('tab')).toHaveLength(2);
+    expect(items()).toHaveLength(2);
     fireEvent.click(screen.getByRole('button', { name: /Remove Location 2/ }));
-    expect(screen.getAllByRole('tab')).toHaveLength(1);
+    expect(items()).toHaveLength(1);
     // The last one cannot be removed.
     expect(
       (screen.getByRole('button', { name: /Remove Main gate/ }) as HTMLButtonElement).disabled,
@@ -158,7 +186,8 @@ describe('App renders and responds', () => {
   });
 
   it('every "how this was calculated" disclosure is reachable', () => {
-    render(<App />);
+    renderLocation();
+    tab('Calculation');
     const explains = screen.getAllByText('How this was calculated');
     expect(explains.length).toBeGreaterThan(5);
     fireEvent.click(explains[0]!);
@@ -168,16 +197,22 @@ describe('App renders and responds', () => {
   });
 
   it('renders the geometry sketch with an accessible description', () => {
-    render(<App />);
+    renderLocation();
+    tab('Sketch');
     expect(screen.getByLabelText(/Side elevation: camera at/)).toBeTruthy();
     expect(screen.getByLabelText(/Plan view:/)).toBeTruthy();
   });
 
   it('exposes the exclusion list with a reason per model', () => {
-    render(<App />);
-    const toggle = screen.getAllByRole('button', { name: 'Show' })[0]!;
-    fireEvent.click(toggle);
-    expect(screen.getByRole('button', { name: 'Hide' })).toBeTruthy();
+    renderLocation();
+    tab(/^Excluded/);
+    const items = within(screen.getByRole('list', { name: 'Excluded models' })).getAllByRole('listitem');
+    expect(items.length).toBeGreaterThan(0);
+    for (const li of items) {
+      // model name, then a non-empty reason
+      expect(li.children).toHaveLength(2);
+      expect(li.children[1]!.textContent!.trim().length).toBeGreaterThan(10);
+    }
   });
 });
 
@@ -304,18 +339,18 @@ describe('ContracTech header branding', () => {
     expect(html).toContain(`<title>${APP_TITLE}</title>`);
   });
 
-  it('never uses the company stamp in the UI', () => {
-    const offenders: string[] = [];
+  it('uses the company stamp only in the report’s sign-off block (the stamp on a final report: report.test.tsx)', () => {
+    const users: string[] = [];
     const walk = (dir: string) => {
       for (const entry of readdirSync(dir)) {
         const p = join(dir, entry);
         if (statSync(p).isDirectory()) { walk(p); continue; }
         if (!/\.(tsx?|css|html)$/.test(entry) || /\.test\.tsx?$/.test(entry) || entry === 'brand.ts') continue;
-        if (/STAMP_URL|contractech-stamp|company-stamp/.test(readFileSync(p, 'utf8'))) offenders.push(p);
+        if (/STAMP_URL|contractech-stamp|company-stamp/.test(readFileSync(p, 'utf8'))) users.push(p.slice(root.length + 1).replace(/\\/g, '/'));
       }
     };
     walk(join(root, 'src'));
-    expect(offenders).toEqual([]);
+    expect(users).toEqual(['src/report/SignOff.tsx']);
   });
 });
 

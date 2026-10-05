@@ -1,0 +1,405 @@
+/*
+ * The client report: a white A4 document in every theme (it is paper), with
+ * print rules so "Print → Save as PDF" gives a clean, branded, multi-page PDF.
+ *
+ * Every printed page carries the running header (the report is one table whose
+ * <thead> Chromium repeats on each page) and a page number in the page footer
+ * (@page margin boxes). A draft carries a fixed watermark, repeated on every
+ * printed page; only a final report carries the stamp.
+ */
+
+.report {
+  --r-ink: #10151c;
+  --r-ink-2: #3a4654;
+  --r-ink-3: #5b6878;
+  --r-rule: #d4dae2;
+  --r-soft: #f1f3f7;
+  --r-brand: #536ffc;
+  --r-accent: #3d56d1;
+  --r-pass: #1d6f42;
+  --r-marginal: #8a5300;
+  --r-fail: #a52121;
+
+  position: relative;
+  color: var(--r-ink);
+  background: #fff;
+  font-size: 10.5pt;
+  line-height: 1.45;
+  color-scheme: light;
+}
+
+.report a {
+  color: var(--r-accent);
+}
+
+.report-frame {
+  width: 100%;
+  border-collapse: collapse;
+}
+.report-frame > thead > tr > td,
+.report-frame > tbody > tr > td,
+.report-frame > tfoot > tr > td {
+  padding: 0;
+  vertical-align: top;
+}
+
+.report-running-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12pt;
+  padding-bottom: 6pt;
+  margin-bottom: 14pt;
+  border-bottom: 2pt solid var(--r-brand);
+  font-size: 8.5pt;
+  color: var(--r-ink-3);
+}
+.report-running-header img {
+  height: 9mm;
+  width: auto;
+}
+
+.report h2 {
+  margin: 0 0 8pt;
+  font-size: 15pt;
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--r-ink);
+}
+.report h2 .report-num {
+  color: var(--r-accent);
+  margin-right: 6pt;
+}
+.report h3 {
+  margin: 0 0 4pt;
+  font-size: 12pt;
+  font-weight: 700;
+}
+.report p {
+  margin: 0 0 6pt;
+}
+.report ul {
+  list-style: disc;
+  padding-left: 14pt;
+  margin: 0 0 6pt;
+}
+.report ul.report-legend,
+.report ul.report-qr-list {
+  list-style: none;
+  padding-left: 0;
+}
+.report .muted {
+  color: var(--r-ink-3);
+}
+.report .small {
+  font-size: 8.5pt;
+}
+
+.report-section {
+  padding-top: 2pt;
+}
+.report-section + .report-section {
+  margin-top: 18pt;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8.5pt;
+  line-height: 1.3;
+}
+.report-table th,
+.report-table td {
+  border-bottom: 0.75pt solid var(--r-rule);
+  padding: 2pt 5pt;
+  text-align: left;
+  vertical-align: top;
+}
+.report-table thead th {
+  background: var(--r-soft);
+  font-weight: 700;
+  color: var(--r-ink-2);
+  border-bottom: 1pt solid var(--r-ink-3);
+}
+.report-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.report-table tbody th {
+  font-weight: 600;
+  width: 32%;
+}
+.report-table tr {
+  break-inside: avoid;
+}
+
+.report-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6pt;
+  margin: 10pt 0;
+}
+.report-facts div {
+  border: 0.75pt solid var(--r-rule);
+  border-left: 3pt solid var(--r-brand);
+  padding: 5pt 7pt;
+}
+.report-facts dt {
+  font-size: 8pt;
+  color: var(--r-ink-3);
+}
+.report-facts dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.report-area {
+  break-inside: avoid;
+  border-top: 1pt solid var(--r-rule);
+  padding-top: 10pt;
+  margin-top: 10pt;
+}
+.report-area:first-of-type {
+  border-top: 0;
+  margin-top: 0;
+}
+.report-asked {
+  background: var(--r-soft);
+  border-left: 3pt solid var(--r-brand);
+  padding: 4pt 8pt;
+  margin: 4pt 0 6pt;
+}
+
+.report-cover {
+  min-height: 230mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.report-cover .cover-logo {
+  height: 22mm;
+  width: auto;
+  margin-top: 18mm;
+}
+.report-cover .cover-title {
+  font-size: 26pt;
+  line-height: 1.15;
+  font-weight: 800;
+  margin: 14mm 0 4mm;
+}
+.report-cover .cover-project {
+  font-size: 16pt;
+  color: var(--r-accent);
+  font-weight: 700;
+}
+.report-cover .cover-band {
+  height: 3pt;
+  background: var(--r-brand);
+  margin: 8mm 0;
+  width: 40mm;
+}
+.report-cover dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4pt 14pt;
+  font-size: 10.5pt;
+}
+.report-cover dt {
+  color: var(--r-ink-3);
+}
+.report-cover dd {
+  margin: 0;
+}
+
+.report-legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2pt 14pt;
+  font-size: 8.5pt;
+  margin-top: 6pt;
+}
+.report-legend li {
+  display: flex;
+  gap: 5pt;
+  align-items: center;
+}
+.report-map > svg {
+  width: 100%;
+  height: auto;
+  max-height: 150mm;
+  border: 0.75pt solid var(--r-rule);
+}
+
+.report-qr-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8pt 14pt;
+}
+.report-qr-item {
+  display: flex;
+  gap: 8pt;
+  break-inside: avoid;
+  align-items: flex-start;
+}
+.report-qr-item svg {
+  width: 24mm;
+  height: 24mm;
+  flex: none;
+}
+.report-qr-item .url {
+  word-break: break-all;
+  font-size: 7.5pt;
+}
+
+.report-signoff {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14mm;
+  margin-top: 10pt;
+  break-inside: avoid;
+}
+.signature-area {
+  position: relative;
+  height: 34mm;
+}
+.signature-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10mm;
+  border-bottom: 1pt solid var(--r-ink);
+}
+.signature-caption {
+  position: absolute;
+  left: 0;
+  bottom: 5mm;
+  font-size: 8pt;
+  color: var(--r-ink-3);
+}
+/* The company stamp, applied as a real stamp is: about 38 mm across, partly over
+   the signature line, turned a little, its ink multiplied onto the paper. */
+.report-stamp {
+  position: absolute;
+  width: 38mm;
+  height: 38mm;
+  left: 34mm;
+  bottom: -2mm;
+  transform: rotate(-10deg);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.report-watermark {
+  display: none;
+}
+
+.report-draft-ribbon {
+  border: 1.5pt solid var(--r-fail);
+  color: var(--r-fail);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-align: center;
+  padding: 3pt;
+  margin-bottom: 10pt;
+}
+
+@media screen {
+  .report {
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 14mm 14mm 18mm;
+    box-shadow: 0 8px 30px rgb(16 21 28 / 0.18);
+    border-radius: 4px;
+  }
+  .report-section.page-break {
+    margin-top: 16mm;
+    padding-top: 10mm;
+    border-top: 1.5px dashed #b8c1cd;
+  }
+}
+
+/* On a phone the on-screen preview reflows; print always uses the A4 layout. */
+@media screen and (max-width: 639.98px) {
+  .report {
+    padding: 6mm 5mm 8mm;
+    font-size: 10pt;
+  }
+  .report-running-header {
+    flex-wrap: wrap;
+  }
+  .report-facts,
+  .report-qr-list,
+  .report-legend {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .report-signoff {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8mm;
+  }
+  .report-cover {
+    min-height: 0;
+    gap: 12mm;
+  }
+  .report-cover .cover-title {
+    font-size: 20pt;
+  }
+  .report-table tbody th {
+    width: 40%;
+  }
+}
+
+@page {
+  size: A4;
+  margin: 14mm 14mm 16mm;
+
+  @bottom-left {
+    content: 'ContracTech — CCTV proposal';
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 8pt;
+    color: #5b6878;
+  }
+  @bottom-right {
+    content: 'Page ' counter(page) ' of ' counter(pages);
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 8pt;
+    color: #5b6878;
+  }
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+  }
+  .report {
+    font-size: 10pt;
+  }
+  .report-section.page-break {
+    break-before: page;
+  }
+  .report-cover {
+    min-height: 240mm;
+  }
+  .report-watermark {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .report-watermark span {
+    transform: rotate(-35deg);
+    font-size: 32pt;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: rgb(165 33 33 / 0.14);
+    white-space: nowrap;
+  }
+  .report a {
+    color: var(--r-accent);
+    text-decoration: none;
+  }
+}

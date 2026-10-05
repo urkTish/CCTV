@@ -11,6 +11,7 @@ import { calculateScenario, calculateForCamera } from '../domain/calculate.ts';
 import { recommend } from '../engine/recommend.ts';
 import type { Project, Location } from '../domain/types.ts';
 import type { UnitSystem } from '../domain/units.ts';
+import { pruneCameras } from '../domain/sitePlanEdit.ts';
 
 export type UnitSystemState = UnitSystem;
 
@@ -51,6 +52,18 @@ export function replaceLocation(project: Project, updated: Location): Project {
     ...project,
     locations: project.locations.map((l) => (l.id === updated.id ? updated : l)),
   };
+}
+
+/**
+ * Drop placed cameras that no longer exist in the project (a location removed,
+ * or its camera count lowered). Returns the same object when nothing changed.
+ */
+export function pruneSitePlan(project: Project): Project {
+  const sitePlan = pruneCameras(
+    project.sitePlan,
+    project.locations.map((l) => ({ id: l.id, cameraCount: l.requirements.cameraCount })),
+  );
+  return sitePlan === project.sitePlan ? project : { ...project, sitePlan };
 }
 
 export function nextLocationId(project: Project): string {

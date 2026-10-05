@@ -143,6 +143,9 @@ const planImageSchema = z
 
 const idSchema = z.string().min(1).max(64);
 
+/** An engineer-typed run length, metres. Absent in older files → null (use the plan). */
+const runOverrideSchema = z.number().finite().min(0).max(10_000).nullable().default(null);
+
 const placedDeviceSchema = z.discriminatedUnion('kind', [
   z
     .object({
@@ -154,10 +157,13 @@ const placedDeviceSchema = z.discriminatedUnion('kind', [
       y: coord,
       rotationDeg: z.number().finite(),
       connectTo: idSchema.nullable(),
+      runMetresOverride: runOverrideSchema,
     })
     .strict(),
   z.object({ kind: z.literal('nvr'), id: idSchema, label: z.string().max(80), x: coord, y: coord }).strict(),
-  z.object({ kind: z.literal('switch'), id: idSchema, label: z.string().max(80), x: coord, y: coord }).strict(),
+  z
+    .object({ kind: z.literal('switch'), id: idSchema, label: z.string().max(80), x: coord, y: coord, runMetresOverride: runOverrideSchema })
+    .strict(),
 ]);
 
 export const sitePlanSchema = z

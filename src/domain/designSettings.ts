@@ -121,7 +121,7 @@ export const ESTIMATED_DEFAULTS = {
 
 /**
  * Recorder analytics implied by the cameras' required analytics (brief: "inherit
- * these from the camera analytics choices"). Mapping, see ASSUMPTIONS 10.x:
+ * these from the camera analytics choices"). Mapping, see ASSUMPTIONS 10.1:
  *   ANPR → ANPR; people counting → people counting;
  *   face capture → face recognition (the recorder holds the face lists);
  *   AcuSense → Motion Detection 2.0 (the recorder's human/vehicle filter).

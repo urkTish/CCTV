@@ -240,7 +240,7 @@ export function cablePlan(inputs: readonly RunInput[], s: CableSettings): CableP
   const warnings: string[] = [];
   for (const r of [...over100, ...over90]) warnings.push(`${r.label}: ${r.tia.message}`);
   for (const f of fibreUplinks) {
-    warnings.push(`${f.label} uplink is ${f.installedMetres.toFixed(1)} m — over 90 m, so it must be fibre (listed separately, not as CAT6).`);
+    warnings.push(`${f.label}: ${f.installedMetres.toFixed(1)} m — an uplink over 90 m must be fibre (listed separately, not as CAT6).`);
   }
   for (const o of packing.oversize) {
     warnings.push(`Run ${o.id} needs ${o.metres.toFixed(1)} m — longer than a whole ${s.boxMetres} m box. It cannot be pulled as one CAT6 run.`);

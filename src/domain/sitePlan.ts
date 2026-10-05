@@ -42,6 +42,13 @@ export interface PlacedCamera {
   readonly rotationDeg: number;
   /** Device id of the switch or NVR this camera is cabled to; null = the NVR. */
   readonly connectTo: string | null;
+  /**
+   * Horizontal run to its endpoint typed in by the engineer (measured on site or
+   * off a drawing), metres. Overrides anything measured on the plan; null = use
+   * the plan. This is also how the keyboard/list alternative sets a run without
+   * drawing one.
+   */
+  readonly runMetresOverride: number | null;
 }
 
 export interface PlacedNvr {
@@ -58,6 +65,8 @@ export interface PlacedSwitch {
   readonly label: string;
   readonly x: number;
   readonly y: number;
+  /** Engineer-entered horizontal uplink run to the NVR, metres; null = use the plan. */
+  readonly runMetresOverride: number | null;
 }
 
 export type PlacedDevice = PlacedCamera | PlacedNvr | PlacedSwitch;
@@ -136,7 +145,12 @@ export function cameraKey(locationId: string, index: number): string {
   return `${locationId}#${index}`;
 }
 
-export type RunLengthBasis = 'drawn' | 'estimated' | 'unplaced' | 'uncalibrated';
+/**
+ * Where a run length came from: drawn on the plan, typed in by the engineer
+ * (`entered`), estimated as straight line × routing factor, or a placeholder
+ * because the device or the scale is missing.
+ */
+export type RunLengthBasis = 'drawn' | 'entered' | 'estimated' | 'unplaced' | 'uncalibrated';
 
 export interface HorizontalRun {
   readonly metres: number | null;
@@ -144,10 +158,20 @@ export interface HorizontalRun {
   readonly explanation: string;
 }
 
+/** A run length the engineer typed in. Not an estimate: it is their measurement. */
+export function enteredRun(metres: number): HorizontalRun {
+  return {
+    metres,
+    basis: 'entered',
+    explanation: `Entered by the engineer: ${metres.toFixed(1)} m (overrides the site plan).`,
+  };
+}
+
 /**
- * Horizontal length of the run between two placed devices: the drawn route if
- * there is one, otherwise straight line × routing factor. Null metres when the
- * plan is not calibrated.
+ * Horizontal length of the run between two placed devices: the length the
+ * engineer typed in on `from` if any, else the drawn route if there is one,
+ * otherwise straight line × routing factor. Null metres when the plan is not
+ * calibrated and nothing was typed in.
  */
 export function horizontalRunBetween(
   plan: SitePlan,
@@ -155,6 +179,9 @@ export function horizontalRunBetween(
   to: PlacedDevice,
   routingFactor: number,
 ): HorizontalRun {
+  if (from.kind !== 'nvr' && from.runMetresOverride !== null) {
+    return enteredRun(from.runMetresOverride);
+  }
   if (!plan.calibration) {
     return { metres: null, basis: 'uncalibrated', explanation: 'The site plan is not calibrated, so no distance can be measured on it.' };
   }

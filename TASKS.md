@@ -1,6 +1,6 @@
 # Task list — CCTV Camera Specification & Recommendation Platform
 
-Status key: `pending` / `in progress` / `done` / `blocked`
+Status key: `pending` / `in progress` / `done` / `blocked` / `deferred` (not built, reason given)
 
 ## Phase 1 — complete
 
@@ -48,9 +48,9 @@ Order is dependencies-first, as the brief requires.
 
 | # | Task | Verification | Status |
 |---|---|---|---|
-| J1 | Group cameras per switch from the site plan (or a single default group when no map) | Test | in progress |
-| J2 | Checks: port count + spare %, PoE budget + headroom, per-port standard (at/bt for PTZ/heated), uplink bandwidth, long-range PoE for 100–250 m runs | One test per check | pending |
-| J3 | Managed/unmanaged default rule, uplink type, select model per switch, list cameras per switch | Engine test | pending |
+| J1 | Group cameras per switch from the site plan (or a single default group when no map) | Test | done |
+| J2 | Checks: port count + spare %, PoE budget + headroom, per-port standard (at/bt for PTZ/heated), uplink bandwidth, long-range PoE for 100–250 m runs | One test per check | done |
+| J3 | Managed/unmanaged default rule, uplink type, select model per switch, list cameras per switch | Engine test | done |
 
 ### K. Site plan data model and scale math (pure)
 
@@ -58,7 +58,7 @@ Order is dependencies-first, as the brief requires.
 |---|---|---|---|
 | K1 | Site-plan types: image, calibration, devices (camera/NVR/switch), routes, routing factor | Types compile | done |
 | K2 | Scale math: px → m from a calibration line; polyline length; straight-line × routing factor estimate | Worked-example tests | done |
-| K3 | Project file save/open (.json with image data URI) with schema validation | Round-trip test; corrupt file rejected with reason | pending |
+| K3 | Project file save/open (.json with image data URI) with schema validation | Round-trip test; corrupt file rejected with reason | done |
 
 ### L. CAT6 cable math (pure)
 
@@ -73,19 +73,19 @@ Order is dependencies-first, as the brief requires.
 
 | # | Task | Verification | Status |
 |---|---|---|---|
-| M1 | Image upload (PNG/JPG; PDF first page if feasible, otherwise stated as unsupported) | jsdom test of upload path / clear message | pending |
-| M2 | Calibrate scale by drawing a line + entering its length; show scale; recalibrate | Test via the list alternative + pure math tests | pending |
-| M3 | Place/drag cameras (FOV cone, rotatable), NVR, switches; draw route polylines; estimated routes marked | Rendered in jsdom; pure math tested | pending |
-| M4 | Keyboard/list alternative: table of devices with editable x/y, rotation, route length | jsdom test edits a device without a pointer | pending |
-| M5 | Optional OSM mode via Leaflet, tile-policy compliant (attribution, no bulk); off by default | Policy checked and cited | pending |
-| M6 | Persistence: Save/Open .json, IndexedDB autosave in try/catch; UI says URL sharing excludes the map | Tests | pending |
+| M1 | Image upload (PNG/JPG; PDF first page if feasible, otherwise stated as unsupported) | jsdom test of upload path / clear message | done — PNG/JPG only; PDF refused with a stated reason (no PDF renderer shipped, ASSUMPTIONS 11.1) |
+| M2 | Calibrate scale by drawing a line + entering its length; show scale; recalibrate | Test via the list alternative + pure math tests | done |
+| M3 | Place/drag cameras (FOV cone, rotatable), NVR, switches; draw route polylines; estimated routes marked | Rendered in jsdom; pure math tested | done |
+| M4 | Keyboard/list alternative: table of devices with editable x/y, rotation, route length | jsdom test edits a device without a pointer | done |
+| M5 | Optional OSM mode via Leaflet, tile-policy compliant (attribution, no bulk); off by default | Policy checked and cited | done — reference view with a measuring tool that feeds the calibration length; Leaflet 1.9.4 lazy-loaded in its own chunk. OSMF tile usage policy checked 2026-10-05 from its published source (live page blocked here) and cited in `src/domain/osmMap.ts` and ASSUMPTIONS 11.6 |
+| M6 | Persistence: Save/Open .json, IndexedDB autosave in try/catch; UI says URL sharing excludes the map | Tests | done |
 
 ### N. Integration
 
 | # | Task | Verification | Status |
 |---|---|---|---|
-| N1 | Wire storage, NVR, switch and cable results into project totals and a functional results section | jsdom test renders them | pending |
-| N2 | `buildBillOfMaterials(project)` — pure, typed, every hardware line with datasheet URL, all warnings | Tested on a realistic multi-location project | pending |
+| N1 | Wire storage, NVR, switch and cable results into project totals and a functional results section | jsdom test renders them | done |
+| N2 | `buildBillOfMaterials(project)` — pure, typed, every hardware line with datasheet URL, all warnings | Tested on a realistic multi-location project | done |
 
 ### P. ContracTech branding (add-on; slotted after G so the phase-2 order is undisturbed)
 
@@ -104,8 +104,40 @@ Source folder `C:\Users\Admin\Desktop\Contractech\Files\` is read-only: only the
 
 | # | Task | Verification | Status |
 |---|---|---|---|
-| O1 | Lint clean | Real output in report | pending |
-| O2 | All tests green | Real output in report | pending |
-| O3 | Build clean (TS strict, no `any`) | Real output in report | pending |
-| O4 | Update ASSUMPTIONS.md and README.md | Files current, no mojibake | pending |
-| O5 | Review own diff as a reviewer; report honestly | Final report | pending |
+| O1 | Lint clean | Real output in report | done — `eslint .` exit 0 |
+| O2 | All tests green | Real output in report | done — 20 files, 358 / 358 (22 files, 379 / 379 after M5) |
+| O3 | Build clean (TS strict, no `any`) | Real output in report | done — `tsc -b` exit 0, `vite build` ok (chunk-size advisory only) |
+| O4 | Update ASSUMPTIONS.md and README.md | Files current, no mojibake | done — ASSUMPTIONS 10 and 11 added |
+| O5 | Review own diff as a reviewer; report honestly | Final report | done — fixes listed in HANDOFF |
+
+---
+
+## UI/UX redesign — Admin, Client, client report
+
+Brief: `uiux-agent-prompt.md`. Audit and information architecture:
+`docs/uiux-audit-and-ia.md` (written before any code). Owner decisions: the PoE
+choice and the recorder form factor are the client's options — asked in plain
+language in the intake with a sensible default, and always reachable in Admin.
+The engine, data files, schemas and `buildBillOfMaterials` are not changed.
+Every visual task is checked in real Chromium at 1440 px and 380 px, light and
+dark.
+
+| # | Task | Verification | Status |
+|---|---|---|---|
+| U1 | Audit the phase-2 app in a real browser; write the audit and the IA for both versions | `docs/uiux-audit-and-ia.md` committed before code | done |
+| U2 | Design tokens: brand blue + derived accessible shades, type scale, spacing, radius, elevation, motion, light/dark | Contrast unit test computes WCAG ratios for every token pair used; browser check | done — 71 contrast checks; fixed two old failures (ink-3 on canvas 4.44:1, input border 2.5:1) |
+| U3 | Shared components: icons, status badge, tabs, Advanced disclosure with changed count, dialog, empty state, field flag slot | jsdom tests (keyboard on tabs, dialog focus) | done |
+| U4 | Routing (`#/client`, `#/intake/…`, project hash) and the Admin shell: header, collapsible left nav / phone drawer, per-section status | Pure tests for route parsing and section status; jsdom nav test; browser check | done — `#/client`, `#/intake/…` and the project hash; nav collapses to icons ≥ 1024 px, drawer below; status = icon + text + colour |
+| U5 | Overview dashboard: project name, totals, cameras by model, every open warning linked to where it is fixed | jsdom test; browser check | done — totals, cameras by model, 17 warnings on the 10-location project each with a link |
+| U6 | Locations list → detail; input tabs with Advanced disclosure; results tabs (recommendation, spec sheet, calculation, sketch, alternatives, excluded) | Existing UI assertions kept (15-field order, Not specified, derived, Unverified, no-result path); browser check | done — every previous assertion kept; tabs wrap instead of scrolling |
+| U7 | Recording & storage, Network and Cabling sections (settings beside their results, advanced allowances behind a disclosure; PoE and form factor kept as primary inputs) | Existing design tests kept; browser check | done — PoE mode and form factor stay primary inputs, never under Advanced |
+| U8 | Site map as a workspace: toolbar, canvas, side panel for the selected device, device list | Existing site-map tests kept; browser check | done |
+| U9 | Search / jump palette (Ctrl/⌘ K) | jsdom test | done |
+| U10 | Workspace extras (client name, prices, report status, intake provenance) in a new envelope file + autosave; engineer Settings | Round-trip tests; old project files still open | done — new `contractech-cctv-workspace` envelope; plain project file written byte-identically when there are no extras |
+| U11 | Bill of materials section with optional prices | jsdom test; browser check | done — phone layout stacks each line (no sideways scroll) |
+| U12 | Client-to-engine mapping module with documented defaults | Unit tests for every answer and default | done — `src/client/intakeMapping.ts`, 19 assumed fields per area, each with a reason |
+| U13 | Client intake wizard (mobile-first), indicative summary, send as file / link | jsdom test of the whole flow; browser check on a phone | done — 6 steps, phone-first; automated run of a 3-area intake takes ~9 s; a client can do it in well under five minutes (not timed with a real person) |
+| U14 | Handoff: open an intake file / link as a draft; "assumed from client intake — please confirm" on every defaulted value; confirm or edit to clear | jsdom test | done — file and link; 19 marks per area (20 for "general activity"); Confirm, Confirm all, or edit clears them |
+| U15 | Report model (pure, from `buildBillOfMaterials`) and an offline QR encoder | Unit tests; QR output decoded by an independent decoder | done — QR encoder written in-house (no dependency): 75/75 codes decoded by ZXing-C++, and all 7 codes decoded again from the printed PDF at 150 dpi |
+| U16 | Report view + A4 print CSS: cover, summary, map, areas, system, BOM, datasheets, assumptions, sign-off; draft watermark; Final behind confirmation with the stamp | jsdom tests per section; Chromium print-to-PDF checked page by page | done — 18-page A4 PDF via Chromium print for the 10-location project; header + “Page n of N” on every page; draft watermark; stamp only after the confirmation |
+| U17 | Close-out: README, ASSUMPTIONS, HANDOFF; lint, test, build; review own diff | Real output in the report | done — tsc 0, eslint 0, 523 / 523 tests (33 files), vite build ok (chunk-size advisory only) |

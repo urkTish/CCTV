@@ -112,8 +112,11 @@ describe('site map: devices, cones and routes (M3–M4)', () => {
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: 'Add NVR / rack' }));
     fireEvent.click(screen.getByRole('button', { name: 'Place Main gate' }));
-    fireEvent.change(screen.getByLabelText(/Facing of Main gate/), { target: { value: '-90' } });
-    expect((screen.getByLabelText(/Facing of Main gate/) as HTMLInputElement).value).toBe('270');
+    const facing = screen.getByLabelText(/Facing of Main gate/) as HTMLInputElement;
+    fireEvent.change(facing, { target: { value: '-90' } });
+    // The typed text stays while editing (NumberInput); the normalised angle shows on blur.
+    fireEvent.blur(facing);
+    expect(facing.value).toBe('270');
 
     fireEvent.change(screen.getByLabelText('Typed run length for Main gate'), { target: { value: '55' } });
     const row = deviceRow('Main gate');

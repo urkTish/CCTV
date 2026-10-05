@@ -33,7 +33,7 @@ function Datasheet({ url }: { url: string }) {
 
 function ChecksTable({ checks, caption }: { checks: readonly (NvrCheck | SwitchCheck)[]; caption: string }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="relative overflow-x-auto">
       <table className="w-full min-w-[640px] text-left text-sm">
         <caption className="sr-only">{caption}</caption>
         <thead className="text-xs text-[var(--color-ink-3)]">
@@ -294,7 +294,7 @@ export function DesignPanel({ design, units }: { design: ProjectDesign; units: U
                     Fibre (not CAT6): {cables.fibreUplinks.map((f) => `${f.label} ${len(f.installedMetres)}`).join(', ')}.
                   </p>
                 )}
-                <div className="mt-3 overflow-x-auto">
+                <div className="relative mt-3 overflow-x-auto">
                   <table className="w-full min-w-[720px] text-left text-sm">
                     <caption className="sr-only">Cable runs</caption>
                     <thead className="text-xs text-[var(--color-ink-3)]">

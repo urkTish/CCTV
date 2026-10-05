@@ -6,8 +6,8 @@
  * inline rather than through an alert.
  */
 
-import type { ReactNode } from 'react';
-import { useId } from 'react';
+import type { InputHTMLAttributes, ReactNode } from 'react';
+import { useId, useState } from 'react';
 
 export function Card({
   title,
@@ -90,20 +90,16 @@ export function NumberField({
         {label}
         {unit && <span className="ml-1 font-normal text-[var(--color-ink-3)]">({unit})</span>}
       </label>
-      <input
+      <NumberInput
         id={id}
-        type="number"
         className={`${controlClass} mt-1 ${error ? 'border-[var(--color-fail)]' : ''}`}
-        value={Number.isFinite(value) ? value : ''}
+        value={value}
         min={min}
         max={max}
         step={step}
         aria-describedby={error ? `${helperId} ${errorId}` : helperId}
         aria-invalid={error ? true : undefined}
-        onChange={(e) => {
-          const next = e.currentTarget.valueAsNumber;
-          onChange(Number.isNaN(next) ? Number.NaN : next);
-        }}
+        onValueChange={onChange}
       />
       <p id={helperId} className="mt-1 text-xs text-[var(--color-ink-3)]">
         {helper}
@@ -114,6 +110,45 @@ export function NumberField({
         </p>
       )}
     </div>
+  );
+}
+
+/**
+ * A number `<input>` that keeps what the engineer is typing.
+ *
+ * A plain controlled number input snaps back to the stored value whenever the
+ * text is not (yet) a number — an emptied field, a lone "-" — because the parent
+ * refuses NaN. Clearing "305" and typing "3" then gave "3053". While the field
+ * has focus this shows the typed text as-is and reports every keystroke
+ * (`NaN` when it is not a number); on blur it shows the stored value again, so a
+ * clamped or rounded value appears once the engineer leaves the field.
+ */
+export function NumberInput({
+  value,
+  onValueChange,
+  onBlur,
+  ...rest
+}: Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'value' | 'onChange'> & {
+  value: number;
+  /** The typed number, or NaN when the text is empty or not a number; `raw` is the text. */
+  onValueChange: (next: number, raw: string) => void;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  return (
+    <input
+      {...rest}
+      type="number"
+      value={draft ?? (Number.isFinite(value) ? value : '')}
+      onChange={(e) => {
+        const raw = e.currentTarget.value;
+        setDraft(raw);
+        onValueChange(raw.trim() === '' ? Number.NaN : e.currentTarget.valueAsNumber, raw);
+      }}
+      onBlur={(e) => {
+        setDraft(null);
+        onBlur?.(e);
+      }}
+    />
   );
 }
 

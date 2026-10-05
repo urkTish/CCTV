@@ -165,3 +165,27 @@ body {
   white-space: nowrap;
   border-width: 0;
 }
+
+/* OpenStreetMap reference view (OsmReferenceMap.tsx). On a phone the attribution
+   wraps to two lines across the whole map and covered Leaflet's scale bar in the
+   bottom-left corner; lift the bottom-left controls above it. */
+@media (max-width: 639.98px) {
+  .osm-map .leaflet-bottom.leaflet-left {
+    bottom: 2.25rem;
+  }
+}
+
+/* Site-map SVG drawn over an uploaded plan (SiteMapPanel.tsx). A plan is dark lines
+   on white paper whatever the app theme, so the markers keep the light palette there:
+   with the dark theme's near-white ink, drawn routes, the NVR marker and the device
+   labels all but vanished on the plan. */
+.plan-on-image {
+  --color-surface: #ffffff;
+  --color-surface-2: #eef1f5;
+  --color-ink: #10151c;
+  --color-ink-3: #64748b;
+  --color-accent: #0b5cad;
+  --color-pass: #1d6f42;
+  --color-marginal: #8a5300;
+  --color-estimate: #6b4ea8;
+}

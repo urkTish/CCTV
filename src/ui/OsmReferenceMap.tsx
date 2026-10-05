@@ -162,7 +162,7 @@ function OsmMapView({
 
       {/* isolation keeps Leaflet's z-indexed panes inside this box, under the attribution. */}
       <div className="relative mt-2 overflow-hidden rounded-control border border-[var(--color-border)]" style={{ isolation: 'isolate' }}>
-        <div ref={containerRef} className="h-72 w-full sm:h-96" role="region" aria-label="OpenStreetMap reference map" />
+        <div ref={containerRef} className="osm-map h-72 w-full sm:h-96" role="region" aria-label="OpenStreetMap reference map" />
         <p
           data-testid="osm-attribution"
           className="absolute right-0 bottom-0 z-[1000] m-0 px-1.5 py-0.5 text-[11px] leading-snug"

@@ -349,7 +349,10 @@ export default function App() {
       </main>
 
       {/* --- project-wide design ---------------------------------------------- */}
-      <div className="mx-auto grid max-w-[1600px] gap-4 px-4 pb-4">
+      {/* minmax(0,1fr): a grid track's default minimum is its widest content, so the
+          design tables (min-width 640/720 px) widened the page on a phone instead of
+          scrolling inside their own overflow-x-auto box. */}
+      <div className="mx-auto grid max-w-[1600px] grid-cols-[minmax(0,1fr)] gap-4 px-4 pb-4">
         <DesignSettingsPanel
           settings={project.settings}
           units={units}

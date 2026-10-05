@@ -61,7 +61,10 @@ describe('system design results (N1)', () => {
 
   it('clamps an out-of-range setting so the link still reopens', () => {
     render(<App />);
-    fireEvent.change(screen.getByLabelText(/Growth headroom/, { selector: 'input' }), { target: { value: '9999' } });
-    expect((screen.getByLabelText(/Growth headroom/, { selector: 'input' }) as HTMLInputElement).value).toBe('500');
+    const growth = screen.getByLabelText(/Growth headroom/, { selector: 'input' }) as HTMLInputElement;
+    fireEvent.change(growth, { target: { value: '9999' } });
+    // The typed text stays while editing (NumberInput); the clamped value shows on blur.
+    fireEvent.blur(growth);
+    expect(growth.value).toBe('500');
   });
 });

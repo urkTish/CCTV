@@ -38,7 +38,7 @@ import { siteMapView, type DeviceView, type RunView } from '../engine/siteMapVie
 import type { Project, UnitSystemState } from '../state/projectTypes.ts';
 import { readFileAsBytes } from './fileIo.ts';
 import { OsmReferenceMap } from './OsmReferenceMap.tsx';
-import { Button, Card, EstimateBadge } from './primitives.tsx';
+import { Button, Card, EstimateBadge, NumberInput } from './primitives.tsx';
 
 type Mode = 'select' | 'calibrate' | 'place-camera' | 'place-nvr' | 'place-switch' | 'route';
 
@@ -441,6 +441,8 @@ export function SiteMapPanel({
       <div className="mt-3 overflow-hidden rounded-control border border-[var(--color-border)]">
         <svg
           ref={svgRef}
+          // Over a plan image the markers keep the light palette in every theme (index.css).
+          className={plan.image ? 'plan-on-image' : undefined}
           viewBox={`0 0 ${widthPx} ${heightPx}`}
           preserveAspectRatio="none"
           style={{ width: '100%', height: 'auto', aspectRatio: `${widthPx} / ${heightPx}`, touchAction: 'none', display: 'block' }}
@@ -575,7 +577,9 @@ export function SiteMapPanel({
       </div>
 
       {view.devices.length > 0 && (
-        <div className="mt-3 overflow-x-auto">
+        // relative: the sr-only "Actions" header is absolutely positioned; without a
+        // positioned scroll box it escaped the overflow clip and widened the page on a phone.
+        <div className="relative mt-3 overflow-x-auto">
           <table className="w-full min-w-[880px] text-left text-sm">
             <caption className="sr-only">Placed devices — editable without a pointer</caption>
             <thead className="text-xs text-[var(--color-ink-3)]">
@@ -637,8 +641,7 @@ function DeviceRow({
 }) {
   const dev = d.device;
   const route = d.endpointId ? routeBetween(plan, dev.id, d.endpointId) : null;
-  const setNumber = (f: (v: number) => (p: SitePlan) => SitePlan) => (e: { currentTarget: HTMLInputElement }) => {
-    const v = num(e.currentTarget.value);
+  const setNumber = (f: (v: number) => (p: SitePlan) => SitePlan) => (v: number) => {
     if (Number.isFinite(v)) edit(f(v));
   };
   return (
@@ -653,14 +656,14 @@ function DeviceRow({
         {d.coneNote && <span className="block text-xs font-normal text-[var(--color-ink-3)]">{d.coneNote}</span>}
       </th>
       <td className="py-1.5 pr-2">
-        <input type="number" aria-label={`x of ${d.label} (px)`} className={inputClass} value={Math.round(dev.x)} onChange={setNumber((v) => (p) => moveDevice(p, dev.id, { x: v, y: dev.y }))} />
+        <NumberInput aria-label={`x of ${d.label} (px)`} className={inputClass} value={Math.round(dev.x)} onValueChange={setNumber((v) => (p) => moveDevice(p, dev.id, { x: v, y: dev.y }))} />
       </td>
       <td className="py-1.5 pr-2">
-        <input type="number" aria-label={`y of ${d.label} (px)`} className={inputClass} value={Math.round(dev.y)} onChange={setNumber((v) => (p) => moveDevice(p, dev.id, { x: dev.x, y: v }))} />
+        <NumberInput aria-label={`y of ${d.label} (px)`} className={inputClass} value={Math.round(dev.y)} onValueChange={setNumber((v) => (p) => moveDevice(p, dev.id, { x: dev.x, y: v }))} />
       </td>
       <td className="py-1.5 pr-2">
         {dev.kind === 'camera' ? (
-          <input type="number" step={15} aria-label={`Facing of ${d.label} (degrees clockwise from up)`} className={inputClass} value={Math.round(dev.rotationDeg)} onChange={setNumber((v) => (p) => rotateCamera(p, dev.id, v))} />
+          <NumberInput step={15} aria-label={`Facing of ${d.label} (degrees clockwise from up)`} className={inputClass} value={Math.round(dev.rotationDeg)} onValueChange={setNumber((v) => (p) => rotateCamera(p, dev.id, v))} />
         ) : (
           <span className="text-[var(--color-ink-3)]">—</span>
         )}
@@ -696,16 +699,14 @@ function DeviceRow({
         {dev.kind === 'nvr' ? (
           <span className="text-[var(--color-ink-3)]">—</span>
         ) : (
-          <input
-            type="number"
+          <NumberInput
             min={0}
             aria-label={`Typed run length for ${d.label}`}
             placeholder="from plan"
             className={inputClass}
-            value={dev.runMetresOverride === null ? '' : round(lengthFromMetres(dev.runMetresOverride, units), 1)}
-            onChange={(e) => {
-              const v = num(e.currentTarget.value);
-              if (e.currentTarget.value.trim() === '') edit((p) => setRunOverride(p, dev.id, null));
+            value={dev.runMetresOverride === null ? Number.NaN : round(lengthFromMetres(dev.runMetresOverride, units), 1)}
+            onValueChange={(v, raw) => {
+              if (raw.trim() === '') edit((p) => setRunOverride(p, dev.id, null));
               else if (Number.isFinite(v)) edit((p) => setRunOverride(p, dev.id, lengthToMetres(v, units)));
             }}
           />

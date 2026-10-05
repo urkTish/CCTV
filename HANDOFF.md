@@ -12,7 +12,8 @@ Brief: `uiux-agent-prompt.md` (owner's explicit command given). Audit + IA:
   disclosures, Recording / Network / Cabling sections, Site map workspace, BOM
   with optional prices, Settings (engineer profile), workspace envelope for
   extras, client-intake mapping module.
-- **Resume at:** U13 (client wizard UI, `src/client/`), U14 (handoff test),
+- **Done since:** U13 client wizard (`src/client/ClientApp.tsx`), U14 handoff.
+- **Resume at:**
   U15–U16 (report), U17 (close-out).
 - Engine, data files, existing schemas and `buildBillOfMaterials` untouched.
 - Browser checks: scripts in the session scratchpad (`uiux/`), not in the repo.

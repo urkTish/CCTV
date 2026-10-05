@@ -78,7 +78,7 @@ describe('answers → engine inputs', () => {
     expect(project.settings.recorder.formFactor).toBe('2U');
     expect(project.settings.recorder.poeMode).toBe('external');
     expect(recorderAnswersInWords(answers([gate], { recording: { retention: '1m', recorderPlace: 'cabinet', cabinetSpace: '2U', power: 'switch' } }))).toEqual({
-      formFactor: 'In a network cabinet (rack), 2u (two slots)',
+      formFactor: 'In a network cabinet (rack), 2U (two slots)',
       poe: 'From a separate network switch',
     });
   });

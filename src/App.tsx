@@ -10,6 +10,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { ClientApp } from './client/ClientApp.tsx';
 import { AdminApp } from './ui/admin/AdminApp.tsx';
 import { parseRoute, type Route } from './ui/route.ts';
 
@@ -24,5 +25,6 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
+  if (route.kind === 'client') return <ClientApp />;
   return <AdminApp key={route.kind} intakePayload={route.kind === 'intake' ? route.payload : null} />;
 }

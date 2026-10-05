@@ -4,7 +4,7 @@
  * is fixed. Plus the project file (save / open / link) and the autosave offer.
  */
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import { cameraDataset } from '../../data/cameras.ts';
 import type { BillOfMaterials } from '../../engine/billOfMaterials.ts';
@@ -12,7 +12,9 @@ import type { ProjectDesign } from '../../engine/projectDesign.ts';
 import type { Project, ProjectTotals } from '../../state/projectTypes.ts';
 import type { ProjectExtras } from '../../state/workspace.ts';
 import { Icon } from '../icons.tsx';
-import { Card, EmptyState, Notice, TextField } from '../primitives.tsx';
+import { Button, Card, EmptyState, Notice, TextField } from '../primitives.tsx';
+import { CLIENT_HASH } from '../route.ts';
+import { buttonClass } from '../uiStyles.ts';
 import type { ProjectWarning, SectionId } from './sections.ts';
 import { sectionDef } from './sections.ts';
 
@@ -31,6 +33,38 @@ function Tile({ label, value, note, go }: { label: string; value: string; note?:
         </dd>
       )}
     </div>
+  );
+}
+
+/** The link an engineer sends a client: the plain-language intake wizard. */
+function ClientIntakeCard() {
+  const [copied, setCopied] = useState<string | null>(null);
+  const link = `${window.location.origin}${window.location.pathname}${CLIENT_HASH}`;
+  return (
+    <Card title="Client intake" subtitle="A short plain-language questionnaire a client can fill in on a phone. They send back a file you open with Open project.">
+      <p className="font-mono text-xs break-all text-[var(--color-ink-2)]">{link}</p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <Button
+          icon="link"
+          onClick={() =>
+            void navigator.clipboard
+              .writeText(link)
+              .then(() => setCopied('Link copied — send it to the client.'))
+              .catch((err: unknown) => setCopied(`Could not copy (${err instanceof Error ? err.message : 'unknown error'}); copy it from above.`))
+          }
+        >
+          Copy the client link
+        </Button>
+        <a href={CLIENT_HASH} className={buttonClass('ghost')}>
+          Preview the intake
+        </a>
+      </div>
+      {copied && (
+        <p role="status" className="mt-2 text-sm text-[var(--color-ink-2)]">
+          {copied}
+        </p>
+      )}
+    </Card>
   );
 }
 
@@ -206,9 +240,12 @@ export function OverviewSection({
             </div>
           </div>
         </Card>
-        <Card title="Project file" subtitle="Save the whole project, map included, or open one.">
-          {projectFile}
-        </Card>
+        <div className="grid content-start gap-4">
+          <Card title="Project file" subtitle="Save the whole project, map included, or open one.">
+            {projectFile}
+          </Card>
+          <ClientIntakeCard />
+        </div>
       </div>
 
       <p className="text-xs text-[var(--color-ink-3)]">

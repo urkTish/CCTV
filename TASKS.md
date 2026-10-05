@@ -136,8 +136,8 @@ dark.
 | U10 | Workspace extras (client name, prices, report status, intake provenance) in a new envelope file + autosave; engineer Settings | Round-trip tests; old project files still open | done — new `contractech-cctv-workspace` envelope; plain project file written byte-identically when there are no extras |
 | U11 | Bill of materials section with optional prices | jsdom test; browser check | done — phone layout stacks each line (no sideways scroll) |
 | U12 | Client-to-engine mapping module with documented defaults | Unit tests for every answer and default | done — `src/client/intakeMapping.ts`, 19 assumed fields per area, each with a reason |
-| U13 | Client intake wizard (mobile-first), indicative summary, send as file / link | jsdom test of the whole flow; browser check on a phone | pending |
-| U14 | Handoff: open an intake file / link as a draft; "assumed from client intake — please confirm" on every defaulted value; confirm or edit to clear | jsdom test | pending |
+| U13 | Client intake wizard (mobile-first), indicative summary, send as file / link | jsdom test of the whole flow; browser check on a phone | done — 6 steps, phone-first; automated run of a 3-area intake takes ~9 s; a client can do it in well under five minutes (not timed with a real person) |
+| U14 | Handoff: open an intake file / link as a draft; "assumed from client intake — please confirm" on every defaulted value; confirm or edit to clear | jsdom test | done — file and link; 19 marks per area (20 for "general activity"); Confirm, Confirm all, or edit clears them |
 | U15 | Report model (pure, from `buildBillOfMaterials`) and an offline QR encoder | Unit tests; QR output decoded by an independent decoder | pending |
 | U16 | Report view + A4 print CSS: cover, summary, map, areas, system, BOM, datasheets, assumptions, sign-off; draft watermark; Final behind confirmation with the stamp | jsdom tests per section; Chromium print-to-PDF checked page by page | pending |
 | U17 | Close-out: README, ASSUMPTIONS, HANDOFF; lint, test, build; review own diff | Real output in the report | pending |

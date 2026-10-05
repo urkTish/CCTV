@@ -286,7 +286,7 @@ export function recorderAnswersInWords(answers: ClientAnswers): { formFactor: st
   const r = answers.recording;
   const place = RECORDER_PLACE_LABEL[r.recorderPlace];
   return {
-    formFactor: r.recorderPlace === 'cabinet' ? `${place}, ${CABINET_SPACE_LABEL[r.cabinetSpace].toLowerCase()}` : place,
+    formFactor: r.recorderPlace === 'cabinet' ? `${place}, ${CABINET_SPACE_LABEL[r.cabinetSpace]}` : place,
     poe: POWER_LABEL[r.power].label,
   };
 }

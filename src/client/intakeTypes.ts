@@ -121,3 +121,6 @@ export function emptyAnswers(): ClientAnswers {
     budget: 'balanced',
   };
 }
+
+/** A wizard still being filled in may have no areas yet (kept in this browser only). */
+export const draftAnswersSchema = clientAnswersSchema.extend({ areas: z.array(clientAreaSchema).max(MAX_AREAS) });

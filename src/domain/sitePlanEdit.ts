@@ -149,22 +149,27 @@ export function setRunOverride(plan: SitePlan, id: string, metres: number | null
   return mapDevice(plan, id, (d) => (d.kind === 'nvr' ? d : { ...d, runMetresOverride: metres }));
 }
 
-/** The device a camera is cabled to: its chosen switch/NVR, else the primary NVR. */
+/**
+ * The device a camera is cabled to: its chosen switch, else the primary NVR.
+ * Same rule as `buildTopology`, so the map and the cable maths always agree.
+ */
 export function endpointIdOf(plan: SitePlan, cam: PlacedCamera): string | null {
-  if (cam.connectTo && deviceById(plan, cam.connectTo)) return cam.connectTo;
+  const target = cam.connectTo ? deviceById(plan, cam.connectTo) : null;
+  if (target && target.kind === 'switch') return target.id;
   return primaryNvr(plan)?.id ?? null;
 }
 
 /**
- * Cable a camera to a switch or NVR (null = the primary NVR). A drawn route to
- * its old endpoint no longer describes the cable, so it is removed.
+ * Cable a camera to a placed switch, or (null) back to the NVR rack — the first
+ * NVR on the plan, the one recorder the design sizes. A drawn route to its old
+ * endpoint no longer describes the cable, so it is removed.
  */
 export function connectCamera(plan: SitePlan, cameraId: string, toId: string | null): SitePlan {
   const cam = deviceById(plan, cameraId);
   if (!cam || cam.kind !== 'camera') throw new SitePlanError(`No camera "${cameraId}" on the plan`);
   if (toId !== null) {
     const target = deviceById(plan, toId);
-    if (!target || target.kind === 'camera') throw new SitePlanError('A camera can only be cabled to a switch or an NVR.');
+    if (!target || target.kind !== 'switch') throw new SitePlanError('A camera is cabled to a switch, or back to the NVR rack.');
   }
   const oldEnd = endpointIdOf(plan, cam);
   const next = mapDevice(plan, cameraId, (d) => (d.kind === 'camera' ? { ...d, connectTo: toId } : d));

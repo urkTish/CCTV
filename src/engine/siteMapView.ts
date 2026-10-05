@@ -62,8 +62,8 @@ export interface SiteMapView {
   readonly devices: readonly DeviceView[];
   readonly lines: readonly LineView[];
   readonly unplaced: readonly UnplacedCamera[];
-  /** Switches and NVRs a camera can be cabled to. */
-  readonly endpoints: readonly { readonly id: string; readonly label: string }[];
+  /** Placed switches a camera can be cabled to (the alternative is the NVR rack). */
+  readonly switches: readonly { readonly id: string; readonly label: string }[];
   readonly warnings: readonly string[];
 }
 
@@ -151,6 +151,10 @@ export function siteMapView(project: Project, results: ReadonlyMap<string, Recom
   if (plan.devices.some((d) => d.kind === 'camera') && !plan.devices.some((d) => d.kind === 'nvr')) {
     warnings.push('Place the NVR / rack: cameras cabled to it cannot be measured until it is on the plan.');
   }
+  const nvrs = plan.devices.filter((d) => d.kind === 'nvr');
+  if (nvrs.length > 1) {
+    warnings.push(`${nvrs.length} NVRs are placed; the design sizes one recorder, at the first one (${nvrs[0]!.label}). Remove the others or treat them as markers.`);
+  }
   if (!plan.calibration && plan.devices.length > 0) {
     warnings.push('The plan is not calibrated: runs use typed-in lengths where given, otherwise the flagged placeholder.');
   }
@@ -162,7 +166,7 @@ export function siteMapView(project: Project, results: ReadonlyMap<string, Recom
     devices,
     lines,
     unplaced,
-    endpoints: plan.devices.filter((d) => d.kind !== 'camera').map((d) => ({ id: d.id, label: deviceLabel(project, d) })),
+    switches: plan.devices.filter((d) => d.kind === 'switch').map((d) => ({ id: d.id, label: deviceLabel(project, d) })),
     warnings,
   };
 }

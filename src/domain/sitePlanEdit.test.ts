@@ -76,6 +76,10 @@ describe('plan edits (M2–M4)', () => {
     expect(endpointIdOf(p, cam(p))).toBe('sw-1');
     expect(p.routes).toHaveLength(0);
     expect(() => connectCamera(p, 'cam-1', 'cam-1')).toThrow(SitePlanError);
+    // Back to the rack is null, not an NVR id: the design has one recorder, the first NVR.
+    expect(() => connectCamera(p, 'cam-1', 'nvr-1')).toThrow(/switch, or back to the NVR rack/);
+    const back = connectCamera(p, 'cam-1', null);
+    expect(endpointIdOf(back, cam(back))).toBe('nvr-1');
   });
 
   it('removing a switch frees its cameras back to the NVR and removes its routes', () => {

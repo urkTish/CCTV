@@ -14,6 +14,7 @@ import { z } from 'zod';
 import { locationSchema, settingsOrDefault, sitePlanSchema } from './projectSchemas.ts';
 import type { Location, Project, UnitSystemState } from './projectTypes.ts';
 import { EMPTY_SITE_PLAN, type SitePlan } from '../domain/sitePlan.ts';
+import { pruneCameras } from '../domain/sitePlanEdit.ts';
 
 /** Identifies our files, so a random `.json` is rejected with a clear reason. */
 export const PROJECT_FILE_FORMAT = 'contractech-cctv-project';
@@ -133,7 +134,13 @@ export function parseProjectFile(text: string): ProjectFileResult {
   const notices: string[] = [];
   const activeOk = data.locations.some((l) => l.id === data.activeLocationId);
   if (!activeOk) notices.push('The saved active location no longer exists; the first location is shown instead.');
-  const sitePlan: SitePlan = data.sitePlan ?? EMPTY_SITE_PLAN;
+  const loaded: SitePlan = data.sitePlan ?? EMPTY_SITE_PLAN;
+  const sitePlan = pruneCameras(
+    loaded,
+    data.locations.map((l) => ({ id: l.id, cameraCount: l.requirements.cameraCount })),
+  );
+  const dropped = loaded.devices.length - sitePlan.devices.length;
+  if (dropped > 0) notices.push(`${dropped} placed camera(s) numbered beyond their location's camera count were removed from the map.`);
 
   return {
     ok: true,

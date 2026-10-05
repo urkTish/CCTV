@@ -1,46 +1,34 @@
 # Handoff — where phase 2 stopped
 
-## CURRENT STATE (cloud session 2, keep this section current)
+## CURRENT STATE (cloud session 2) — phase 2 complete except M5
 
-- **Done this session:** K3 (project file save/open), M1–M4 and M6 (site map editor
-  `src/ui/SiteMapPanel.tsx`, edits in `src/domain/sitePlanEdit.ts`, view model in
-  `src/engine/siteMapView.ts`, upload in `src/domain/planImage.ts`, Save/Open +
-  IndexedDB autosave). **M5 (OSM/Leaflet) deferred** — see ASSUMPTIONS 11.6.
-- **N1 done:** `designProject()` in `src/engine/projectDesign.ts` chains storage →
-  PoE-mode rule → recorder → switches → cable plan; UI in `src/ui/DesignSettingsPanel.tsx`
-  (all phase-2 inputs) and `src/ui/DesignPanel.tsx` (results), totals in the Project card.
-- **N2 done:** `buildBillOfMaterials()` in `src/engine/billOfMaterials.ts`, tested on an
-  18-camera, 4-location project with a site map (fibre uplink, over-100 m run, placeholders).
-- **Resume at:** O1–O5 (close-out).
-- Tooling in this Linux container: run `node node_modules/vitest/vitest.mjs run`,
-  `node node_modules/typescript/bin/tsc -b`, `node node_modules/eslint/bin/eslint.js .`
-  (the `.bin` shims are not executable). Never stage `node_modules/` or `dist/`.
-
-
-**Stopped:** 2026-10-05, on the owner's instruction ("stop all"). The agent was
-stopped mid-task, not at a planned checkpoint.
-
-## State at stop (verified by the main session after the stop)
-
-- **Tests:** 11 files, **259 / 259 passing**
-- **Build:** clean (`tsc -b && vite build`)
-- **Lint:** clean, exit 0
-- **Phase 2 tasks:** 27 done / 1 in progress / 16 pending (of 44), about 61%
-- `resolve.preserveSymlinks` has been **removed** from `vite.config.ts`. The build
-  passes without it on this short path.
-
-| Group | Status |
-|---|---|
-| G. Data research (NVR, switch, HDD datasheets) | done |
-| H. Storage maths | done |
-| I. NVR engine | done |
-| J. PoE switch engine | **J1 in progress**, J2–J3 pending |
-| K. Site plan data model + scale maths | K1–K2 done, **K3 pending** (project save/open) |
-| L. CAT6 cable maths (bin packing, 90 m limit) | done |
-| M. Site map UI | all 6 pending |
-| N. Integration + `buildBillOfMaterials` | both pending |
-| O. Close-out | all 5 pending |
-| P. ContracTech branding | done |
+- **Tests 358 / 358 (20 files), `tsc -b` clean, `eslint .` clean, `vite build` ok.**
+- **Done this session:** K3, M1–M4, M6, N1, N2, O1–O5. **M5 (OSM/Leaflet) deferred**:
+  it needs the `leaflet` package and no dependencies were added (ASSUMPTIONS 11.6).
+- Where things are:
+  - project file save/open `src/state/projectFile.ts`; IndexedDB autosave
+    `src/state/autosave.ts` + `src/ui/useAutosave.ts`
+  - site map: edits `src/domain/sitePlanEdit.ts`, upload `src/domain/planImage.ts`,
+    view model `src/engine/siteMapView.ts`, UI `src/ui/SiteMapPanel.tsx`
+  - whole-project design `src/engine/projectDesign.ts`; UI `src/ui/DesignSettingsPanel.tsx`,
+    `src/ui/DesignPanel.tsx`
+  - bill of materials `src/engine/billOfMaterials.ts` (no report UI, by the brief)
+- New model field: `runMetresOverride` on placed cameras and switches (typed run
+  length, basis `entered`, not an estimate). Older files open with it null.
+- O5 self-review fixes: a camera can only be cabled to a switch or back to the
+  first NVR (the map and the cable maths disagreed before); several placed NVRs now
+  warn; the SVG map is `role="group"` so its focusable devices stay accessible;
+  opening a file drops cameras numbered past their location's count (with a
+  notice); calibration draft is cleared after a new image upload.
+- **Needs eyes in a real browser** (no browser in this container): the site map
+  (drag, click-to-calibrate, route drawing, cone size on a real plan), the two new
+  cards' layout on desktop and mobile, and the IndexedDB restore prompt.
+- **Resume at:** nothing pending in TASKS.md except M5. The UI/UX redesign still
+  waits for the owner's explicit command.
+- Tooling in this Linux container: `node node_modules/vitest/vitest.mjs run`,
+  `node node_modules/typescript/bin/tsc -b`, `node node_modules/eslint/bin/eslint.js .`,
+  `node node_modules/vite/bin/vite.js build` (the `.bin` shims are not executable).
+  Never stage `node_modules/` or `dist/`; restore `dist/` after a build.
 
 ## Update — 2026-10-05, cloud session
 

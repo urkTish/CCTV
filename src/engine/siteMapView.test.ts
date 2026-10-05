@@ -54,7 +54,12 @@ describe('site map view model', () => {
     const v = view(plan);
     expect(v.lines).toEqual([]);
     expect(v.devices.find((d) => d.device.id === 'sw-1')!.run).toMatchObject({ metres: 140, basis: 'entered', isEstimate: false });
-    expect(v.endpoints.map((e) => e.label)).toEqual(['NVR / rack', 'Switch 1']);
+    expect(v.switches.map((e) => e.label)).toEqual(['Switch 1']);
+  });
+
+  it('warns that only the first of several NVRs is the rack', () => {
+    const plan = placeNvr(placeNvr(EMPTY_SITE_PLAN, { x: 0, y: 0 }, 'Comms'), { x: 9, y: 9 }, 'Spare');
+    expect(view(plan).warnings.join(' ')).toMatch(/2 NVRs are placed.*first one \(Comms\)/);
   });
 
   it('draws no cone before calibration and says why', () => {

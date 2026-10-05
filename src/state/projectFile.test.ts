@@ -117,6 +117,19 @@ describe('project file save/open (K3)', () => {
     expect(result.notices[0]).toMatch(/first location/);
   });
 
+  it('drops a placed camera numbered beyond its location\'s count, with a notice', () => {
+    const doc = JSON.parse(serializeProjectFile(projectWithMap(), 'metric')) as {
+      sitePlan: { devices: { kind: string; index?: number }[] };
+    };
+    doc.sitePlan.devices[2]!.index = 7; // loc-1 has 1 camera
+    const result = reparse(doc);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.opened.project.sitePlan.devices.map((d) => d.id)).toEqual(['nvr-1', 'sw-1']);
+    expect(result.opened.project.sitePlan.routes).toEqual([]);
+    expect(result.notices[0]).toMatch(/1 placed camera/);
+  });
+
   it('derives a safe file name', () => {
     expect(projectFileName(projectWithMap())).toBe('Warehouse-Phase-2.json');
     expect(projectFileName({ ...defaultProject(), name: '///' })).toBe('cctv-project.json');

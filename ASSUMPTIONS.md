@@ -79,7 +79,9 @@ For contrast, these are not assumptions and carry their source URL in the code:
 | 4.9 | Only the frame rates Hikvision publishes a bitrate column for (30/25/20/15/12.5/10) are offered. | Interpolating a bitrate would be inventing a figure. |
 | 4.10 | For a resolution with no published bitrate row, the next **larger** published row is used, flagged as an estimate. | Never under-estimate bandwidth. |
 
-## 5. Deliberately not built
+## 5. Deliberately not built (in phase 1)
+
+*Phase 2 has since built the recorder, storage, switching, cabling, site map and bill-of-materials function; see sections 7 to 11. The printable client proposal is still not built.*
 
 NVR/recorder selection, storage hardware and RAID sizing, PoE switch selection,
 cable runs and distance limits, and the printable client proposal with a bill of
@@ -145,6 +147,23 @@ enforces it). The processing script lives outside the project, at
 | 9.4 | **Stamp**: ink keyed on "blue and dark" (blue excess − 0.5 × luminance) with a soft 12→30 ramp; faint pixels kept only within 2 px of solid ink; nothing outside the outer ring (geometric guard); edge colours un-mixed against the local background; full 1024 × 1024 resolution. | Measured on the output: alpha is exactly 0 everywhere outside the outer ring and in the corners (no grey halo or vignette left). |
 | 9.5 | **What the owner should look at before the stamp goes on a client document** — see the close-out report for the full visual description. In short: (a) the ink comes out darker and navier (opaque mean ≈ `#193E70`) than it looks in the source, because the source's bright blue glow has been removed; (b) the light speckles inside the strokes, which are part of the rubber-stamp texture, became small transparent holes, so on white it reads as a slightly more "distressed" impression than the source; (c) the stamp is low contrast on dark backgrounds — it is meant for white paper. | If a cleaner, flat-colour stamp is wanted, ask for a vector redraw from the original artwork rather than keying a photo. |
 | 9.6 | The stamp is exported from `src/brand.ts` (`STAMP_URL`) but used nowhere in the UI; a test fails if any UI file references it. Because `brand.ts` imports it, Vite still emits the PNG into `dist/` (306 kB). | Harmless; it is there for the future client report. |
+
+## 10. Phase-2 engineering choices (storage, recorder, switching, cabling, BOM)
+
+| # | Choice | Reasoning / where |
+|---|---|---|
+| 10.1 | Recorder analytics are **inherited from the cameras' analytics** unless the engineer sets them: ANPR → ANPR; people counting → people counting; face capture → face recognition (the recorder holds the face lists); AcuSense → Motion Detection 2.0 (the recorder's human/vehicle filter). Only locations that have a recommended camera contribute. | Brief item 2. `inheritedRecorderAnalytics()` in `designSettings.ts`. |
+| 10.2 | **Monitor outputs count HDMI only.** On most of these recorders VGA mirrors HDMI 1 rather than driving a separate monitor, so counting it would over-promise. | `evaluateNvr()` in `nvrEngine.ts`. |
+| 10.3 | Storage is computed on each camera's **target** bitrate (what it writes on average); the recorder's incoming-bandwidth check uses the sum of **peak** bitrates (what it must be able to ingest). | `designProject()`. |
+| 10.4 | Storage chain: recorded data → × (1 + growth headroom) → ÷ (1 − formatting overhead) = usable capacity the drives must give **after** RAID. Both steps are multiplicative, so their order does not change the result. The 5% formatting overhead is an estimate (no published figure for a Hikvision NVR) and is flagged. Motion-only duty (default 30%) is always flagged. | `storage.ts`, `standards.ts`. |
+| 10.5 | **One budget tier for project hardware**: when every location asks for the same tier it is used; mixed tiers score as "any" (fit first, then the economy-leaning default), because one recorder and its switches serve every location. | `projectBudgetTier()`. |
+| 10.6 | **Built-in vs external PoE (auto)**: built-in only when the channels needed (cameras + headroom, rounded up) are 16 or fewer, no camera is cabled to a switch placed on the map, and every camera's **installed** run (route + camera drop + rack drop + service loop, before waste) is 90 m or less. The reason is shown, and it says when run lengths are estimates. | Brief item 2. `decidePoeMode()`. |
+| 10.7 | **One recorder per project**, at the first NVR placed on the map. When nothing fits, the engine says so and suggests splitting across two recorders, but does not design the split. A camera is cabled either to a placed switch or back to that NVR rack. | `topology.ts`, `connectCamera()`. |
+| 10.8 | **Switch groups**: one per placed switch (IDF), plus one at the rack for cameras cabled straight back — unless PoE is built-in, when the recorder powers those. A switch in the rack uplinks to the NVR by patch cord, so it has no uplink run in the cable plan; an IDF switch's uplink has a rack drop at both ends. | `groupCameras()`, `cabling.ts`. |
+| 10.9 | The TIA-568 90 m / 100 m checks use the **installed** length; the waste allowance is purchasing only. Extend-mode PoE runs over 100 m still show as TIA failures in the cable plan **and** as served-by-extend-mode in the switch plan: both are true. | `cabling.ts`, `switchEngine.ts`. |
+| 10.10 | Defaults that are planning allowances, not sourced: ceiling-to-rack drop 3 m, routing factor 1.3, unplaced-camera run 40 m (all flagged Unverified wherever they feed a number); service loop 3 m and waste 10% are the brief's defaults. | `designSettings.ts`, `ESTIMATED_DEFAULTS`. |
+| 10.11 | **Bill of materials.** Product lines (cameras, recorder, drives, switches) carry the manufacturer datasheet URL and `verifiedOn`. Commodity lines (CAT6 box, RJ45 connectors, patch cords, fibre runs) are marked `generic` with no datasheet and no invented part number. Cameras are one line per model **and lens**. Patch-cord length, fibre type, fibre connectors and SFP modules are **not sized** (the line says so). A BOM that could not be fully designed is `complete: false` with the reasons, never silently short. | `billOfMaterials.ts`. |
+| 10.12 | Design-setting inputs are **clamped to the ranges the URL and file schemas accept** as they are typed, so an out-of-range value can never produce a link or file that will not reopen. | `DesignSettingsPanel.tsx`. |
 
 ## 11. Site map and project files (M1–M6, K3)
 

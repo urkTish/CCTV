@@ -104,8 +104,8 @@ Source folder `C:\Users\Admin\Desktop\Contractech\Files\` is read-only: only the
 
 | # | Task | Verification | Status |
 |---|---|---|---|
-| O1 | Lint clean | Real output in report | pending |
-| O2 | All tests green | Real output in report | pending |
-| O3 | Build clean (TS strict, no `any`) | Real output in report | pending |
-| O4 | Update ASSUMPTIONS.md and README.md | Files current, no mojibake | pending |
-| O5 | Review own diff as a reviewer; report honestly | Final report | pending |
+| O1 | Lint clean | Real output in report | done — `eslint .` exit 0 |
+| O2 | All tests green | Real output in report | done — 20 files, 358 / 358 |
+| O3 | Build clean (TS strict, no `any`) | Real output in report | done — `tsc -b` exit 0, `vite build` ok (chunk-size advisory only) |
+| O4 | Update ASSUMPTIONS.md and README.md | Files current, no mojibake | done — ASSUMPTIONS 10 and 11 added |
+| O5 | Review own diff as a reviewer; report honestly | Final report | done — fixes listed in HANDOFF |

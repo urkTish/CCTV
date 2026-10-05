@@ -11,7 +11,7 @@
 import { useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 
 import { checkPlanFile, planImageFromBytes, PLAN_UPLOAD_ACCEPT } from '../domain/planImage.ts';
-import { SitePlanError, deviceById, type Point, type SitePlan } from '../domain/sitePlan.ts';
+import { SitePlanError, type Point, type SitePlan } from '../domain/sitePlan.ts';
 import {
   calibrate,
   canvasCentre,
@@ -88,18 +88,19 @@ export function SiteMapPanel({
   const [cameraToPlace, setCameraToPlace] = useState<string>('');
   const [routeCameraId, setRouteCameraId] = useState<string>('');
   const [routeDraft, setRouteDraft] = useState<Point[]>([]);
-  const calFromPlan = () => ({
-    ax: plan.calibration?.a.x ?? Number.NaN,
-    ay: plan.calibration?.a.y ?? Number.NaN,
-    bx: plan.calibration?.b.x ?? Number.NaN,
-    by: plan.calibration?.b.y ?? Number.NaN,
+  const calDraft = (c: SitePlan['calibration']) => ({
+    ax: c?.a.x ?? Number.NaN,
+    ay: c?.a.y ?? Number.NaN,
+    bx: c?.b.x ?? Number.NaN,
+    by: c?.b.y ?? Number.NaN,
     /** Held in metres so a units switch mid-calibration cannot change it. */
-    metres: plan.calibration?.metres ?? Number.NaN,
+    metres: c?.metres ?? Number.NaN,
     next: 'a' as 'a' | 'b',
   });
-  const [cal, setCal] = useState(calFromPlan);
-  const startCalibrating = () => {
-    setCal(calFromPlan());
+  const [cal, setCal] = useState(() => calDraft(plan.calibration));
+  /** Start (re)calibrating from `from` — the current scale, or nothing for a new image. */
+  const startCalibrating = (from: SitePlan['calibration'] = plan.calibration) => {
+    setCal(calDraft(from));
     setMode('calibrate');
   };
 
@@ -143,7 +144,7 @@ export function SiteMapPanel({
         kind: 'info',
         text: `Loaded ${result.image.fileName} (${result.image.widthPx} × ${result.image.heightPx} px).${hadScale ? ' The old scale was cleared — calibrate again on this image.' : ' Now calibrate the scale.'}`,
       });
-      startCalibrating();
+      startCalibrating(null);
     } catch (err) {
       setMessage({ kind: 'error', text: `Could not read ${file.name}: ${err instanceof Error ? err.message : 'unknown error'}.` });
     }
@@ -218,7 +219,10 @@ export function SiteMapPanel({
       ArrowDown: { x: 0, y: step },
     };
     const m = moves[e.key];
-    if (m) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setSelected(d.device.id);
+    } else if (m) {
       e.preventDefault();
       edit((pl) => moveDevice(pl, d.device.id, { x: Math.round(d.device.x + m.x), y: Math.round(d.device.y + m.y) }));
     } else if (d.device.kind === 'camera' && (e.key === '[' || e.key === ']')) {
@@ -298,7 +302,7 @@ export function SiteMapPanel({
         <span data-testid="plan-scale" className="font-mono text-[var(--color-ink-2)]">
           {scaleText ?? 'not calibrated — distances cannot be measured on the plan yet'}
         </span>
-        <Button onClick={startCalibrating}>{plan.calibration ? 'Recalibrate' : 'Calibrate scale'}</Button>
+        <Button onClick={() => startCalibrating()}>{plan.calibration ? 'Recalibrate' : 'Calibrate scale'}</Button>
         {plan.calibration && (
           <Button variant="ghost" onClick={() => edit(clearCalibration)}>
             Clear scale
@@ -425,7 +429,7 @@ export function SiteMapPanel({
           viewBox={`0 0 ${widthPx} ${heightPx}`}
           preserveAspectRatio="none"
           style={{ width: '100%', height: 'auto', aspectRatio: `${widthPx} / ${heightPx}`, touchAction: 'none', display: 'block' }}
-          role="img"
+          role="group"
           aria-label={`Site plan, ${view.devices.length} device(s) placed. The table below lists every device and can edit it without a pointer.`}
           onPointerDown={onCanvasDown}
           onPointerMove={onCanvasMove}
@@ -577,7 +581,7 @@ export function SiteMapPanel({
                   key={d.device.id}
                   d={d}
                   plan={plan}
-                  endpoints={view.endpoints}
+                  switches={view.switches}
                   units={units}
                   edit={edit}
                 />
@@ -606,13 +610,13 @@ function RunCell({ run, units }: { run: RunView | null; units: UnitSystemState }
 function DeviceRow({
   d,
   plan,
-  endpoints,
+  switches,
   units,
   edit,
 }: {
   d: DeviceView;
   plan: SitePlan;
-  endpoints: readonly { readonly id: string; readonly label: string }[];
+  switches: readonly { readonly id: string; readonly label: string }[];
   units: UnitSystemState;
   edit: (f: (p: SitePlan) => SitePlan) => boolean;
 }) {
@@ -657,8 +661,8 @@ function DeviceRow({
               edit((p) => connectCamera(p, dev.id, v === '' ? null : v));
             }}
           >
-            <option value="">Primary NVR</option>
-            {endpoints.map((x) => (
+            <option value="">NVR / rack</option>
+            {switches.map((x) => (
               <option key={x.id} value={x.id}>
                 {x.label}
               </option>
@@ -698,7 +702,7 @@ function DeviceRow({
             Remove route
           </Button>
         )}
-        <Button variant="ghost" onClick={() => edit((p) => (deviceById(p, dev.id) ? removeDevice(p, dev.id) : p))}>
+        <Button variant="ghost" onClick={() => edit((p) => removeDevice(p, dev.id))}>
           Remove
         </Button>
       </td>

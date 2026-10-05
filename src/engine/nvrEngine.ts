@@ -268,7 +268,7 @@ export function evaluateNvr(nvr: Nvr, req: NvrRequirement, drives: readonly Hdd[
   });
 
   // HDMI only: on most units VGA mirrors HDMI 1 rather than driving a separate
-  // monitor (ASSUMPTIONS 10.x), so counting it would over-promise.
+  // monitor (ASSUMPTIONS 10.2), so counting it would over-promise.
   checks.push({
     id: 'outputs',
     label: 'Monitor outputs',

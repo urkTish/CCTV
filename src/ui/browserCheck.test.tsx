@@ -24,6 +24,12 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 
+/** Open an Admin section from the navigation. */
+function goTo(section: string) {
+  const nav = screen.getByRole('navigation', { name: 'Project sections' });
+  fireEvent.click(within(nav).getByRole('button', { name: new RegExp(`^${section.replace(/[()&]/g, '\\$&')}`) }));
+}
+
 function input(label: string | RegExp): HTMLInputElement {
   return screen.getByLabelText(label) as HTMLInputElement;
 }
@@ -31,6 +37,7 @@ function input(label: string | RegExp): HTMLInputElement {
 describe('number fields keep what is being typed', () => {
   it('a design setting can be emptied and retyped; the stored value returns on blur', () => {
     render(<App />);
+    goTo('Cabling');
     const box = input(/^Cable box length/);
     expect(box.value).toBe('305');
 
@@ -41,6 +48,7 @@ describe('number fields keep what is being typed', () => {
     expect(box.value).toBe('500');
 
     // Out of range: shown as typed while editing, the clamped value after blur.
+    goTo('Recording & storage');
     const growth = input(/^Growth headroom/);
     fireEvent.focus(growth);
     fireEvent.change(growth, { target: { value: '900' } });
@@ -49,14 +57,18 @@ describe('number fields keep what is being typed', () => {
     expect(Number(growth.value)).toBeLessThan(900);
 
     // An emptied field that is left reverts to the stored value.
-    fireEvent.focus(box);
-    fireEvent.change(box, { target: { value: '' } });
-    fireEvent.blur(box);
-    expect(box.value).toBe('500');
+    goTo('Cabling');
+    const box2 = input(/^Cable box length/);
+    expect(box2.value).toBe('500');
+    fireEvent.focus(box2);
+    fireEvent.change(box2, { target: { value: '' } });
+    fireEvent.blur(box2);
+    expect(box2.value).toBe('500');
   });
 
   it('the camera count can be emptied and retyped', () => {
     render(<App />);
+    goTo('Locations & cameras');
     const count = input(/^Cameras of this type at this location/);
     fireEvent.focus(count);
     fireEvent.change(count, { target: { value: '' } });
@@ -64,11 +76,13 @@ describe('number fields keep what is being typed', () => {
     fireEvent.change(count, { target: { value: '3' } });
     fireEvent.blur(count);
     expect(count.value).toBe('3');
-    expect(screen.getByRole('tab', { selected: true }).textContent).toContain('×3');
+    const list = screen.getByRole('list', { name: 'Locations' });
+    expect(within(list).getByRole('button', { current: true }).textContent).toContain('×3');
   });
 
   it('the site-map device table keeps an emptied coordinate and takes the retyped one', () => {
     render(<App />);
+    goTo('Site map');
     fireEvent.click(screen.getByRole('button', { name: 'Place Main gate' }));
     const table = screen.getByRole('table', { name: /Placed devices/ });
     const x = within(table).getByLabelText('x of Main gate (px)') as HTMLInputElement;
@@ -102,6 +116,7 @@ function pngFile(w: number, h: number): File {
 describe('site-map markers over a plan image', () => {
   it('keep the light palette only when a plan image is shown', async () => {
     render(<App />);
+    goTo('Site map');
     const svg = () => screen.getByRole('group', { name: /^Site plan/ });
     expect(svg().getAttribute('class')).toBeNull();
     fireEvent.change(screen.getByLabelText('Plan image (PNG or JPG)'), { target: { files: [pngFile(1200, 800)] } });

@@ -512,6 +512,7 @@ export function Tabs<T extends string>({
   active,
   onChange,
   size = 'md',
+  wrap = false,
 }: {
   label: string;
   idBase: string;
@@ -519,6 +520,8 @@ export function Tabs<T extends string>({
   active: T;
   onChange: (next: T) => void;
   size?: 'sm' | 'md';
+  /** Wrap onto a second row instead of scrolling sideways. */
+  wrap?: boolean;
 }) {
   const refs = useRef(new Map<string, HTMLButtonElement>());
   const onKey = (e: KeyboardEvent<HTMLButtonElement>, index: number) => {
@@ -537,7 +540,7 @@ export function Tabs<T extends string>({
     refs.current.get(t.id)?.focus();
   };
   return (
-    <div role="tablist" aria-label={label} className="flex gap-1 overflow-x-auto border-b border-[var(--color-border)]">
+    <div role="tablist" aria-label={label} className={`flex min-w-0 gap-x-1 border-b border-[var(--color-border)] ${wrap ? 'flex-wrap' : 'overflow-x-auto'}`}>
       {tabs.map((t, i) => {
         const selected = t.id === active;
         const ids = tabIds(idBase, t.id);

@@ -1,3 +1,24 @@
+# Handoff — where the UI/UX redesign stands
+
+## UI/UX redesign (cloud session 5, 2026-10-05) — IN PROGRESS
+
+Brief: `uiux-agent-prompt.md` (owner's explicit command given). Audit + IA:
+`docs/uiux-audit-and-ia.md`. Task list: TASKS.md, section "UI/UX redesign" (U1–U17).
+
+- **Done:** U1–U12 — tokens with the ContracTech blue + contrast test; shared
+  components; one app with routes (`#/client`, `#/intake/…`, project hash); the
+  Admin shell (left nav with per-section status, drawer on phones, jump palette
+  Ctrl K), Overview, Locations list → detail with input/result tabs and Advanced
+  disclosures, Recording / Network / Cabling sections, Site map workspace, BOM
+  with optional prices, Settings (engineer profile), workspace envelope for
+  extras, client-intake mapping module.
+- **Resume at:** U13 (client wizard UI, `src/client/`), U14 (handoff test),
+  U15–U16 (report), U17 (close-out).
+- Engine, data files, existing schemas and `buildBillOfMaterials` untouched.
+- Browser checks: scripts in the session scratchpad (`uiux/`), not in the repo.
+
+---
+
 # Handoff — where phase 2 stopped
 
 ## Browser check (cloud session 4, 2026-10-05)

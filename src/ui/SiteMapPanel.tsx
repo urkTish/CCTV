@@ -9,7 +9,7 @@
  * pointer and keyboard input.
  */
 
-import { useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
 
 import { checkPlanFile, planImageFromBytes, PLAN_UPLOAD_ACCEPT } from '../domain/planImage.ts';
 import { SitePlanError, type Point, type SitePlan } from '../domain/sitePlan.ts';
@@ -38,6 +38,7 @@ import { siteMapView, type DeviceView, type RunView } from '../engine/siteMapVie
 import type { Project, UnitSystemState } from '../state/projectTypes.ts';
 import { readFileAsBytes } from './fileIo.ts';
 import { OsmReferenceMap } from './OsmReferenceMap.tsx';
+import { Icon, type IconName } from './icons.tsx';
 import { Button, Card, EstimateBadge, NumberInput } from './primitives.tsx';
 
 type Mode = 'select' | 'calibrate' | 'place-camera' | 'place-nvr' | 'place-switch' | 'route';
@@ -49,6 +50,15 @@ const MODE_LABEL: Readonly<Record<Mode, string>> = {
   'place-nvr': 'Place NVR / rack',
   'place-switch': 'Place switch',
   route: 'Draw route',
+};
+
+const MODE_ICON: Readonly<Record<Mode, IconName>> = {
+  select: 'arrow-right',
+  calibrate: 'edit',
+  'place-camera': 'camera',
+  'place-nvr': 'recorder',
+  'place-switch': 'network',
+  route: 'cable',
 };
 
 const MODE_HINT: Readonly<Record<Mode, string>> = {
@@ -72,11 +82,14 @@ export function SiteMapPanel({
   units,
   results,
   onPlanChange,
+  selectRequest = null,
 }: {
   project: Project;
   units: UnitSystemState;
   results: ReadonlyMap<string, RecommendationResult>;
   onPlanChange: (next: SitePlan) => void;
+  /** Ask the panel to select a device (from the jump palette); `seq` makes repeats count. */
+  selectRequest?: { readonly id: string; readonly seq: number } | null;
 }) {
   const plan = project.sitePlan;
   const view = useMemo(() => siteMapView(project, results), [project, results]);
@@ -85,7 +98,13 @@ export function SiteMapPanel({
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [mode, setMode] = useState<Mode>('select');
   const [message, setMessage] = useState<{ kind: 'error' | 'info'; text: string } | null>(null);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(selectRequest?.id ?? null);
+  const [lastRequest, setLastRequest] = useState(selectRequest?.seq ?? 0);
+  if (selectRequest && selectRequest.seq !== lastRequest) {
+    // Adjusting state while rendering (React's documented pattern for "reset on prop change").
+    setLastRequest(selectRequest.seq);
+    setSelected(selectRequest.id);
+  }
   const [dragId, setDragId] = useState<string | null>(null);
   const [cameraToPlace, setCameraToPlace] = useState<string>('');
   const [routeCameraId, setRouteCameraId] = useState<string>('');
@@ -264,352 +283,520 @@ export function SiteMapPanel({
       ? null
       : `1 px = ${sig(lengthFromMetres(view.metresPerPx, units))} ${u} · 100 px = ${sig(lengthFromMetres(view.metresPerPx * 100, units))} ${u}`;
 
+  const selectedView = view.devices.find((d) => d.device.id === selected) ?? null;
+
   return (
-    <Card
-      title="Site map"
-      subtitle="Upload a floor or site plan, set its scale, place the cameras, NVR and switches, and draw the cable routes. Cable lengths, switch grouping and the bill of materials use what is placed here."
-    >
-      {/* --- upload ------------------------------------------------------------ */}
-      <div className="flex flex-wrap items-end gap-3">
-        <div>
-          <label htmlFor="plan-upload" className="block text-sm font-medium text-[var(--color-ink)]">
-            Plan image (PNG or JPG)
-          </label>
-          <input
-            id="plan-upload"
-            type="file"
-            accept={PLAN_UPLOAD_ACCEPT}
-            className="mt-1 text-sm text-[var(--color-ink-2)]"
-            onChange={(e) => {
-              void onUpload(e.currentTarget.files?.[0]);
-              e.currentTarget.value = '';
-            }}
-          />
-          <p className="mt-1 text-xs text-[var(--color-ink-3)]">PDF is not supported — export the page as PNG or JPG first.</p>
+    <div className="grid gap-4">
+      {/* --- plan and scale ---------------------------------------------------- */}
+      <Card title="Plan and scale" subtitle="Upload a floor or site plan (PNG or JPG), then set its scale from a dimension you know.">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex flex-wrap items-end gap-3">
+            <div>
+              <label htmlFor="plan-upload" className="block text-sm font-medium text-[var(--color-ink)]">
+                Plan image (PNG or JPG)
+              </label>
+              <input
+                id="plan-upload"
+                type="file"
+                accept={PLAN_UPLOAD_ACCEPT}
+                className="mt-1 max-w-full text-sm text-[var(--color-ink-2)] file:mr-3 file:rounded-control file:border file:border-[var(--color-border-strong)] file:bg-[var(--color-surface)] file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-[var(--color-ink)]"
+                onChange={(e) => {
+                  void onUpload(e.currentTarget.files?.[0]);
+                  e.currentTarget.value = '';
+                }}
+              />
+              <p className="mt-1 text-xs text-[var(--color-ink-3)]">PDF is not supported — export the page as PNG or JPG first.</p>
+            </div>
+            {plan.image && (
+              <Button variant="ghost" icon="trash" onClick={() => edit(removeImage)}>
+                Remove image
+              </Button>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="font-medium text-[var(--color-ink)]">Scale:</span>
+            <span data-testid="plan-scale" className="font-mono text-[var(--color-ink-2)]">
+              {scaleText ?? 'not calibrated — distances cannot be measured on the plan yet'}
+            </span>
+            <Button onClick={() => startCalibrating()}>{plan.calibration ? 'Recalibrate' : 'Calibrate scale'}</Button>
+            {plan.calibration && (
+              <Button variant="ghost" onClick={() => edit(clearCalibration)}>
+                Clear scale
+              </Button>
+            )}
+          </div>
         </div>
-        {plan.image && (
-          <Button variant="ghost" onClick={() => edit(removeImage)}>
-            Remove image
-          </Button>
-        )}
-      </div>
 
-      {message && (
-        <p
-          role={message.kind === 'error' ? 'alert' : 'status'}
-          className="mt-3 rounded-control border-l-4 px-3 py-2 text-sm"
-          style={{
-            borderColor: message.kind === 'error' ? 'var(--color-fail)' : 'var(--color-accent)',
-            background: message.kind === 'error' ? 'var(--color-fail-soft)' : 'var(--color-accent-soft)',
-            color: message.kind === 'error' ? 'var(--color-fail)' : 'var(--color-ink)',
-          }}
-        >
-          {message.text}
-        </p>
-      )}
-
-      {/* --- scale ------------------------------------------------------------- */}
-      <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
-        <span className="font-medium text-[var(--color-ink)]">Scale:</span>
-        <span data-testid="plan-scale" className="font-mono text-[var(--color-ink-2)]">
-          {scaleText ?? 'not calibrated — distances cannot be measured on the plan yet'}
-        </span>
-        <Button onClick={() => startCalibrating()}>{plan.calibration ? 'Recalibrate' : 'Calibrate scale'}</Button>
-        {plan.calibration && (
-          <Button variant="ghost" onClick={() => edit(clearCalibration)}>
-            Clear scale
-          </Button>
-        )}
-      </div>
-
-      {mode === 'calibrate' && (
-        <fieldset className="mt-3 rounded-control border border-[var(--color-border)] p-3">
-          <legend className="px-1 text-sm font-semibold text-[var(--color-ink)]">Calibration line</legend>
-          <p className="mb-2 text-xs text-[var(--color-ink-3)]">
-            Click both ends of a known dimension on the plan (a door, a grid line, a dimensioned wall), or type the two
-            points in image pixels. Then enter its real length.
+        {message && (
+          <p
+            role={message.kind === 'error' ? 'alert' : 'status'}
+            className="mt-3 rounded-control border-l-4 px-3 py-2 text-sm"
+            style={{
+              borderColor: message.kind === 'error' ? 'var(--color-fail)' : 'var(--color-brand)',
+              background: message.kind === 'error' ? 'var(--color-fail-soft)' : 'var(--color-accent-soft)',
+              color: message.kind === 'error' ? 'var(--color-fail)' : 'var(--color-ink)',
+            }}
+          >
+            {message.text}
           </p>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-            {(
-              [
-                ['ax', 'Point A x (px)'],
-                ['ay', 'Point A y (px)'],
-                ['bx', 'Point B x (px)'],
-                ['by', 'Point B y (px)'],
-              ] as const
-            ).map(([k, label]) => (
-              <label key={k} className="text-xs text-[var(--color-ink-2)]">
-                {label}
+        )}
+
+        {mode === 'calibrate' && (
+          <fieldset className="mt-3 rounded-control border border-[var(--color-border)] p-3">
+            <legend className="px-1 text-sm font-semibold text-[var(--color-ink)]">Calibration line</legend>
+            <p className="mb-2 text-xs text-[var(--color-ink-3)]">
+              Click both ends of a known dimension on the plan (a door, a grid line, a dimensioned wall), or type the two
+              points in image pixels. Then enter its real length.
+            </p>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+              {(
+                [
+                  ['ax', 'Point A x (px)'],
+                  ['ay', 'Point A y (px)'],
+                  ['bx', 'Point B x (px)'],
+                  ['by', 'Point B y (px)'],
+                ] as const
+              ).map(([k, label]) => (
+                <label key={k} className="text-xs text-[var(--color-ink-2)]">
+                  {label}
+                  <input
+                    type="number"
+                    className={inputClass}
+                    value={Number.isFinite(cal[k]) ? cal[k] : ''}
+                    onChange={(e) => {
+                      const v = num(e.currentTarget.value);
+                      setCal((c) => ({ ...c, [k]: v }));
+                    }}
+                  />
+                </label>
+              ))}
+              <label className="text-xs text-[var(--color-ink-2)]">
+                Real length ({u})
                 <input
                   type="number"
+                  min={0}
                   className={inputClass}
-                  value={Number.isFinite(cal[k]) ? cal[k] : ''}
+                  value={Number.isFinite(cal.metres) ? round(lengthFromMetres(cal.metres, units), 4) : ''}
                   onChange={(e) => {
                     const v = num(e.currentTarget.value);
-                    setCal((c) => ({ ...c, [k]: v }));
+                    setCal((c) => ({ ...c, metres: lengthToMetres(v, units) }));
                   }}
                 />
               </label>
+            </div>
+            <div className="mt-2 flex gap-2">
+              <Button variant="primary" onClick={applyCalibration}>
+                Apply calibration
+              </Button>
+              <Button variant="ghost" onClick={() => setMode('select')}>
+                Cancel
+              </Button>
+            </div>
+          </fieldset>
+        )}
+      </Card>
+
+      {/* --- workspace: toolbar, canvas, side panel ----------------------------- */}
+      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <section aria-label="Map workspace" className="min-w-0 rounded-card border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-card)]">
+          <div className="flex flex-wrap items-center gap-2 border-b border-[var(--color-border)] px-3 py-2">
+            <div className="flex flex-wrap gap-1" role="group" aria-label="Map tool">
+              {(['select', 'place-camera', 'place-nvr', 'place-switch', 'route'] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  aria-pressed={mode === m}
+                  onClick={() => {
+                    setMode(m);
+                    setRouteDraft([]);
+                  }}
+                  className={`inline-flex items-center gap-1.5 rounded-control border px-2.5 py-1.5 text-sm ${
+                    mode === m
+                      ? 'border-[var(--color-brand)] bg-[var(--color-accent-soft)] font-medium text-[var(--color-accent)]'
+                      : 'border-transparent text-[var(--color-ink-2)] hover:bg-[var(--color-surface-2)]'
+                  }`}
+                >
+                  <Icon name={MODE_ICON[m]} size={16} />
+                  {MODE_LABEL[m]}
+                </button>
+              ))}
+            </div>
+            {mode === 'place-camera' && (
+              <label className="text-sm text-[var(--color-ink-2)]">
+                <span className="sr-only">Camera to place</span>
+                <select
+                  className={inputClass}
+                  value={chosenUnplaced ? unplacedKey(chosenUnplaced.locationId, chosenUnplaced.index) : ''}
+                  onChange={(e) => setCameraToPlace(e.currentTarget.value)}
+                >
+                  {view.unplaced.length === 0 && <option value="">Every camera is placed</option>}
+                  {view.unplaced.map((c) => (
+                    <option key={unplacedKey(c.locationId, c.index)} value={unplacedKey(c.locationId, c.index)}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            {mode === 'route' && (
+              <>
+                <label className="text-sm text-[var(--color-ink-2)]">
+                  <span className="sr-only">Camera to route</span>
+                  <select className={inputClass} value={routeCamera?.device.id ?? ''} onChange={(e) => setRouteCameraId(e.currentTarget.value)}>
+                    {cameraViews.length === 0 && <option value="">Place a camera first</option>}
+                    {cameraViews.map((c) => (
+                      <option key={c.device.id} value={c.device.id}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <Button variant="primary" onClick={finishRoute}>
+                  Finish route ({routeDraft.length} bend{routeDraft.length === 1 ? '' : 's'})
+                </Button>
+              </>
+            )}
+            <p className="w-full text-xs text-[var(--color-ink-3)]">{MODE_HINT[mode]}</p>
+          </div>
+
+          <div className="p-3">
+            <div className="overflow-hidden rounded-control border border-[var(--color-border)]">
+            <svg
+              ref={svgRef}
+              // Over a plan image the markers keep the light palette in every theme (index.css).
+              className={plan.image ? 'plan-on-image' : undefined}
+              viewBox={`0 0 ${widthPx} ${heightPx}`}
+              preserveAspectRatio="none"
+              style={{ width: '100%', height: 'auto', aspectRatio: `${widthPx} / ${heightPx}`, touchAction: 'none', display: 'block' }}
+              role="group"
+              aria-label={`Site plan, ${view.devices.length} device(s) placed. The table below lists every device and can edit it without a pointer.`}
+              onPointerDown={onCanvasDown}
+              onPointerMove={onCanvasMove}
+              onPointerUp={() => setDragId(null)}
+              onPointerCancel={() => setDragId(null)}
+            >
+              {plan.image ? (
+                <image href={plan.image.dataUri} x={0} y={0} width={widthPx} height={heightPx} />
+              ) : (
+                <>
+                  <rect x={0} y={0} width={widthPx} height={heightPx} fill="var(--color-surface-2)" />
+                  <text x={widthPx / 2} y={heightPx / 2} textAnchor="middle" fontSize={unit * 2} fill="var(--color-ink-3)">
+                    No plan image — devices can still be placed and run lengths typed in the table
+                  </text>
+                </>
+              )}
+
+              {view.devices.map((d) =>
+                d.cone.length > 2 ? (
+                  <polygon
+                    key={`cone-${d.device.id}`}
+                    points={d.cone.map((p) => `${p.x},${p.y}`).join(' ')}
+                    fill="var(--color-brand)"
+                    fillOpacity={0.18}
+                    stroke="var(--color-brand)"
+                    strokeWidth={unit * 0.15}
+                  />
+                ) : null,
+              )}
+
+              {view.lines.map((l) => {
+                const a = l.points[0]!;
+                const b = l.points[l.points.length - 1]!;
+                return (
+                  <g key={l.id}>
+                    <polyline
+                      points={l.points.map((p) => `${p.x},${p.y}`).join(' ')}
+                      fill="none"
+                      stroke={l.kind === 'drawn' ? 'var(--color-ink)' : 'var(--color-estimate)'}
+                      strokeWidth={unit * 0.3}
+                      strokeDasharray={l.kind === 'estimated' ? `${unit} ${unit * 0.7}` : undefined}
+                    />
+                    {l.kind === 'estimated' && (
+                      <text x={(a.x + b.x) / 2} y={(a.y + b.y) / 2 - unit * 0.5} textAnchor="middle" fontSize={unit * 1.4} fill="var(--color-estimate)">
+                        estimated route
+                      </text>
+                    )}
+                  </g>
+                );
+              })}
+
+              {plan.calibration && (
+                <line
+                  x1={plan.calibration.a.x}
+                  y1={plan.calibration.a.y}
+                  x2={plan.calibration.b.x}
+                  y2={plan.calibration.b.y}
+                  stroke="var(--color-marginal)"
+                  strokeWidth={unit * 0.3}
+                />
+              )}
+              {mode === 'calibrate' &&
+                [
+                  [cal.ax, cal.ay],
+                  [cal.bx, cal.by],
+                ].map(([x, y], i) =>
+                  Number.isFinite(x) && Number.isFinite(y) ? (
+                    <circle key={i} cx={x} cy={y} r={unit * 0.6} fill="var(--color-marginal)" />
+                  ) : null,
+                )}
+
+              {mode === 'route' && routeCamera && routeDraft.length > 0 && (
+                <polyline
+                  points={[routeCamera.device, ...routeDraft].map((p) => `${p.x},${p.y}`).join(' ')}
+                  fill="none"
+                  stroke="var(--color-accent)"
+                  strokeWidth={unit * 0.3}
+                />
+              )}
+
+              {view.devices.map((d) => (
+                <g
+                  key={d.device.id}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`${d.label} (${d.device.kind}) at ${Math.round(d.device.x)}, ${Math.round(d.device.y)} px`}
+                  onPointerDown={(e) => onDeviceDown(e, d.device.id)}
+                  onKeyDown={(e) => onDeviceKey(e, d)}
+                  style={{ cursor: mode === 'select' ? 'move' : 'crosshair' }}
+                >
+                  {d.device.kind === 'camera' ? (
+                    <circle cx={d.device.x} cy={d.device.y} r={unit * 0.9} fill="var(--color-accent)" stroke={selected === d.device.id ? 'var(--color-ink)' : 'white'} strokeWidth={unit * 0.25} />
+                  ) : (
+                    <rect
+                      x={d.device.x - unit}
+                      y={d.device.y - unit}
+                      width={unit * 2}
+                      height={unit * 2}
+                      fill={d.device.kind === 'nvr' ? 'var(--color-ink)' : 'var(--color-pass)'}
+                      stroke={selected === d.device.id ? 'var(--color-accent)' : 'white'}
+                      strokeWidth={unit * 0.25}
+                    />
+                  )}
+                  <text x={d.device.x + unit * 1.3} y={d.device.y + unit * 0.5} fontSize={unit * 1.5} fill="var(--color-ink)" stroke="var(--color-surface)" strokeWidth={unit * 0.3} paintOrder="stroke">
+                    {d.label}
+                  </text>
+                </g>
+              ))}
+            </svg>
+            </div>
+            {view.warnings.map((w) => (
+              <p key={w} className="mt-2 flex gap-1.5 text-xs text-[var(--color-marginal)]">
+                <Icon name="alert" size={14} />
+                {w}
+              </p>
             ))}
-            <label className="text-xs text-[var(--color-ink-2)]">
-              Real length ({u})
-              <input
-                type="number"
-                min={0}
-                className={inputClass}
-                value={Number.isFinite(cal.metres) ? round(lengthFromMetres(cal.metres, units), 4) : ''}
-                onChange={(e) => {
-                  const v = num(e.currentTarget.value);
-                  setCal((c) => ({ ...c, metres: lengthToMetres(v, units) }));
-                }}
-              />
-            </label>
           </div>
-          <div className="mt-2 flex gap-2">
-            <Button variant="primary" onClick={applyCalibration}>
-              Apply calibration
+        </section>
+
+        <SidePanel selected={selectedView} plan={plan} switches={view.switches} units={units} edit={edit} onClose={() => setSelected(null)} />
+      </div>
+
+      {/* --- M4: keyboard / list alternative ---------------------------------- */}
+      <Card title="Device list" subtitle="Everything the map does, without a pointer: place, move, rotate, cable and type a run length.">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button icon="plus" onClick={() => edit((p) => placeNvr(p, canvasCentre(p)))}>Add NVR / rack</Button>
+          <Button icon="plus" onClick={() => edit((p) => placeSwitch(p, canvasCentre(p)))}>Add switch</Button>
+          {view.unplaced.length > 0 && <span className="text-sm text-[var(--color-ink-3)]">Not yet placed:</span>}
+          {view.unplaced.map((c) => (
+            <Button key={unplacedKey(c.locationId, c.index)} variant="ghost" onClick={() => edit((p) => placeCamera(p, c.locationId, c.index, canvasCentre(p)))}>
+              Place {c.label}
             </Button>
-            <Button variant="ghost" onClick={() => setMode('select')}>
-              Cancel
-            </Button>
+          ))}
+        </div>
+
+        {view.devices.length > 0 && (
+          // relative: the sr-only "Actions" header is absolutely positioned; without a
+          // positioned scroll box it escaped the overflow clip and widened the page on a phone.
+          <div className="relative mt-3 overflow-x-auto">
+            <table className="w-full min-w-[880px] text-left text-sm">
+              <caption className="sr-only">Placed devices — editable without a pointer</caption>
+              <thead className="text-xs text-[var(--color-ink-3)]">
+                <tr>
+                  <th scope="col" className="py-1 pr-2">Device</th>
+                  <th scope="col" className="py-1 pr-2">x (px)</th>
+                  <th scope="col" className="py-1 pr-2">y (px)</th>
+                  <th scope="col" className="py-1 pr-2">Facing (°)</th>
+                  <th scope="col" className="py-1 pr-2">Cabled to</th>
+                  <th scope="col" className="py-1 pr-2">Horizontal run</th>
+                  <th scope="col" className="py-1 pr-2">Typed run ({u})</th>
+                  <th scope="col" className="py-1"><span className="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {view.devices.map((d) => (
+                  <DeviceRow
+                    key={d.device.id}
+                    d={d}
+                    plan={plan}
+                    switches={view.switches}
+                    units={units}
+                    edit={edit}
+                  />
+                ))}
+              </tbody>
+            </table>
           </div>
-        </fieldset>
-      )}
+        )}
+      </Card>
 
       {/* --- M5: optional online reference map (off by default) --------------- */}
-      <OsmReferenceMap units={units} onUseAsCalibrationLength={calibrateFromMap} />
+      <Card title="Online reference map" subtitle="Optional. Look the site up on OpenStreetMap and measure a known distance for the calibration.">
+        <OsmReferenceMap units={units} onUseAsCalibrationLength={calibrateFromMap} />
+      </Card>
+    </div>
+  );
+}
 
-      {/* --- tools ------------------------------------------------------------- */}
-      <div className="mt-4 flex flex-wrap items-center gap-2" role="group" aria-label="Map tool">
-        {(['select', 'place-camera', 'place-nvr', 'place-switch', 'route'] as const).map((m) => (
-          <button
-            key={m}
-            type="button"
-            aria-pressed={mode === m}
-            onClick={() => {
-              setMode(m);
-              setRouteDraft([]);
-            }}
-            className={`rounded-control border px-3 py-1.5 text-sm ${
-              mode === m
-                ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)] font-medium text-[var(--color-accent)]'
-                : 'border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-ink-2)]'
-            }`}
-          >
-            {MODE_LABEL[m]}
-          </button>
-        ))}
-        {mode === 'place-camera' && (
-          <label className="text-sm text-[var(--color-ink-2)]">
-            <span className="sr-only">Camera to place</span>
-            <select
-              className={inputClass}
-              value={chosenUnplaced ? unplacedKey(chosenUnplaced.locationId, chosenUnplaced.index) : ''}
-              onChange={(e) => setCameraToPlace(e.currentTarget.value)}
-            >
-              {view.unplaced.length === 0 && <option value="">Every camera is placed</option>}
-              {view.unplaced.map((c) => (
-                <option key={unplacedKey(c.locationId, c.index)} value={unplacedKey(c.locationId, c.index)}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
+const LEGEND: readonly { readonly label: string; readonly swatch: ReactNode }[] = [
+  { label: 'Camera', swatch: <circle cx="10" cy="10" r="6" fill="var(--color-accent)" stroke="white" strokeWidth="2" /> },
+  { label: 'Field of view', swatch: <path d="M3 17 10 3l7 14z" fill="var(--color-brand)" fillOpacity="0.2" stroke="var(--color-brand)" /> },
+  { label: 'NVR / rack', swatch: <rect x="4" y="4" width="12" height="12" fill="var(--color-ink)" /> },
+  { label: 'Switch', swatch: <rect x="4" y="4" width="12" height="12" fill="var(--color-pass)" /> },
+  { label: 'Drawn route', swatch: <path d="M2 10h16" stroke="var(--color-ink)" strokeWidth="2.5" /> },
+  { label: 'Estimated route', swatch: <path d="M2 10h16" stroke="var(--color-estimate)" strokeWidth="2.5" strokeDasharray="4 3" /> },
+];
+
+/** The selected device, editable; with nothing selected, the legend. */
+function SidePanel({
+  selected,
+  plan,
+  switches,
+  units,
+  edit,
+  onClose,
+}: {
+  selected: DeviceView | null;
+  plan: SitePlan;
+  switches: readonly { readonly id: string; readonly label: string }[];
+  units: UnitSystemState;
+  edit: (f: (p: SitePlan) => SitePlan) => boolean;
+  onClose: () => void;
+}) {
+  if (!selected) {
+    return (
+      <aside aria-label="Selected device" className="rounded-card border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-[var(--shadow-card)]">
+        <h3 className="text-sm font-semibold text-[var(--color-ink)]">No device selected</h3>
+        <p className="mt-1 text-sm text-[var(--color-ink-2)]">
+          Click a device on the plan (or focus it and press Enter) to edit it here. The device list below does the same without a pointer.
+        </p>
+        <h4 className="mt-4 text-xs font-semibold tracking-wide text-[var(--color-ink-3)] uppercase">Legend</h4>
+        <ul className="mt-2 grid gap-1.5 text-sm text-[var(--color-ink-2)]">
+          {LEGEND.map((l) => (
+            <li key={l.label} className="flex items-center gap-2">
+              <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" className="plan-on-image shrink-0">
+                {l.swatch}
+              </svg>
+              {l.label}
+            </li>
+          ))}
+        </ul>
+      </aside>
+    );
+  }
+  const dev = selected.device;
+  const route = selected.endpointId ? routeBetween(plan, dev.id, selected.endpointId) : null;
+  const setNumber = (f: (v: number) => (p: SitePlan) => SitePlan) => (v: number) => {
+    if (Number.isFinite(v)) edit(f(v));
+  };
+  const u = lengthUnitLabel(units);
+  return (
+    <aside aria-label="Selected device" className="rounded-card border border-[var(--color-brand)] bg-[var(--color-surface)] p-4 shadow-[var(--shadow-raised)]">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <h3 className="text-sm font-semibold text-[var(--color-ink)]">{selected.label}</h3>
+          <p className="text-xs text-[var(--color-ink-3)]">{dev.kind === 'nvr' ? 'NVR / rack' : dev.kind}</p>
+        </div>
+        <Button variant="ghost" size="sm" icon="close" ariaLabel="Deselect device" onClick={onClose} />
+      </div>
+      {selected.coneNote && <p className="mt-2 text-xs text-[var(--color-ink-3)]">{selected.coneNote}</p>}
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        {dev.kind !== 'camera' && (
+          <label className="col-span-2 text-xs text-[var(--color-ink-2)]">
+            Device name
+            <input className={inputClass} value={dev.label} onChange={(e) => edit((p) => renameDevice(p, dev.id, e.currentTarget.value))} />
           </label>
         )}
-        {mode === 'route' && (
+        <label className="text-xs text-[var(--color-ink-2)]">
+          x (px)
+          <NumberInput className={inputClass} value={Math.round(dev.x)} onValueChange={setNumber((v) => (p) => moveDevice(p, dev.id, { x: v, y: dev.y }))} />
+        </label>
+        <label className="text-xs text-[var(--color-ink-2)]">
+          y (px)
+          <NumberInput className={inputClass} value={Math.round(dev.y)} onValueChange={setNumber((v) => (p) => moveDevice(p, dev.id, { x: dev.x, y: v }))} />
+        </label>
+        {dev.kind === 'camera' && (
           <>
-            <label className="text-sm text-[var(--color-ink-2)]">
-              <span className="sr-only">Camera to route</span>
-              <select className={inputClass} value={routeCamera?.device.id ?? ''} onChange={(e) => setRouteCameraId(e.currentTarget.value)}>
-                {cameraViews.length === 0 && <option value="">Place a camera first</option>}
-                {cameraViews.map((c) => (
-                  <option key={c.device.id} value={c.device.id}>
-                    {c.label}
+            <label className="col-span-2 text-xs text-[var(--color-ink-2)]">
+              Facing (degrees clockwise from up)
+              <div className="flex gap-1">
+                <Button size="sm" ariaLabel="Rotate 15 degrees anticlockwise" onClick={() => edit((p) => rotateCamera(p, dev.id, dev.rotationDeg - 15))}>
+                  −15°
+                </Button>
+                <NumberInput step={15} className={inputClass} value={Math.round(dev.rotationDeg)} onValueChange={setNumber((v) => (p) => rotateCamera(p, dev.id, v))} />
+                <Button size="sm" ariaLabel="Rotate 15 degrees clockwise" onClick={() => edit((p) => rotateCamera(p, dev.id, dev.rotationDeg + 15))}>
+                  +15°
+                </Button>
+              </div>
+            </label>
+            <label className="col-span-2 text-xs text-[var(--color-ink-2)]">
+              Cabled to
+              <select
+                className={inputClass}
+                value={dev.connectTo ?? ''}
+                onChange={(e) => {
+                  const v = e.currentTarget.value;
+                  edit((p) => connectCamera(p, dev.id, v === '' ? null : v));
+                }}
+              >
+                <option value="">NVR / rack</option>
+                {switches.map((x) => (
+                  <option key={x.id} value={x.id}>
+                    {x.label}
                   </option>
                 ))}
               </select>
             </label>
-            <Button variant="primary" onClick={finishRoute}>
-              Finish route ({routeDraft.length} bend{routeDraft.length === 1 ? '' : 's'})
-            </Button>
           </>
         )}
-      </div>
-      <p className="mt-1 text-xs text-[var(--color-ink-3)]">{MODE_HINT[mode]}</p>
-
-      {/* --- canvas ------------------------------------------------------------ */}
-      <div className="mt-3 overflow-hidden rounded-control border border-[var(--color-border)]">
-        <svg
-          ref={svgRef}
-          // Over a plan image the markers keep the light palette in every theme (index.css).
-          className={plan.image ? 'plan-on-image' : undefined}
-          viewBox={`0 0 ${widthPx} ${heightPx}`}
-          preserveAspectRatio="none"
-          style={{ width: '100%', height: 'auto', aspectRatio: `${widthPx} / ${heightPx}`, touchAction: 'none', display: 'block' }}
-          role="group"
-          aria-label={`Site plan, ${view.devices.length} device(s) placed. The table below lists every device and can edit it without a pointer.`}
-          onPointerDown={onCanvasDown}
-          onPointerMove={onCanvasMove}
-          onPointerUp={() => setDragId(null)}
-          onPointerCancel={() => setDragId(null)}
-        >
-          {plan.image ? (
-            <image href={plan.image.dataUri} x={0} y={0} width={widthPx} height={heightPx} />
-          ) : (
-            <>
-              <rect x={0} y={0} width={widthPx} height={heightPx} fill="var(--color-surface-2)" />
-              <text x={widthPx / 2} y={heightPx / 2} textAnchor="middle" fontSize={unit * 2} fill="var(--color-ink-3)">
-                No plan image — devices can still be placed and run lengths typed in the table
-              </text>
-            </>
-          )}
-
-          {view.devices.map((d) =>
-            d.cone.length > 2 ? (
-              <polygon
-                key={`cone-${d.device.id}`}
-                points={d.cone.map((p) => `${p.x},${p.y}`).join(' ')}
-                fill="var(--color-accent)"
-                fillOpacity={0.15}
-                stroke="var(--color-accent)"
-                strokeWidth={unit * 0.15}
-              />
-            ) : null,
-          )}
-
-          {view.lines.map((l) => {
-            const a = l.points[0]!;
-            const b = l.points[l.points.length - 1]!;
-            return (
-              <g key={l.id}>
-                <polyline
-                  points={l.points.map((p) => `${p.x},${p.y}`).join(' ')}
-                  fill="none"
-                  stroke={l.kind === 'drawn' ? 'var(--color-ink)' : 'var(--color-estimate)'}
-                  strokeWidth={unit * 0.3}
-                  strokeDasharray={l.kind === 'estimated' ? `${unit} ${unit * 0.7}` : undefined}
-                />
-                {l.kind === 'estimated' && (
-                  <text x={(a.x + b.x) / 2} y={(a.y + b.y) / 2 - unit * 0.5} textAnchor="middle" fontSize={unit * 1.4} fill="var(--color-estimate)">
-                    estimated route
-                  </text>
-                )}
-              </g>
-            );
-          })}
-
-          {plan.calibration && (
-            <line
-              x1={plan.calibration.a.x}
-              y1={plan.calibration.a.y}
-              x2={plan.calibration.b.x}
-              y2={plan.calibration.b.y}
-              stroke="var(--color-marginal)"
-              strokeWidth={unit * 0.3}
+        {dev.kind !== 'nvr' && (
+          <label className="col-span-2 text-xs text-[var(--color-ink-2)]">
+            Typed run ({u})
+            <NumberInput
+              min={0}
+              placeholder="from plan"
+              className={inputClass}
+              value={dev.runMetresOverride === null ? Number.NaN : round(lengthFromMetres(dev.runMetresOverride, units), 1)}
+              onValueChange={(v, raw) => {
+                if (raw.trim() === '') edit((p) => setRunOverride(p, dev.id, null));
+                else if (Number.isFinite(v)) edit((p) => setRunOverride(p, dev.id, lengthToMetres(v, units)));
+              }}
             />
-          )}
-          {mode === 'calibrate' &&
-            [
-              [cal.ax, cal.ay],
-              [cal.bx, cal.by],
-            ].map(([x, y], i) =>
-              Number.isFinite(x) && Number.isFinite(y) ? (
-                <circle key={i} cx={x} cy={y} r={unit * 0.6} fill="var(--color-marginal)" />
-              ) : null,
-            )}
-
-          {mode === 'route' && routeCamera && routeDraft.length > 0 && (
-            <polyline
-              points={[routeCamera.device, ...routeDraft].map((p) => `${p.x},${p.y}`).join(' ')}
-              fill="none"
-              stroke="var(--color-accent)"
-              strokeWidth={unit * 0.3}
-            />
-          )}
-
-          {view.devices.map((d) => (
-            <g
-              key={d.device.id}
-              tabIndex={0}
-              role="button"
-              aria-label={`${d.label} (${d.device.kind}) at ${Math.round(d.device.x)}, ${Math.round(d.device.y)} px`}
-              onPointerDown={(e) => onDeviceDown(e, d.device.id)}
-              onKeyDown={(e) => onDeviceKey(e, d)}
-              style={{ cursor: mode === 'select' ? 'move' : 'crosshair' }}
-            >
-              {d.device.kind === 'camera' ? (
-                <circle cx={d.device.x} cy={d.device.y} r={unit * 0.9} fill="var(--color-accent)" stroke={selected === d.device.id ? 'var(--color-ink)' : 'white'} strokeWidth={unit * 0.25} />
-              ) : (
-                <rect
-                  x={d.device.x - unit}
-                  y={d.device.y - unit}
-                  width={unit * 2}
-                  height={unit * 2}
-                  fill={d.device.kind === 'nvr' ? 'var(--color-ink)' : 'var(--color-pass)'}
-                  stroke={selected === d.device.id ? 'var(--color-accent)' : 'white'}
-                  strokeWidth={unit * 0.25}
-                />
-              )}
-              <text x={d.device.x + unit * 1.3} y={d.device.y + unit * 0.5} fontSize={unit * 1.5} fill="var(--color-ink)" stroke="var(--color-surface)" strokeWidth={unit * 0.3} paintOrder="stroke">
-                {d.label}
-              </text>
-            </g>
-          ))}
-        </svg>
+          </label>
+        )}
       </div>
-
-      {view.warnings.map((w) => (
-        <p key={w} className="mt-2 text-xs text-[var(--color-marginal)]">
-          {w}
+      {selected.run && (
+        <p className="mt-3 text-sm text-[var(--color-ink-2)]">
+          {dev.kind === 'switch' ? 'Uplink' : 'Horizontal run'}: <RunCell run={selected.run} units={units} />
         </p>
-      ))}
-
-      {/* --- M4: keyboard / list alternative ---------------------------------- */}
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <Button onClick={() => edit((p) => placeNvr(p, canvasCentre(p)))}>Add NVR / rack</Button>
-        <Button onClick={() => edit((p) => placeSwitch(p, canvasCentre(p)))}>Add switch</Button>
-        {view.unplaced.length > 0 && <span className="text-sm text-[var(--color-ink-3)]">Not yet placed:</span>}
-        {view.unplaced.map((c) => (
-          <Button key={unplacedKey(c.locationId, c.index)} variant="ghost" onClick={() => edit((p) => placeCamera(p, c.locationId, c.index, canvasCentre(p)))}>
-            Place {c.label}
-          </Button>
-        ))}
-      </div>
-
-      {view.devices.length > 0 && (
-        // relative: the sr-only "Actions" header is absolutely positioned; without a
-        // positioned scroll box it escaped the overflow clip and widened the page on a phone.
-        <div className="relative mt-3 overflow-x-auto">
-          <table className="w-full min-w-[880px] text-left text-sm">
-            <caption className="sr-only">Placed devices — editable without a pointer</caption>
-            <thead className="text-xs text-[var(--color-ink-3)]">
-              <tr>
-                <th scope="col" className="py-1 pr-2">Device</th>
-                <th scope="col" className="py-1 pr-2">x (px)</th>
-                <th scope="col" className="py-1 pr-2">y (px)</th>
-                <th scope="col" className="py-1 pr-2">Facing (°)</th>
-                <th scope="col" className="py-1 pr-2">Cabled to</th>
-                <th scope="col" className="py-1 pr-2">Horizontal run</th>
-                <th scope="col" className="py-1 pr-2">Typed run ({u})</th>
-                <th scope="col" className="py-1"><span className="sr-only">Actions</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              {view.devices.map((d) => (
-                <DeviceRow
-                  key={d.device.id}
-                  d={d}
-                  plan={plan}
-                  switches={view.switches}
-                  units={units}
-                  edit={edit}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
       )}
-    </Card>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {route && (
+          <Button variant="ghost" size="sm" onClick={() => edit((p) => removeRoute(p, route.id))}>
+            Remove its route
+          </Button>
+        )}
+        <Button
+          variant="danger"
+          size="sm"
+          icon="trash"
+          onClick={() => {
+            if (edit((p) => removeDevice(p, dev.id))) onClose();
+          }}
+        >
+          Remove device
+        </Button>
+      </div>
+    </aside>
   );
 }
 

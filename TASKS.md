@@ -127,15 +127,15 @@ dark.
 | U1 | Audit the phase-2 app in a real browser; write the audit and the IA for both versions | `docs/uiux-audit-and-ia.md` committed before code | done |
 | U2 | Design tokens: brand blue + derived accessible shades, type scale, spacing, radius, elevation, motion, light/dark | Contrast unit test computes WCAG ratios for every token pair used; browser check | done — 71 contrast checks; fixed two old failures (ink-3 on canvas 4.44:1, input border 2.5:1) |
 | U3 | Shared components: icons, status badge, tabs, Advanced disclosure with changed count, dialog, empty state, field flag slot | jsdom tests (keyboard on tabs, dialog focus) | done |
-| U4 | Routing (`#/client`, `#/intake/…`, project hash) and the Admin shell: header, collapsible left nav / phone drawer, per-section status | Pure tests for route parsing and section status; jsdom nav test; browser check | pending |
-| U5 | Overview dashboard: project name, totals, cameras by model, every open warning linked to where it is fixed | jsdom test; browser check | pending |
-| U6 | Locations list → detail; input tabs with Advanced disclosure; results tabs (recommendation, spec sheet, calculation, sketch, alternatives, excluded) | Existing UI assertions kept (15-field order, Not specified, derived, Unverified, no-result path); browser check | pending |
-| U7 | Recording & storage, Network and Cabling sections (settings beside their results, advanced allowances behind a disclosure; PoE and form factor kept as primary inputs) | Existing design tests kept; browser check | pending |
-| U8 | Site map as a workspace: toolbar, canvas, side panel for the selected device, device list | Existing site-map tests kept; browser check | pending |
-| U9 | Search / jump palette (Ctrl/⌘ K) | jsdom test | pending |
-| U10 | Workspace extras (client name, prices, report status, intake provenance) in a new envelope file + autosave; engineer Settings | Round-trip tests; old project files still open | pending |
-| U11 | Bill of materials section with optional prices | jsdom test; browser check | pending |
-| U12 | Client-to-engine mapping module with documented defaults | Unit tests for every answer and default | pending |
+| U4 | Routing (`#/client`, `#/intake/…`, project hash) and the Admin shell: header, collapsible left nav / phone drawer, per-section status | Pure tests for route parsing and section status; jsdom nav test; browser check | done — `#/client`, `#/intake/…` and the project hash; nav collapses to icons ≥ 1024 px, drawer below; status = icon + text + colour |
+| U5 | Overview dashboard: project name, totals, cameras by model, every open warning linked to where it is fixed | jsdom test; browser check | done — totals, cameras by model, 17 warnings on the 10-location project each with a link |
+| U6 | Locations list → detail; input tabs with Advanced disclosure; results tabs (recommendation, spec sheet, calculation, sketch, alternatives, excluded) | Existing UI assertions kept (15-field order, Not specified, derived, Unverified, no-result path); browser check | done — every previous assertion kept; tabs wrap instead of scrolling |
+| U7 | Recording & storage, Network and Cabling sections (settings beside their results, advanced allowances behind a disclosure; PoE and form factor kept as primary inputs) | Existing design tests kept; browser check | done — PoE mode and form factor stay primary inputs, never under Advanced |
+| U8 | Site map as a workspace: toolbar, canvas, side panel for the selected device, device list | Existing site-map tests kept; browser check | done |
+| U9 | Search / jump palette (Ctrl/⌘ K) | jsdom test | done |
+| U10 | Workspace extras (client name, prices, report status, intake provenance) in a new envelope file + autosave; engineer Settings | Round-trip tests; old project files still open | done — new `contractech-cctv-workspace` envelope; plain project file written byte-identically when there are no extras |
+| U11 | Bill of materials section with optional prices | jsdom test; browser check | done — phone layout stacks each line (no sideways scroll) |
+| U12 | Client-to-engine mapping module with documented defaults | Unit tests for every answer and default | done — `src/client/intakeMapping.ts`, 19 assumed fields per area, each with a reason |
 | U13 | Client intake wizard (mobile-first), indicative summary, send as file / link | jsdom test of the whole flow; browser check on a phone | pending |
 | U14 | Handoff: open an intake file / link as a draft; "assumed from client intake — please confirm" on every defaulted value; confirm or edit to clear | jsdom test | pending |
 | U15 | Report model (pure, from `buildBillOfMaterials`) and an offline QR encoder | Unit tests; QR output decoded by an independent decoder | pending |

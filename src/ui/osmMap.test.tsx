@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { act, render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, screen, cleanup, fireEvent, waitFor, within } from '@testing-library/react';
 
 import App from '../App.tsx';
 import { OSM_COPYRIGHT_URL, OSM_OFFLINE_MESSAGE } from '../domain/osmMap.ts';
@@ -22,6 +22,12 @@ const leaflet = vi.hoisted(() => {
   };
 });
 vi.mock('./osmLeaflet.ts', () => ({ mountOsmMap: leaflet.mountOsmMap }));
+
+/** Open an Admin section from the navigation. */
+function goTo(section: string) {
+  const nav = screen.getByRole('navigation', { name: 'Project sections' });
+  fireEvent.click(within(nav).getByRole('button', { name: new RegExp(`^${section.replace(/[()&]/g, '\\$&')}`) }));
+}
 
 const toggle = () => screen.getByRole('checkbox', { name: 'Show OpenStreetMap (online)' }) as HTMLInputElement;
 
@@ -48,6 +54,7 @@ afterEach(cleanup);
 describe('OpenStreetMap mode (M5)', () => {
   it('is off by default: no map, no Leaflet loaded', async () => {
     render(<App />);
+    goTo('Site map');
     expect(toggle().checked).toBe(false);
     expect(screen.queryByRole('region', { name: 'OpenStreetMap reference map' })).toBeNull();
     expect(screen.queryByTestId('osm-attribution')).toBeNull();
@@ -58,6 +65,7 @@ describe('OpenStreetMap mode (M5)', () => {
 
   it('lazy-loads Leaflet when turned on, with attribution on the map, and removes it when turned off', async () => {
     render(<App />);
+    goTo('Site map');
     const opts = await turnOn();
     const region = screen.getByRole('region', { name: 'OpenStreetMap reference map' });
     expect(leaflet.mountOsmMap.mock.calls[0]![0]).toBe(region);
@@ -78,6 +86,7 @@ describe('OpenStreetMap mode (M5)', () => {
 
   it('comes back to the last view when turned off and on again', async () => {
     render(<App />);
+    goTo('Site map');
     const opts = await turnOn();
     opts.onViewChange({ lat: 51.5, lng: -0.12, zoom: 17 });
     fireEvent.click(toggle());
@@ -89,6 +98,7 @@ describe('OpenStreetMap mode (M5)', () => {
   it('says so when the browser is offline, and re-requests the tiles when it is back', async () => {
     setOnline(false);
     render(<App />);
+    goTo('Site map');
     await turnOn();
     expect(screen.getByRole('alert').textContent).toBe(OSM_OFFLINE_MESSAGE);
 
@@ -106,6 +116,7 @@ describe('OpenStreetMap mode (M5)', () => {
 
   it('reports tiles that fail to load', async () => {
     render(<App />);
+    goTo('Site map');
     const opts = await turnOn();
     act(() => {
       opts.onTileError();
@@ -119,6 +130,7 @@ describe('OpenStreetMap mode (M5)', () => {
       throw new Error('Map container is already initialized.');
     });
     render(<App />);
+    goTo('Site map');
     fireEvent.click(toggle());
     expect((await screen.findByRole('alert')).textContent).toBe(
       'The map could not be loaded: Map container is already initialized. The plan-image mode is unaffected.',
@@ -128,6 +140,7 @@ describe('OpenStreetMap mode (M5)', () => {
 
   it('feeds a length measured on the map into the plan calibration', async () => {
     render(<App />);
+    goTo('Site map');
     const opts = await turnOn();
     expect(screen.getByTestId('osm-measured').textContent).toBe('click two points on the map');
     act(() => opts.onMeasure([{ lat: 0, lng: 0 }]));

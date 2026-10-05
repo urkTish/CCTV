@@ -207,16 +207,54 @@ body {
   }
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
+/* Screen-reader-only text uses Tailwind's own `sr-only` / `not-sr-only`
+   utilities, so responsive and focus variants (md:not-sr-only on the header
+   title, focus:not-sr-only on the skip link) can undo it. */
+
+/* Stacked tables: below 640 px a data table becomes one block per row, each
+   cell labelled from its data-label, so a phone never scrolls sideways to read
+   a verdict or a quantity. Above that it is an ordinary table. */
+@media (max-width: 639.98px) {
+  .stack-table,
+  .stack-table tbody,
+  .stack-table tfoot,
+  .stack-table tr,
+  .stack-table th,
+  .stack-table td {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+  .stack-table thead {
+    display: none;
+  }
+  .stack-table tr {
+    padding: 0.5rem 0;
+  }
+  .stack-table td,
+  .stack-table th {
+    padding: 0.125rem 0 !important;
+    text-align: left !important;
+  }
+  .stack-table td[data-label] {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    text-align: right !important;
+  }
+  .stack-table td[data-label] > * {
+    min-width: 0;
+  }
+  .stack-table td[data-label]::before {
+    content: attr(data-label);
+    flex: none;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    text-align: left;
+    color: var(--color-ink-3);
+  }
 }
 
 /* OpenStreetMap reference view (OsmReferenceMap.tsx). On a phone the attribution

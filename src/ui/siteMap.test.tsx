@@ -33,6 +33,19 @@ function deviceRow(label: string): HTMLElement {
   return within(table).getByRole('rowheader', { name: new RegExp(`^${label}`) }).closest('tr')!;
 }
 
+/** Open an Admin section from the navigation. */
+function goTo(section: string) {
+  const nav = screen.getByRole('navigation', { name: 'Project sections' });
+  fireEvent.click(within(nav).getByRole('button', { name: new RegExp(`^${section.replace(/[()&]/g, '\\$&')}`) }));
+}
+
+/** Render the app and open the Site map section. */
+function renderMap() {
+  const r = render(<App />);
+  goTo('Site map');
+  return r;
+}
+
 function calibrateViaForm() {
   fireEvent.click(screen.getByRole('button', { name: 'Calibrate scale' }));
   // 300-400-500 px line declared as 25 m → 0.05 m/px.
@@ -46,14 +59,14 @@ function calibrateViaForm() {
 
 describe('site map: upload (M1)', () => {
   it('refuses a PDF with the stated reason', async () => {
-    render(<App />);
+    renderMap();
     const input = screen.getByLabelText('Plan image (PNG or JPG)');
     fireEvent.change(input, { target: { files: [new File(['%PDF-1.7'], 'plan.pdf', { type: 'application/pdf' })] } });
     expect((await screen.findByRole('alert')).textContent).toBe(PDF_UNSUPPORTED_MESSAGE);
   });
 
   it('loads a PNG, reads its size from the file and asks for calibration', async () => {
-    render(<App />);
+    renderMap();
     fireEvent.change(screen.getByLabelText('Plan image (PNG or JPG)'), { target: { files: [pngFile(1200, 800)] } });
     expect(await screen.findByText(/Loaded plan\.png \(1200 × 800 px\)\. Now calibrate the scale\./)).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Remove image' })).toBeTruthy();
@@ -63,7 +76,7 @@ describe('site map: upload (M1)', () => {
 
 describe('site map: calibration (M2)', () => {
   it('sets the scale from the list alternative and shows it', () => {
-    render(<App />);
+    renderMap();
     expect(screen.getByTestId('plan-scale').textContent).toMatch(/not calibrated/);
     calibrateViaForm();
     expect(screen.getByTestId('plan-scale').textContent).toBe('1 px = 0.05 m · 100 px = 5 m');
@@ -71,7 +84,7 @@ describe('site map: calibration (M2)', () => {
   });
 
   it('refuses a zero-length line with a message instead of crashing', () => {
-    render(<App />);
+    renderMap();
     fireEvent.click(screen.getByRole('button', { name: 'Calibrate scale' }));
     for (const l of ['Point A x (px)', 'Point A y (px)', 'Point B x (px)', 'Point B y (px)']) {
       fireEvent.change(screen.getByLabelText(l), { target: { value: '5' } });
@@ -84,7 +97,7 @@ describe('site map: calibration (M2)', () => {
 
 describe('site map: devices, cones and routes (M3–M4)', () => {
   it('places devices from the keyboard and draws the FOV cone and the estimated route', () => {
-    const { container } = render(<App />);
+    const { container } = renderMap();
     calibrateViaForm();
     fireEvent.click(screen.getByRole('button', { name: 'Add NVR / rack' }));
     fireEvent.click(screen.getByRole('button', { name: 'Place Main gate' }));
@@ -109,7 +122,7 @@ describe('site map: devices, cones and routes (M3–M4)', () => {
   });
 
   it('edits rotation and a typed run length without a pointer', () => {
-    render(<App />);
+    renderMap();
     fireEvent.click(screen.getByRole('button', { name: 'Add NVR / rack' }));
     fireEvent.click(screen.getByRole('button', { name: 'Place Main gate' }));
     const facing = screen.getByLabelText(/Facing of Main gate/) as HTMLInputElement;
@@ -126,7 +139,7 @@ describe('site map: devices, cones and routes (M3–M4)', () => {
   });
 
   it('moves a focused device with the arrow keys', () => {
-    const { container } = render(<App />);
+    const { container } = renderMap();
     fireEvent.click(screen.getByRole('button', { name: 'Add switch' }));
     const sw = within(container.querySelector('svg[aria-label^="Site plan"]') as HTMLElement).getByRole('button', { name: /Switch 1/ });
     fireEvent.keyDown(sw, { key: 'ArrowRight' });
@@ -135,7 +148,7 @@ describe('site map: devices, cones and routes (M3–M4)', () => {
   });
 
   it('cables a camera to a switch and removes the switch again', () => {
-    render(<App />);
+    renderMap();
     fireEvent.click(screen.getByRole('button', { name: 'Add NVR / rack' }));
     fireEvent.click(screen.getByRole('button', { name: 'Add switch' }));
     fireEvent.click(screen.getByRole('button', { name: 'Place Main gate' }));
@@ -149,10 +162,14 @@ describe('site map: devices, cones and routes (M3–M4)', () => {
 
   it('drops a placed camera when its location’s count goes down', () => {
     render(<App />);
+    goTo('Locations & cameras');
     fireEvent.change(screen.getByLabelText(/Cameras of this type at this location/, { selector: 'input' }), { target: { value: '2' } });
+    goTo('Site map');
     fireEvent.click(screen.getByRole('button', { name: 'Place Main gate #2' }));
     expect(screen.getByLabelText('x of Main gate #2 (px)')).toBeTruthy();
+    goTo('Locations & cameras');
     fireEvent.change(screen.getByLabelText(/Cameras of this type at this location/, { selector: 'input' }), { target: { value: '1' } });
+    goTo('Site map');
     expect(screen.queryByLabelText('x of Main gate #2 (px)')).toBeNull();
   });
 });
@@ -178,7 +195,11 @@ describe('project persistence (M6)', () => {
     );
     fireEvent.change(screen.getByLabelText('Open project'), { target: { files: [new File([saved], 'site.json')] } });
     expect(await screen.findByText('Opened site.json.')).toBeTruthy();
-    expect(screen.getAllByRole('tab').map((t) => t.textContent?.replace(/×\d+$/, ''))).toEqual(['Dock', 'Yard']);
+    goTo('Locations & cameras');
+    const list = screen.getByRole('list', { name: 'Locations' });
+    expect(within(list).getAllByRole('listitem')).toHaveLength(2);
+    expect(within(list).getAllByRole('listitem').map((li) => li.querySelector('.truncate')?.textContent)).toEqual(['Dock', 'Yard']);
+    goTo('Site map');
     expect((screen.getByLabelText('Name of Comms room') as HTMLInputElement).value).toBe('Comms room');
   });
 
@@ -186,6 +207,7 @@ describe('project persistence (M6)', () => {
     render(<App />);
     fireEvent.change(screen.getByLabelText('Open project'), { target: { files: [new File(['{"format":"nope"}'], 'bad.json')] } });
     expect((await screen.findByText(/bad\.json was not opened/)).textContent).toMatch(/not a ContracTech CCTV project file/);
-    expect(screen.getAllByRole('tab')).toHaveLength(1);
+    goTo('Locations & cameras');
+    expect(within(screen.getByRole('list', { name: 'Locations' })).getAllByRole('listitem')).toHaveLength(1);
   });
 });

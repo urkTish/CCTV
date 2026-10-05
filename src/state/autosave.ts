@@ -3,8 +3,9 @@
  *
  * The site plan is not in the shareable URL (the image is too big), so without
  * this a browser refresh would lose a map that was never saved to a file. The
- * whole project is written as the same JSON document `Save project` produces,
- * so restoring goes through the same validation as opening a file.
+ * whole project (with its extras: client name, prices, report state, intake
+ * marks) is written as the same JSON document `Save project` produces, so
+ * restoring goes through the same validation as opening a file.
  *
  * Autosave is a convenience, never a dependency: IndexedDB can be missing
  * (old browser, jsdom), blocked (private mode, storage policy) or full. Every
@@ -12,8 +13,8 @@
  * app carries on and the UI says autosave is unavailable.
  */
 
-import { parseProjectFile, serializeProjectFile, type ProjectFileResult } from './projectFile.ts';
 import type { Project, UnitSystemState } from './projectTypes.ts';
+import { DEFAULT_EXTRAS, parseWorkspace, serializeWorkspace, type ProjectExtras, type WorkspaceResult } from './workspace.ts';
 
 export interface AutosaveStore {
   load(): Promise<string | null>;
@@ -72,9 +73,14 @@ function why(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-export async function autosaveProject(store: AutosaveStore, project: Project, units: UnitSystemState): Promise<AutosaveStatus> {
+export async function autosaveProject(
+  store: AutosaveStore,
+  project: Project,
+  units: UnitSystemState,
+  extras: ProjectExtras = DEFAULT_EXTRAS,
+): Promise<AutosaveStatus> {
   try {
-    await store.save(serializeProjectFile(project, units));
+    await store.save(serializeWorkspace(project, units, extras));
     return { ok: true };
   } catch (err) {
     return { ok: false, reason: `Autosave failed (${why(err)}). Use Save project to keep your work.` };
@@ -82,14 +88,14 @@ export async function autosaveProject(store: AutosaveStore, project: Project, un
 }
 
 /** The autosaved project, null when there is none, or a reason when it is unreadable. */
-export async function loadAutosave(store: AutosaveStore): Promise<ProjectFileResult | null> {
+export async function loadAutosave(store: AutosaveStore): Promise<WorkspaceResult | null> {
   let text: string | null;
   try {
     text = await store.load();
   } catch (err) {
     return { ok: false, reason: `Could not read the autosave (${why(err)}).` };
   }
-  return text === null ? null : parseProjectFile(text);
+  return text === null ? null : parseWorkspace(text);
 }
 
 export async function clearAutosave(store: AutosaveStore): Promise<AutosaveStatus> {

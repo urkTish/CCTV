@@ -90,9 +90,15 @@ be used as the plan's calibration length. Leaflet loads only when it is turned o
 (ASSUMPTIONS 11.6).
 
 **Drawing the site** (no plan to upload, or to trace over one): *Draw a new
-layout* asks for the site's width × height in metres and a grid square; the
-scale follows from it (1 m = 20 px), so cones, distances and cable runs work
-with no calibration step. The second toolbar row draws rectangles / rooms (Shift
+layout* asks only for the size of the building or area itself (width × depth)
+and an optional name. The canvas gets a margin on every side of max(5 m, 50% of
+the longer side), the grid square is picked by size (0.5 / 1 / 2 / 5 / 10 m),
+and the scale follows (1 m = 20 px), so cones, distances and cable runs work
+with no calibration step — e.g. 10 × 6 m → a 20 × 16 m canvas with a 1 m grid.
+The place is drawn for you (building outline and name label, one undo step).
+*Add margin* grows the canvas on any side later without moving anything
+relative to anything else; *Extend canvas to fit* appears when a shape reaches
+past the edge; *Advanced* sets the exact canvas size and grid. The second toolbar row draws rectangles / rooms (Shift
 for a square), straight lines and walls (Shift for 45°; click the first point to
 close an area), smooth curves through clicked points (fences, kerbs), doors,
 double doors, windows and gates (drag along a wall, or click for the usual
@@ -189,7 +195,7 @@ src/
     cabling.ts      run lengths, TIA-568 checks, bin packing
     sitePlan.ts     site-plan types and scale maths
     sitePlanEdit.ts pure edits to the plan + FOV-cone geometry
-    layoutShapes.ts drawn site layout: shapes, geometry, blank canvas, schema
+    layoutShapes.ts drawn site layout: shapes, geometry, canvas sized from the place, schema
     planImage.ts    PNG/JPEG header reading for uploads
     osmMap.ts       OpenStreetMap tile-policy constants, measuring maths
   data/

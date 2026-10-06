@@ -87,6 +87,15 @@
   --color-estimate: #6b4ea8;
   --color-estimate-soft: #eee8f8;
 
+  /* Drawn site layout fills (LayoutShapesSvg.tsx): decorative areas behind the
+     walls; walls and labels use --color-ink. */
+  --color-plan-room: #f6f7f9;
+  --color-plan-building: #dfe4eb;
+  --color-plan-car-park: #eceef2;
+  --color-plan-grass: #dcefdd;
+  --color-plan-paving: #eee8dc;
+  --color-plan-hatch: #8794a4;
+
   --color-scrim: rgb(16 21 28 / 0.45);
 }
 
@@ -120,6 +129,13 @@
     --color-estimate: #b79df0;
     --color-estimate-soft: #211a33;
 
+    --color-plan-room: #1a212a;
+    --color-plan-building: #2a3440;
+    --color-plan-car-park: #212932;
+    --color-plan-grass: #17301f;
+    --color-plan-paving: #2d2a22;
+    --color-plan-hatch: #66768a;
+
     --color-scrim: rgb(0 0 0 / 0.6);
   }
 }
@@ -152,6 +168,13 @@
 
   --color-estimate: #b79df0;
   --color-estimate-soft: #211a33;
+
+  --color-plan-room: #1a212a;
+  --color-plan-building: #2a3440;
+  --color-plan-car-park: #212932;
+  --color-plan-grass: #17301f;
+  --color-plan-paving: #2d2a22;
+  --color-plan-hatch: #66768a;
 
   --color-scrim: rgb(0 0 0 / 0.6);
 }
@@ -280,4 +303,10 @@ body {
   --color-pass: #1d6f42;
   --color-marginal: #8a5300;
   --color-estimate: #6b4ea8;
+  --color-plan-room: #f6f7f9;
+  --color-plan-building: #dfe4eb;
+  --color-plan-car-park: #eceef2;
+  --color-plan-grass: #dcefdd;
+  --color-plan-paving: #eee8dc;
+  --color-plan-hatch: #8794a4;
 }

@@ -807,3 +807,76 @@ export function redoHistory<T>(h: History<T>, current: T): { state: T; history: 
   if (next === undefined) return null;
   return { state: next, history: { past: [...h.past, current], future: h.future.slice(1) } };
 }
+
+// ---------------------------------------------------------------------------
+// Starting shapes (the keyboard alternative's "Add …" buttons)
+// ---------------------------------------------------------------------------
+
+/** What the drawing tools make: a shape kind, or one of the opening variants. */
+export type DrawTool = 'rect' | 'polyline' | 'curve' | 'text' | OpeningVariant;
+
+/**
+ * A sensible first shape of each kind, centred on `at`: a 6 × 4 m room, a 6 m
+ * wall, a 6 m curve, an opening at its usual width, a label. Sizes are in
+ * metres when the plan has a scale (else at the blank-layout scale), and never
+ * more than 40% of the canvas.
+ */
+export function defaultShape(
+  tool: DrawTool,
+  at: Point,
+  metresPerPx: number | null,
+  canvas: { readonly widthPx: number; readonly heightPx: number },
+  text = 'Label',
+): LayoutShape {
+  const pxPerM = metresPerPx && metresPerPx > 0 ? 1 / metresPerPx : FALLBACK_PX_PER_METRE;
+  const cap = (px: number, of: number) => Math.min(px, of * 0.4);
+  const w = cap(6 * pxPerM, canvas.widthPx);
+  const h = cap(4 * pxPerM, canvas.heightPx);
+  switch (tool) {
+    case 'rect':
+      return { kind: 'rect', id: 'new', cx: at.x, cy: at.y, width: w, height: h, rotationDeg: 0, stroke: 'wall', fill: 'room' };
+    case 'polyline':
+      return { kind: 'polyline', id: 'new', points: [{ x: at.x - w / 2, y: at.y }, { x: at.x + w / 2, y: at.y }], closed: false, stroke: 'wall', fill: 'none' };
+    case 'curve':
+      return {
+        kind: 'curve',
+        id: 'new',
+        points: [
+          { x: at.x - w / 2, y: at.y },
+          { x: at.x, y: at.y - h / 2 },
+          { x: at.x + w / 2, y: at.y },
+        ],
+        closed: false,
+        stroke: 'fence',
+        fill: 'none',
+      };
+    case 'text':
+      return { kind: 'text', id: 'new', x: at.x, y: at.y, text, sizePx: (Math.max(canvas.widthPx, canvas.heightPx) / 100) * 1.8, rotationDeg: 0 };
+    default:
+      return { kind: 'opening', id: 'new', variant: tool, cx: at.x, cy: at.y, widthMetres: OPENING_DEFAULT_WIDTH_M[tool], rotationDeg: 0, flip: false };
+  }
+}
+
+/** A short name for a shape, for lists and screen readers ("Room 6.0 × 4.0 m", "Fence 23.5 m"…). */
+export function describeShape(s: LayoutShape, metresPerPx: number | null): string {
+  const m = (px: number) => (metresPerPx ? `${(px * metresPerPx).toFixed(1)} m` : `${Math.round(px)} px`);
+  switch (s.kind) {
+    case 'rect': {
+      const what = s.fill === 'none' ? (s.width === s.height ? 'Square' : 'Rectangle') : AREA_FILL_LABEL[s.fill];
+      const dims = metresPerPx
+        ? `${(s.width * metresPerPx).toFixed(1)} × ${(s.height * metresPerPx).toFixed(1)} m`
+        : `${Math.round(s.width)} × ${Math.round(s.height)} px`;
+      return `${what} ${dims}`;
+    }
+    case 'polyline':
+    case 'curve': {
+      const style = LINE_STYLE_LABEL[s.stroke].split(' ')[0]!;
+      const what = s.closed && s.fill !== 'none' ? AREA_FILL_LABEL[s.fill] : `${s.kind === 'curve' ? 'Curved ' : ''}${s.kind === 'curve' ? style.toLowerCase() : style}`;
+      return `${what} ${s.closed ? 'outline ' : ''}${m(shapeLengthPx(s))}`;
+    }
+    case 'opening':
+      return `${OPENING_LABEL[s.variant]} ${s.widthMetres.toFixed(2)} m`;
+    case 'text':
+      return `Label “${s.text}”`;
+  }
+}

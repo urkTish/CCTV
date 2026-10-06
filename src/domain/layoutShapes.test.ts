@@ -5,6 +5,8 @@ import {
   canvasCalibration,
   canvasPx,
   constrainAngle,
+  defaultShape,
+  describeShape,
   duplicateShape,
   EMPTY_HISTORY,
   EMPTY_LAYOUT,
@@ -42,6 +44,7 @@ import {
   undoHistory,
   updateShape,
   type CurveShape,
+  type History,
   type LayoutShape,
   type OpeningShape,
   type PolylineShape,
@@ -345,7 +348,7 @@ describe('point list text form (keyboard alternative)', () => {
 
 describe('undo / redo history', () => {
   it('undoes and redoes, and a new edit clears redo', () => {
-    let h = recordHistory(EMPTY_HISTORY, 'a');
+    let h = recordHistory<string>(EMPTY_HISTORY, 'a');
     h = recordHistory(h, 'b');
     const u = undoHistory(h, 'c')!;
     expect(u.state).toBe('b');
@@ -359,8 +362,8 @@ describe('undo / redo history', () => {
   });
 
   it('keeps at most the limit', () => {
-    let h: typeof EMPTY_HISTORY | { past: readonly number[]; future: readonly number[] } = EMPTY_HISTORY;
-    for (let i = 0; i < 5; i++) h = recordHistory(h as { past: readonly number[]; future: readonly number[] }, i, 3);
+    let h: History<number> = EMPTY_HISTORY;
+    for (let i = 0; i < 5; i++) h = recordHistory(h, i, 3);
     expect(h.past).toEqual([2, 3, 4]);
   });
 });
@@ -408,5 +411,33 @@ describe('layout schema', () => {
     expect(isEmptyLayout({ ...EMPTY_LAYOUT, gridMetres: 2 })).toBe(false);
     expect(isEmptyLayout({ ...EMPTY_LAYOUT, canvas: { widthMetres: 5, heightMetres: 5 } })).toBe(false);
     expect(layoutOf(EMPTY_SITE_PLAN)).toBe(EMPTY_LAYOUT);
+  });
+});
+
+describe('starting shapes and descriptions', () => {
+  const canvas = { widthPx: 800, heightPx: 500 };
+  it('makes a 6 × 4 m room at the plan scale, capped to the canvas', () => {
+    const r = defaultShape('rect', { x: 400, y: 250 }, 0.05, canvas);
+    expect(r).toMatchObject({ kind: 'rect', cx: 400, cy: 250, width: 120, height: 80 });
+    const small = defaultShape('rect', { x: 0, y: 0 }, 0.05, { widthPx: 100, heightPx: 100 });
+    expect(small).toMatchObject({ width: 40, height: 40 });
+    expect(defaultShape('rect', { x: 0, y: 0 }, null, canvas)).toMatchObject({ width: 120 });
+  });
+
+  it('makes valid shapes of every tool', () => {
+    for (const tool of ['rect', 'polyline', 'curve', 'text', 'door', 'double-door', 'window', 'gate'] as const) {
+      const s = defaultShape(tool, { x: 400, y: 250 }, 0.05, canvas);
+      expect(() => addShape(EMPTY_SITE_PLAN, s)).not.toThrow();
+    }
+    expect(defaultShape('gate', { x: 0, y: 0 }, 0.05, canvas)).toMatchObject({ kind: 'opening', variant: 'gate', widthMetres: 4 });
+  });
+
+  it('describes shapes in metres when there is a scale', () => {
+    expect(describeShape(rect({ fill: 'room' }), 0.05)).toBe('Room 5.0 × 3.0 m');
+    expect(describeShape(rect({ fill: 'none' }), null)).toBe('Rectangle 100 × 60 px');
+    expect(describeShape(line([{ x: 0, y: 0 }, { x: 200, y: 0 }]), 0.05)).toBe('Wall 10.0 m');
+    expect(describeShape({ kind: 'curve', id: 'c', points: [{ x: 0, y: 0 }, { x: 100, y: 0 }], closed: false, stroke: 'fence', fill: 'none' }, 0.05)).toBe('Curved fence 5.0 m');
+    expect(describeShape(door(), 0.05)).toBe('Door 1.00 m');
+    expect(describeShape({ kind: 'text', id: 't', x: 0, y: 0, text: 'Gatehouse', sizePx: 10, rotationDeg: 0 }, null)).toBe('Label “Gatehouse”');
   });
 });

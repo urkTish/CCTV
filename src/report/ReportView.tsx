@@ -100,7 +100,7 @@ export function ReportView({ model }: { model: ReportModel }) {
 
               <Section n={2} title="Site map">
                 {m.map ? (
-                  <ReportMap view={m.map} image={m.planImage} />
+                  <ReportMap view={m.map} image={m.planImage} layoutShapes={m.layoutShapes} metresPerPx={m.metresPerPx} />
                 ) : (
                   <p className="muted">No site plan has been added yet. Camera positions will be marked on the plan after the site survey.</p>
                 )}

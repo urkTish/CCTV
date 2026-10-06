@@ -1,18 +1,63 @@
 /**
- * Site map editor (M1–M5): upload a plan, calibrate its scale, place cameras,
- * the NVR and switches, draw cable routes — and a table that does all of it
- * from the keyboard. An optional OpenStreetMap view (off by default) can supply
- * the calibration length.
+ * Site map editor (M1–M5): upload a plan — or draw the layout on a blank canvas
+ * whose size sets the scale — calibrate it, place cameras, the NVR and
+ * switches, draw cable routes, and draw the site itself (rooms, walls, fences,
+ * curves, doors, windows, gates, labels) with undo / redo and a snapping grid.
+ * Tables and lists do all of it from the keyboard. An optional OpenStreetMap
+ * view (off by default) can supply the calibration length.
  *
- * Every edit is a pure function from `domain/sitePlanEdit.ts`; everything drawn
- * comes from `engine/siteMapView.ts`. This component only renders and forwards
- * pointer and keyboard input.
+ * Every edit is a pure function from `domain/sitePlanEdit.ts` or
+ * `domain/layoutShapes.ts`; everything drawn comes from `engine/siteMapView.ts`
+ * and `LayoutShapesSvg.tsx`. This component only renders and forwards pointer
+ * and keyboard input.
  */
 
-import { useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
 
 import { checkPlanFile, planImageFromBytes, PLAN_UPLOAD_ACCEPT } from '../domain/planImage.ts';
-import { SitePlanError, type Point, type SitePlan } from '../domain/sitePlan.ts';
+import { SitePlanError, distancePx, type Point, type SitePlan } from '../domain/sitePlan.ts';
+import {
+  AREA_FILL_LABEL,
+  AREA_FILLS,
+  EMPTY_HISTORY,
+  LINE_STYLE_LABEL,
+  LINE_STYLES,
+  OPENING_DEFAULT_WIDTH_M,
+  OPENING_LABEL,
+  OPENING_VARIANTS,
+  addShape,
+  angleFromUp,
+  constrainAngle,
+  describeShape,
+  drawingMetresPerPx,
+  gridSpacingPx,
+  layoutOf,
+  localToPlan,
+  moveShapeTo,
+  openingFromDrag,
+  openingGeometry,
+  polylinePathD,
+  recordHistory,
+  rectCorners,
+  rectFromCorners,
+  redoHistory,
+  removeShape,
+  resizeRectFromCorner,
+  rotateShape,
+  shapeAnchor,
+  shapeBounds,
+  shapeById,
+  smoothPathD,
+  snapPoint,
+  translateShape,
+  undoHistory,
+  updateShape,
+  type AreaFill,
+  type History,
+  type LayoutShape,
+  type LineStyle,
+  type OpeningVariant,
+} from '../domain/layoutShapes.ts';
 import {
   calibrate,
   canvasCentre,
@@ -40,8 +85,12 @@ import { readFileAsBytes } from './fileIo.ts';
 import { OsmReferenceMap } from './OsmReferenceMap.tsx';
 import { Icon, type IconName } from './icons.tsx';
 import { Button, Card, EstimateBadge, NumberInput } from './primitives.tsx';
+import { LayoutCanvasForm, LayoutShapeList, ShapeActions, ShapeFields } from './LayoutShapeEditor.tsx';
+import { GridLines, LayoutDefs, LayoutShapeGraphic } from './LayoutShapesSvg.tsx';
+import { THEME_PALETTE, lineStroke } from './planPalette.ts';
 
-type Mode = 'select' | 'calibrate' | 'place-camera' | 'place-nvr' | 'place-switch' | 'route';
+type DrawMode = 'draw-rect' | 'draw-line' | 'draw-curve' | 'draw-opening' | 'draw-text';
+type Mode = 'select' | 'calibrate' | 'place-camera' | 'place-nvr' | 'place-switch' | 'route' | DrawMode;
 
 const MODE_LABEL: Readonly<Record<Mode, string>> = {
   select: 'Select / move',
@@ -50,6 +99,11 @@ const MODE_LABEL: Readonly<Record<Mode, string>> = {
   'place-nvr': 'Place NVR / rack',
   'place-switch': 'Place switch',
   route: 'Draw route',
+  'draw-rect': 'Rectangle',
+  'draw-line': 'Line / wall',
+  'draw-curve': 'Curve',
+  'draw-opening': 'Door / window / gate',
+  'draw-text': 'Label',
 };
 
 const MODE_ICON: Readonly<Record<Mode, IconName>> = {
@@ -59,16 +113,61 @@ const MODE_ICON: Readonly<Record<Mode, IconName>> = {
   'place-nvr': 'recorder',
   'place-switch': 'network',
   route: 'cable',
+  'draw-rect': 'square',
+  'draw-line': 'polyline',
+  'draw-curve': 'curve',
+  'draw-opening': 'door',
+  'draw-text': 'text',
 };
 
 const MODE_HINT: Readonly<Record<Mode, string>> = {
-  select: 'Drag a device to move it. Focus a device and use the arrow keys to nudge it; [ and ] rotate a camera.',
+  select:
+    'Drag a device or a drawn shape to move it; drag a selected shape’s handles to resize or rotate it (Shift keeps a square / turns freely). Focus a device or shape and use the arrow keys to nudge it; [ and ] rotate; Delete removes a shape. Ctrl+Z / Ctrl+Y undo and redo.',
   calibrate: 'Click the two ends of a dimension you know, then enter its real length below.',
   'place-camera': 'Click the plan where the chosen camera goes.',
   'place-nvr': 'Click the plan where the NVR / rack is.',
   'place-switch': 'Click the plan where the switch / IDF is.',
   route: 'Click along walls and ceilings to add bends, then press Finish route.',
+  'draw-rect': 'Drag from corner to corner to draw a room or a wall outline. Hold Shift for a square.',
+  'draw-line':
+    'Click each corner of the wall, fence or line; Shift keeps 45° angles. Click the first point again to close an area, or press Finish (or Enter, or double-click). Esc cancels.',
+  'draw-curve': 'Click the points the curve should pass through, then Finish (or Enter, or double-click). Click the first point to close it into an area. Esc cancels.',
+  'draw-opening': 'Drag along a wall from one side of the opening to the other — or click to place one at its usual width — then turn or flip it in the panel.',
+  'draw-text': 'Type the label text, then click where it goes.',
 };
+
+/** What a phone user should know about each drawing tool (shown below 640 px). */
+const TOUCH_HINT: Partial<Readonly<Record<Mode, string>>> = {
+  'draw-rect': 'On a phone: drag with one finger.',
+  'draw-line': 'On a phone: tap each corner, then Finish. Turn on Snap for straight walls.',
+  'draw-curve': 'On a phone: tap the points, then Finish. Freehand drawing is not available.',
+  'draw-opening': 'On a phone: tap to place, then set the width and turn it in the panel below the map.',
+  select: 'On a phone the handles are small: resize and turn shapes precisely in the panel below the map or in the shape list.',
+};
+
+type ShapeHandle = 'move' | 'rotate' | { corner: 0 | 1 | 2 | 3 } | { vertex: number } | { end: 0 | 1 };
+
+interface ShapeDrag {
+  readonly id: string;
+  readonly handle: ShapeHandle;
+  readonly start: Point;
+  readonly orig: LayoutShape;
+  readonly planAtStart: SitePlan;
+  readonly recorded: boolean;
+}
+
+interface DeviceDrag {
+  readonly id: string;
+  readonly planAtStart: SitePlan;
+  readonly recorded: boolean;
+}
+
+const r2 = (p: Point): Point => ({ x: Math.round(p.x * 100) / 100, y: Math.round(p.y * 100) / 100 });
+
+function isEditableTarget(t: EventTarget | null): boolean {
+  if (!(t instanceof HTMLElement)) return false;
+  return t.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName);
+}
 
 const inputClass =
   'w-full min-w-0 rounded-control border border-[var(--color-border-strong)] bg-[var(--color-surface)] px-2 py-1 text-sm text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none';
@@ -100,12 +199,45 @@ export function SiteMapPanel({
   const [message, setMessage] = useState<{ kind: 'error' | 'info'; text: string } | null>(null);
   const [selected, setSelected] = useState<string | null>(selectRequest?.id ?? null);
   const [lastRequest, setLastRequest] = useState(selectRequest?.seq ?? 0);
+  const [selectedShapeId, setSelectedShapeId] = useState<string | null>(null);
   if (selectRequest && selectRequest.seq !== lastRequest) {
     // Adjusting state while rendering (React's documented pattern for "reset on prop change").
     setLastRequest(selectRequest.seq);
     setSelected(selectRequest.id);
+    setSelectedShapeId(null);
   }
-  const [dragId, setDragId] = useState<string | null>(null);
+  const [deviceDrag, setDeviceDrag] = useState<DeviceDrag | null>(null);
+  const [shapeDrag, setShapeDrag] = useState<ShapeDrag | null>(null);
+  /** Rectangle or opening being dragged out. */
+  const [dragDraft, setDragDraft] = useState<{ a: Point; b: Point; square: boolean } | null>(null);
+  /** Points of a line or curve being drawn, and where the pointer is. */
+  const [pathDraft, setPathDraft] = useState<Point[]>([]);
+  const [hover, setHover] = useState<Point | null>(null);
+  const [lineStyle, setLineStyle] = useState<LineStyle>('wall');
+  const [areaFill, setAreaFill] = useState<AreaFill>('none');
+  const [closePath, setClosePath] = useState(false);
+  const [openingVariant, setOpeningVariant] = useState<OpeningVariant>('door');
+  const [labelText, setLabelText] = useState('');
+  const [showGrid, setShowGrid] = useState(true);
+  const [snapOn, setSnapOn] = useState(true);
+  const [locked, setLocked] = useState(false);
+  const [canvasFormOpen, setCanvasFormOpen] = useState(false);
+
+  // ---- undo / redo ---------------------------------------------------------
+  // Every edit made here records the plan before it. A plan that changes from
+  // outside (a file opened, an autosave restored) clears the history, so undo
+  // can never bring back another project's plan (ASSUMPTIONS 13.5).
+  const [history, setHistory] = useState<History<SitePlan>>(EMPTY_HISTORY);
+  const [knownPlan, setKnownPlan] = useState(plan);
+  const [emitted, setEmitted] = useState<SitePlan | null>(null);
+  if (plan !== knownPlan) {
+    setKnownPlan(plan);
+    if (plan !== emitted) setHistory(EMPTY_HISTORY);
+  }
+  const emit = (next: SitePlan) => {
+    setEmitted(next);
+    onPlanChange(next);
+  };
   const [cameraToPlace, setCameraToPlace] = useState<string>('');
   const [routeCameraId, setRouteCameraId] = useState<string>('');
   const [routeDraft, setRouteDraft] = useState<Point[]>([]);
@@ -127,14 +259,91 @@ export function SiteMapPanel({
 
   const { widthPx, heightPx } = view;
   const unit = Math.max(widthPx, heightPx) / 100; // marker size, in image px
+  const layout = layoutOf(plan);
+  const drawMpp = drawingMetresPerPx(plan.calibration);
+  const gridPx = gridSpacingPx(layout.gridMetres, view.metresPerPx);
+  const snapPx = snapOn ? gridPx : null;
+  const snap = (p: Point) => r2(snapPoint(p, snapPx));
+  const selectedShape = selectedShapeId ? shapeById(plan, selectedShapeId) : null;
+  const idBase = `lay${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
+  // Over an image the fills let the plan show through and doors do not paint over it.
+  const palette = plan.image ? { ...THEME_PALETTE, fillOpacity: 0.45, cutOpenings: false } : THEME_PALETTE;
+
+  const undo = () => {
+    const r = undoHistory(history, plan);
+    if (!r) return;
+    setHistory(r.history);
+    emit(r.state);
+  };
+  const redo = () => {
+    const r = redoHistory(history, plan);
+    if (!r) return;
+    setHistory(r.history);
+    emit(r.state);
+  };
+  const cancelDrafts = () => {
+    setPathDraft([]);
+    setDragDraft(null);
+    setHover(null);
+  };
+  /** Switch to a drawing tool with sensible starting styles (rooms filled, curves as fences). */
+  const chooseDrawTool = (m: DrawMode) => {
+    setMode(m);
+    setRouteDraft([]);
+    cancelDrafts();
+    if (m === 'draw-curve' && lineStyle === 'wall') setLineStyle('fence');
+    if (m === 'draw-rect' && areaFill === 'none') setAreaFill('room');
+  };
+  const selectShape = (id: string | null) => {
+    setSelectedShapeId(id);
+    if (id) setSelected(null);
+  };
+
+  /** Finish the line or curve being drawn; `closed` when the first point was clicked again. */
+  const finishPath = (closedByClick = false) => {
+    const pts = pathDraft.filter((p, i) => i === 0 || distancePx(p, pathDraft[i - 1]!) > 0.5);
+    if (pts.length < 2) {
+      setMessage({ kind: 'error', text: 'A line needs at least two points: click on the plan to add them.' });
+      return;
+    }
+    const closed = (closedByClick || closePath) && pts.length >= 3;
+    const kind = mode === 'draw-curve' ? 'curve' : 'polyline';
+    const box: { id: string | null } = { id: null };
+    const ok = edit((pl) => {
+      // The fill is chosen with "Close into an area"; closing by clicking the first point keeps it unfilled.
+      const r = addShape(pl, { kind, id: 'new', points: pts, closed, stroke: lineStyle, fill: closed && closePath ? areaFill : 'none' });
+      box.id = r.shape.id;
+      return r.plan;
+    });
+    if (ok) {
+      cancelDrafts();
+      if (box.id) selectShape(box.id);
+    }
+  };
+
+  const addAndSelect = (shape: LayoutShape) => {
+    const box: { id: string | null } = { id: null };
+    const ok = edit((pl) => {
+      const r = addShape(pl, shape);
+      box.id = r.shape.id;
+      return r.plan;
+    });
+    if (ok && box.id) selectShape(box.id);
+  };
   const unplacedKey = (l: string, i: number) => `${l}#${i}`;
   const chosenUnplaced = view.unplaced.find((c) => unplacedKey(c.locationId, c.index) === cameraToPlace) ?? view.unplaced[0] ?? null;
   const cameraViews = view.devices.filter((d) => d.device.kind === 'camera');
 
-  /** Apply an edit; a refused edit becomes an on-screen message, never a crash. */
-  const edit = (f: (p: SitePlan) => SitePlan) => {
+  /**
+   * Apply an edit; a refused edit becomes an on-screen message, never a crash.
+   * `record: false` is for the second and later steps of one drag.
+   */
+  const edit = (f: (p: SitePlan) => SitePlan, record = true) => {
     try {
-      onPlanChange(f(plan));
+      const next = f(plan);
+      if (next === plan) return true;
+      if (record) setHistory((h) => recordHistory(h, plan));
+      emit(next);
       return true;
     } catch (err) {
       if (err instanceof SitePlanError) {
@@ -203,6 +412,8 @@ export function SiteMapPanel({
     const p = toImage(e);
     if (!p) return;
     const at = { x: Math.round(p.x), y: Math.round(p.y) };
+    const sp = snap(p);
+    const capture = () => svgRef.current?.setPointerCapture?.(e.pointerId);
     switch (mode) {
       case 'calibrate':
         setCal((c) => (c.next === 'a' ? { ...c, ax: at.x, ay: at.y, next: 'b' } : { ...c, bx: at.x, by: at.y, next: 'a' }));
@@ -223,6 +434,32 @@ export function SiteMapPanel({
         break;
       case 'select':
         setSelected(null);
+        setSelectedShapeId(null);
+        break;
+      case 'draw-rect':
+      case 'draw-opening':
+        setDragDraft({ a: sp, b: sp, square: e.shiftKey });
+        capture();
+        break;
+      case 'draw-line':
+      case 'draw-curve': {
+        const last = pathDraft[pathDraft.length - 1];
+        const q = e.shiftKey && last ? r2(constrainAngle(last, sp)) : sp;
+        const first = pathDraft[0];
+        if (first && pathDraft.length >= 3 && distancePx(q, first) < unit * 1.2) {
+          finishPath(true);
+          break;
+        }
+        if (last && distancePx(last, q) < 0.5) break; // the second click of a double-click
+        setPathDraft([...pathDraft, q]);
+        break;
+      }
+      case 'draw-text':
+        if (labelText.trim() === '') {
+          setMessage({ kind: 'error', text: 'Type the label text in the toolbar first, then click where it goes.' });
+          break;
+        }
+        addAndSelect({ kind: 'text', id: 'new', x: sp.x, y: sp.y, text: labelText.trim(), sizePx: unit * 1.8, rotationDeg: 0 });
         break;
     }
   };
@@ -231,14 +468,96 @@ export function SiteMapPanel({
     if (mode !== 'select') return;
     e.stopPropagation();
     setSelected(id);
-    setDragId(id);
+    setSelectedShapeId(null);
+    setDeviceDrag({ id, planAtStart: plan, recorded: false });
     svgRef.current?.setPointerCapture?.(e.pointerId);
   };
 
-  const onCanvasMove = (e: PointerEvent<SVGSVGElement>) => {
-    if (!dragId) return;
+  const onShapeDown = (e: PointerEvent<SVGElement>, shape: LayoutShape, handle: ShapeHandle) => {
+    if (mode !== 'select' || locked) return;
+    e.stopPropagation();
     const p = toImage(e);
-    if (p) edit((pl) => moveDevice(pl, dragId, { x: Math.round(p.x), y: Math.round(p.y) }));
+    if (!p) return;
+    selectShape(shape.id);
+    setShapeDrag({ id: shape.id, handle, start: p, orig: shape, planAtStart: plan, recorded: false });
+    svgRef.current?.setPointerCapture?.(e.pointerId);
+  };
+
+  /** The shape a drag on `handle` produces with the pointer at `p`. */
+  const draggedShape = (d: ShapeDrag, p: Point, shift: boolean): LayoutShape => {
+    const o = d.orig;
+    const h = d.handle;
+    if (h === 'move') {
+      // Snap the offset, not the position: a shape drawn on the grid stays on it.
+      const off = snap({ x: p.x - d.start.x, y: p.y - d.start.y });
+      return translateShape(o, off.x, off.y);
+    }
+    if (h === 'rotate') {
+      const c = shapeAnchor(o);
+      const deg = angleFromUp(c, p);
+      return rotateShape(o, shift ? Math.round(deg) : Math.round(deg / 15) * 15);
+    }
+    if ('corner' in h && o.kind === 'rect') return resizeRectFromCorner(o, h.corner, snap(p), shift, 1);
+    if ('vertex' in h && (o.kind === 'polyline' || o.kind === 'curve')) {
+      return { ...o, points: o.points.map((q, i) => (i === h.vertex ? snap(p) : q)) };
+    }
+    if ('end' in h && o.kind === 'opening') {
+      const [left, right] = openingGeometry(o, o.widthMetres / drawMpp).gap;
+      const q = snap(p);
+      return { ...o, ...(h.end === 0 ? openingFromDrag(o.variant, q, right, drawMpp) : openingFromDrag(o.variant, left, q, drawMpp)) };
+    }
+    return o;
+  };
+
+  const onCanvasMove = (e: PointerEvent<SVGSVGElement>) => {
+    const p = toImage(e);
+    if (!p) return;
+    if (dragDraft) {
+      setDragDraft({ ...dragDraft, b: snap(p), square: e.shiftKey });
+      return;
+    }
+    if ((mode === 'draw-line' || mode === 'draw-curve') && pathDraft.length > 0) {
+      const last = pathDraft[pathDraft.length - 1]!;
+      const sp = snap(p);
+      setHover(e.shiftKey ? r2(constrainAngle(last, sp)) : sp);
+      return;
+    }
+    if (shapeDrag) {
+      const next = draggedShape(shapeDrag, p, e.shiftKey);
+      if (edit((pl) => updateShape(pl, next), false) && !shapeDrag.recorded) {
+        setHistory((h) => recordHistory(h, shapeDrag.planAtStart));
+        setShapeDrag({ ...shapeDrag, recorded: true });
+      }
+      return;
+    }
+    if (!deviceDrag) return;
+    if (edit((pl) => moveDevice(pl, deviceDrag.id, { x: Math.round(p.x), y: Math.round(p.y) }), false) && !deviceDrag.recorded) {
+      setHistory((h) => recordHistory(h, deviceDrag.planAtStart));
+      setDeviceDrag({ ...deviceDrag, recorded: true });
+    }
+  };
+
+  const onCanvasUp = () => {
+    if (dragDraft) {
+      const { a, b, square } = dragDraft;
+      setDragDraft(null);
+      if (mode === 'draw-rect') {
+        const r = rectFromCorners(a, b, square);
+        if (r.width < unit * 0.5 || r.height < unit * 0.5) {
+          setMessage({ kind: 'info', text: 'Drag from one corner to the opposite corner to draw a rectangle.' });
+        } else {
+          addAndSelect({ kind: 'rect', id: 'new', ...r, rotationDeg: 0, stroke: lineStyle, fill: areaFill });
+        }
+      } else if (mode === 'draw-opening') {
+        const tap = distancePx(a, b) < unit * 0.8;
+        const geom = tap
+          ? { cx: a.x, cy: a.y, widthMetres: OPENING_DEFAULT_WIDTH_M[openingVariant], rotationDeg: 0 }
+          : openingFromDrag(openingVariant, a, b, drawMpp);
+        addAndSelect({ kind: 'opening', id: 'new', variant: openingVariant, ...geom, widthMetres: Math.round(geom.widthMetres * 100) / 100, flip: false });
+      }
+    }
+    setDeviceDrag(null);
+    setShapeDrag(null);
   };
 
   const onDeviceKey = (e: KeyboardEvent<SVGGElement>, d: DeviceView) => {
@@ -253,6 +572,7 @@ export function SiteMapPanel({
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       setSelected(d.device.id);
+      setSelectedShapeId(null);
     } else if (m) {
       e.preventDefault();
       edit((pl) => moveDevice(pl, d.device.id, { x: Math.round(d.device.x + m.x), y: Math.round(d.device.y + m.y) }));
@@ -262,6 +582,65 @@ export function SiteMapPanel({
       edit((pl) => rotateCamera(pl, d.device.id, rot));
     }
   };
+
+  const onShapeKey = (e: KeyboardEvent<SVGGElement>, s: LayoutShape) => {
+    const base = snapPx ?? unit;
+    const step = (e.shiftKey ? 5 : 1) * base;
+    const moves: Record<string, Point> = {
+      ArrowLeft: { x: -step, y: 0 },
+      ArrowRight: { x: step, y: 0 },
+      ArrowUp: { x: 0, y: -step },
+      ArrowDown: { x: 0, y: step },
+    };
+    const m = moves[e.key];
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      selectShape(s.id);
+    } else if (m) {
+      e.preventDefault();
+      const a = shapeAnchor(s);
+      edit((pl) => updateShape(pl, moveShapeTo(s, r2({ x: a.x + m.x, y: a.y + m.y }))));
+    } else if ((e.key === '[' || e.key === ']') && s.kind !== 'polyline' && s.kind !== 'curve') {
+      e.preventDefault();
+      edit((pl) => updateShape(pl, rotateShape(s, s.rotationDeg + (e.key === ']' ? 15 : -15))));
+    } else if (e.key === 'Delete' || e.key === 'Backspace') {
+      e.preventDefault();
+      if (edit((pl) => removeShape(pl, s.id))) setSelectedShapeId(null);
+    }
+  };
+
+  // Ctrl/⌘+Z, Ctrl+Y / Ctrl+Shift+Z, Esc, Enter and Delete while the Site map is open
+  // (not while typing in a field). The listener reads the latest handler from a ref.
+  const onWindowKey = (e: globalThis.KeyboardEvent) => {
+    if (e.defaultPrevented || isEditableTarget(e.target)) return;
+    const mod = e.ctrlKey || e.metaKey;
+    const k = e.key.toLowerCase();
+    if (mod && k === 'z' && !e.shiftKey) {
+      e.preventDefault();
+      undo();
+    } else if (mod && (k === 'y' || (k === 'z' && e.shiftKey))) {
+      e.preventDefault();
+      redo();
+    } else if (e.key === 'Escape') {
+      if (pathDraft.length > 0 || dragDraft) cancelDrafts();
+      else setSelectedShapeId(null);
+    } else if (e.key === 'Enter' && (mode === 'draw-line' || mode === 'draw-curve') && pathDraft.length > 0) {
+      e.preventDefault();
+      finishPath();
+    } else if ((e.key === 'Delete' || e.key === 'Backspace') && selectedShape && !(e.target instanceof SVGElement)) {
+      e.preventDefault();
+      if (edit((pl) => removeShape(pl, selectedShape.id))) setSelectedShapeId(null);
+    }
+  };
+  const keyRef = useRef(onWindowKey);
+  useEffect(() => {
+    keyRef.current = onWindowKey;
+  });
+  useEffect(() => {
+    const listener = (e: globalThis.KeyboardEvent) => keyRef.current(e);
+    window.addEventListener('keydown', listener);
+    return () => window.removeEventListener('keydown', listener);
+  }, []);
 
   // ---- routes --------------------------------------------------------------
   const routeCamera = cameraViews.find((c) => c.device.id === routeCameraId) ?? cameraViews[0] ?? null;
@@ -288,7 +667,10 @@ export function SiteMapPanel({
   return (
     <div className="grid gap-4">
       {/* --- plan and scale ---------------------------------------------------- */}
-      <Card title="Plan and scale" subtitle="Upload a floor or site plan (PNG or JPG), then set its scale from a dimension you know.">
+      <Card
+        title="Plan and scale"
+        subtitle="Upload a floor or site plan (PNG or JPG) and set its scale from a dimension you know — or, with no plan, draw the layout on a blank canvas sized in metres."
+      >
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-wrap items-end gap-3">
             <div>
@@ -311,6 +693,14 @@ export function SiteMapPanel({
               <Button variant="ghost" icon="trash" onClick={() => edit(removeImage)}>
                 Remove image
               </Button>
+            )}
+            {!plan.image && (
+              <div>
+                <span className="block text-sm font-medium text-[var(--color-ink)]">No plan to upload?</span>
+                <Button className="mt-1" icon={layout.canvas ? 'edit' : 'square'} ariaExpanded={canvasFormOpen} onClick={() => setCanvasFormOpen((o) => !o)}>
+                  {layout.canvas ? `Layout size: ${round(lengthFromMetres(layout.canvas.widthMetres, units), 1)} × ${round(lengthFromMetres(layout.canvas.heightMetres, units), 1)} ${u}` : 'Draw a new layout'}
+                </Button>
+              </div>
             )}
           </div>
           <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -338,6 +728,26 @@ export function SiteMapPanel({
             }}
           >
             {message.text}
+          </p>
+        )}
+
+        {canvasFormOpen && !plan.image && (
+          <LayoutCanvasForm
+            plan={plan}
+            units={units}
+            edit={edit}
+            onCancel={() => setCanvasFormOpen(false)}
+            onDone={(text) => {
+              setCanvasFormOpen(false);
+              setMessage({ kind: 'info', text });
+              if (!layout.canvas) chooseDrawTool('draw-rect');
+            }}
+          />
+        )}
+        {plan.image && layout.shapes.length === 0 && (
+          <p className="mt-3 text-xs text-[var(--color-ink-3)]">
+            You can also draw over the image (rooms, walls, doors, labels) with the drawing tools — calibrate first so door widths and the grid are in
+            metres.
           </p>
         )}
 
@@ -409,6 +819,7 @@ export function SiteMapPanel({
                   onClick={() => {
                     setMode(m);
                     setRouteDraft([]);
+                    cancelDrafts();
                   }}
                   className={`inline-flex items-center gap-1.5 rounded-control border px-2.5 py-1.5 text-sm ${
                     mode === m
@@ -456,7 +867,116 @@ export function SiteMapPanel({
                 </Button>
               </>
             )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 border-b border-[var(--color-border)] px-3 py-2">
+            <div className="flex flex-wrap gap-1" role="group" aria-label="Drawing tool">
+              {(['draw-rect', 'draw-line', 'draw-curve', 'draw-opening', 'draw-text'] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  aria-pressed={mode === m}
+                  onClick={() => chooseDrawTool(m)}
+                  className={`inline-flex items-center gap-1.5 rounded-control border px-2.5 py-1.5 text-sm ${
+                    mode === m
+                      ? 'border-[var(--color-brand)] bg-[var(--color-accent-soft)] font-medium text-[var(--color-accent)]'
+                      : 'border-transparent text-[var(--color-ink-2)] hover:bg-[var(--color-surface-2)]'
+                  }`}
+                >
+                  <Icon name={MODE_ICON[m]} size={16} />
+                  {MODE_LABEL[m]}
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-wrap items-center gap-1" role="group" aria-label="History">
+              <Button size="sm" variant="ghost" icon="undo" disabled={history.past.length === 0} onClick={undo} title="Undo (Ctrl+Z)">
+                Undo
+              </Button>
+              <Button size="sm" variant="ghost" icon="redo" disabled={history.future.length === 0} onClick={redo} title="Redo (Ctrl+Y)">
+                Redo
+              </Button>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--color-ink-2)]">
+              <label className="inline-flex items-center gap-1.5" title={gridPx ? undefined : 'Set the scale (or draw a new layout) to use the metre grid'}>
+                <input type="checkbox" checked={showGrid && gridPx !== null} disabled={gridPx === null} onChange={(e) => setShowGrid(e.currentTarget.checked)} />
+                Grid {round(lengthFromMetres(layout.gridMetres, units), 2)} {u}
+              </label>
+              <label className="inline-flex items-center gap-1.5">
+                <input type="checkbox" checked={snapOn && gridPx !== null} disabled={gridPx === null} onChange={(e) => setSnapOn(e.currentTarget.checked)} />
+                Snap to grid
+              </label>
+              <label className="inline-flex items-center gap-1.5" title="Drawn shapes ignore the pointer, so devices on top are easy to pick and drag">
+                <input type="checkbox" checked={locked} onChange={(e) => setLocked(e.currentTarget.checked)} />
+                Lock drawing
+              </label>
+            </div>
+
+            {(mode === 'draw-rect' || mode === 'draw-line' || mode === 'draw-curve') && (
+              <div className="flex w-full flex-wrap items-end gap-2" role="group" aria-label="Drawing options">
+                <label className="text-xs text-[var(--color-ink-2)]">
+                  Line style
+                  <select className={inputClass} value={lineStyle} onChange={(e) => setLineStyle(e.currentTarget.value as LineStyle)}>
+                    {LINE_STYLES.map((l) => (
+                      <option key={l} value={l}>
+                        {LINE_STYLE_LABEL[l]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {mode !== 'draw-rect' && (
+                  <label className="inline-flex items-center gap-1.5 pb-1 text-sm text-[var(--color-ink-2)]">
+                    <input type="checkbox" checked={closePath} onChange={(e) => setClosePath(e.currentTarget.checked)} />
+                    Close into an area
+                  </label>
+                )}
+                <label className="text-xs text-[var(--color-ink-2)]">
+                  Fill (closed shapes)
+                  <select className={inputClass} value={areaFill} disabled={mode !== 'draw-rect' && !closePath} onChange={(e) => setAreaFill(e.currentTarget.value as AreaFill)}>
+                    {AREA_FILLS.map((f) => (
+                      <option key={f} value={f}>
+                        {AREA_FILL_LABEL[f]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {mode !== 'draw-rect' && (
+                  <>
+                    <Button variant="primary" size="sm" disabled={pathDraft.length < 2} onClick={() => finishPath()}>
+                      Finish {mode === 'draw-curve' ? 'curve' : 'line'} ({pathDraft.length} point{pathDraft.length === 1 ? '' : 's'})
+                    </Button>
+                    {pathDraft.length > 0 && (
+                      <Button variant="ghost" size="sm" onClick={cancelDrafts}>
+                        Cancel
+                      </Button>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+            {mode === 'draw-opening' && (
+              <div className="flex w-full flex-wrap items-end gap-2" role="group" aria-label="Drawing options">
+                <label className="text-xs text-[var(--color-ink-2)]">
+                  Opening
+                  <select className={inputClass} value={openingVariant} onChange={(e) => setOpeningVariant(e.currentTarget.value as OpeningVariant)}>
+                    {OPENING_VARIANTS.map((v) => (
+                      <option key={v} value={v}>
+                        {OPENING_LABEL[v]} ({round(lengthFromMetres(OPENING_DEFAULT_WIDTH_M[v], units), 1)} {u})
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            )}
+            {mode === 'draw-text' && (
+              <div className="flex w-full flex-wrap items-end gap-2" role="group" aria-label="Drawing options">
+                <label className="text-xs text-[var(--color-ink-2)]">
+                  Label text
+                  <input className={inputClass} maxLength={120} value={labelText} placeholder="e.g. Reception" onChange={(e) => setLabelText(e.currentTarget.value)} />
+                </label>
+              </div>
+            )}
             <p className="w-full text-xs text-[var(--color-ink-3)]">{MODE_HINT[mode]}</p>
+            {TOUCH_HINT[mode] && <p className="w-full text-xs text-[var(--color-ink-3)] sm:hidden">{TOUCH_HINT[mode]}</p>}
           </div>
 
           <div className="p-3">
@@ -469,22 +989,53 @@ export function SiteMapPanel({
               preserveAspectRatio="none"
               style={{ width: '100%', height: 'auto', aspectRatio: `${widthPx} / ${heightPx}`, touchAction: 'none', display: 'block' }}
               role="group"
-              aria-label={`Site plan, ${view.devices.length} device(s) placed. The table below lists every device and can edit it without a pointer.`}
+              aria-label={`Site plan, ${view.devices.length} device(s) placed${layout.shapes.length ? `, ${layout.shapes.length} drawn shape(s)` : ''}. The tables below list every device and shape and can edit them without a pointer.`}
               onPointerDown={onCanvasDown}
               onPointerMove={onCanvasMove}
-              onPointerUp={() => setDragId(null)}
-              onPointerCancel={() => setDragId(null)}
+              onPointerUp={onCanvasUp}
+              onPointerCancel={() => {
+                setDeviceDrag(null);
+                setShapeDrag(null);
+                setDragDraft(null);
+              }}
+              onPointerLeave={() => setHover(null)}
+              onDoubleClick={() => {
+                if ((mode === 'draw-line' || mode === 'draw-curve') && pathDraft.length >= 2) finishPath();
+              }}
+              data-mode={mode}
             >
               {plan.image ? (
                 <image href={plan.image.dataUri} x={0} y={0} width={widthPx} height={heightPx} />
+              ) : layout.canvas ? (
+                <rect x={0} y={0} width={widthPx} height={heightPx} fill="var(--color-surface)" />
               ) : (
                 <>
                   <rect x={0} y={0} width={widthPx} height={heightPx} fill="var(--color-surface-2)" />
-                  <text x={widthPx / 2} y={heightPx / 2} textAnchor="middle" fontSize={unit * 2} fill="var(--color-ink-3)">
-                    No plan image — devices can still be placed and run lengths typed in the table
-                  </text>
+                  {layout.shapes.length === 0 && (
+                    <text x={widthPx / 2} y={heightPx / 2} textAnchor="middle" fontSize={unit * 2} fill="var(--color-ink-3)">
+                      No plan image — devices can still be placed and run lengths typed in the table
+                    </text>
+                  )}
                 </>
               )}
+              {showGrid && gridPx !== null && <GridLines widthPx={widthPx} heightPx={heightPx} gridPx={gridPx} unit={unit} />}
+
+              <LayoutDefs idBase={idBase} palette={palette} unit={unit} />
+              {layout.shapes.map((sh) => (
+                <g
+                  key={sh.id}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`${describeShape(sh, view.metresPerPx)} (${sh.id})${sh.id === selectedShapeId ? ', selected' : ''}`}
+                  data-shape-id={sh.id}
+                  onPointerDown={(e) => onShapeDown(e, sh, 'move')}
+                  onKeyDown={(e) => onShapeKey(e, sh)}
+                  pointerEvents={mode === 'select' && !locked ? undefined : 'none'}
+                  style={{ cursor: mode === 'select' && !locked ? 'move' : undefined }}
+                >
+                  <LayoutShapeGraphic shape={sh} palette={palette} unit={unit} metresPerPx={drawMpp} idBase={idBase} hit />
+                </g>
+              ))}
 
               {view.devices.map((d) =>
                 d.cone.length > 2 ? (
@@ -549,6 +1100,20 @@ export function SiteMapPanel({
                 />
               )}
 
+              <DrawDrafts
+                mode={mode}
+                dragDraft={dragDraft}
+                pathDraft={pathDraft}
+                hover={hover}
+                closePath={closePath}
+                lineStyle={lineStyle}
+                openingVariant={openingVariant}
+                unit={unit}
+                metresPerPx={view.metresPerPx}
+                drawMpp={drawMpp}
+                units={units}
+              />
+
               {view.devices.map((d) => (
                 <g
                   key={d.device.id}
@@ -577,6 +1142,10 @@ export function SiteMapPanel({
                   </text>
                 </g>
               ))}
+
+              {selectedShape && mode === 'select' && !locked && (
+                <ShapeHandles shape={selectedShape} unit={unit} drawMpp={drawMpp} onHandleDown={onShapeDown} />
+              )}
             </svg>
             </div>
             {view.warnings.map((w) => (
@@ -588,7 +1157,25 @@ export function SiteMapPanel({
           </div>
         </section>
 
-        <SidePanel selected={selectedView} plan={plan} switches={view.switches} units={units} edit={edit} onClose={() => setSelected(null)} />
+        {selectedShape ? (
+          <aside aria-label="Selected shape" className="rounded-card border border-[var(--color-brand)] bg-[var(--color-surface)] p-4 shadow-[var(--shadow-raised)]">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-semibold text-[var(--color-ink)]">{describeShape(selectedShape, view.metresPerPx)}</h3>
+                <p className="text-xs text-[var(--color-ink-3)]">Drawn shape · {selectedShape.id}</p>
+              </div>
+              <Button variant="ghost" size="sm" icon="close" ariaLabel="Deselect shape" onClick={() => setSelectedShapeId(null)} />
+            </div>
+            <div className="mt-3">
+              <ShapeFields shape={selectedShape} name={selectedShape.id} units={units} metresPerPx={view.metresPerPx} edit={edit} />
+            </div>
+            <div className="mt-3">
+              <ShapeActions shape={selectedShape} name={selectedShape.id} edit={edit} offset={unit * 2} onRemoved={() => setSelectedShapeId(null)} />
+            </div>
+          </aside>
+        ) : (
+          <SidePanel selected={selectedView} plan={plan} switches={view.switches} units={units} edit={edit} onClose={() => setSelected(null)} />
+        )}
       </div>
 
       {/* --- M4: keyboard / list alternative ---------------------------------- */}
@@ -639,6 +1226,11 @@ export function SiteMapPanel({
         )}
       </Card>
 
+      {/* --- keyboard / list alternative for the drawn layout -------------------- */}
+      <Card title="Drawn layout" subtitle="Everything the drawing tools do, without a pointer: add a shape, then edit its position, size, rotation, points, text and style, or delete it.">
+        <LayoutShapeList plan={plan} units={units} metresPerPx={view.metresPerPx} canvas={{ widthPx, heightPx }} edit={edit} unit={unit} />
+      </Card>
+
       {/* --- M5: optional online reference map (off by default) --------------- */}
       <Card title="Online reference map" subtitle="Optional. Look the site up on OpenStreetMap and measure a known distance for the calibration.">
         <OsmReferenceMap units={units} onUseAsCalibrationLength={calibrateFromMap} />
@@ -654,6 +1246,17 @@ const LEGEND: readonly { readonly label: string; readonly swatch: ReactNode }[] 
   { label: 'Switch', swatch: <rect x="4" y="4" width="12" height="12" fill="var(--color-pass)" /> },
   { label: 'Drawn route', swatch: <path d="M2 10h16" stroke="var(--color-ink)" strokeWidth="2.5" /> },
   { label: 'Estimated route', swatch: <path d="M2 10h16" stroke="var(--color-estimate)" strokeWidth="2.5" strokeDasharray="4 3" /> },
+  { label: 'Drawn wall', swatch: <path d="M2 10h16" stroke="var(--color-ink)" strokeWidth="4" /> },
+  {
+    label: 'Drawn fence',
+    swatch: (
+      <>
+        <path d="M2 10h16" stroke="var(--color-ink)" strokeWidth="1.2" />
+        <path d="M2 10h16" stroke="var(--color-ink)" strokeWidth="6" strokeDasharray="1 3.5" />
+      </>
+    ),
+  },
+  { label: 'Door', swatch: <path d="M3 17h14M5 17V5M5 5a12 12 0 0 1 12 12" fill="none" stroke="var(--color-ink)" strokeWidth="1.5" /> },
 ];
 
 /** The selected device, editable; with nothing selected, the legend. */
@@ -911,4 +1514,146 @@ function DeviceRow({
       </td>
     </tr>
   );
+}
+
+/** Live preview of the shape being drawn, with its size in the length unit. */
+function DrawDrafts({
+  mode,
+  dragDraft,
+  pathDraft,
+  hover,
+  closePath,
+  lineStyle,
+  openingVariant,
+  unit,
+  metresPerPx,
+  drawMpp,
+  units,
+}: {
+  mode: Mode;
+  dragDraft: { a: Point; b: Point; square: boolean } | null;
+  pathDraft: readonly Point[];
+  hover: Point | null;
+  closePath: boolean;
+  lineStyle: LineStyle;
+  openingVariant: OpeningVariant;
+  unit: number;
+  metresPerPx: number | null;
+  drawMpp: number;
+  units: UnitSystemState;
+}) {
+  const len = (px: number) =>
+    metresPerPx ? `${round(lengthFromMetres(px * metresPerPx, units), 1)} ${lengthUnitLabel(units)}` : `${Math.round(px)} px`;
+  const st = lineStroke(lineStyle, unit);
+  const label = (x: number, y: number, text: string) => (
+    <text x={x} y={y} fontSize={unit * 1.4} textAnchor="middle" fill="var(--color-accent)" stroke="var(--color-surface)" strokeWidth={unit * 0.3} paintOrder="stroke" pointerEvents="none">
+      {text}
+    </text>
+  );
+  if (dragDraft && mode === 'draw-rect') {
+    const r = rectFromCorners(dragDraft.a, dragDraft.b, dragDraft.square);
+    return (
+      <g pointerEvents="none" data-testid="draw-draft">
+        <path d={polylinePathD(rectCorners({ ...r, rotationDeg: 0 }), true)} fill="var(--color-accent)" fillOpacity={0.08} stroke="var(--color-accent)" strokeWidth={st.width} strokeDasharray={`${unit * 0.6} ${unit * 0.4}`} />
+        {label(r.cx, r.cy - r.height / 2 - unit * 0.8, `${len(r.width)} × ${len(r.height)}`)}
+      </g>
+    );
+  }
+  if (dragDraft && mode === 'draw-opening') {
+    const { a, b } = dragDraft;
+    const w = distancePx(a, b);
+    return (
+      <g pointerEvents="none" data-testid="draw-draft">
+        <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="var(--color-accent)" strokeWidth={unit * 0.4} />
+        {w > unit * 0.8 && label((a.x + b.x) / 2, (a.y + b.y) / 2 - unit, `${OPENING_LABEL[openingVariant]} ${round(lengthFromMetres(w * drawMpp, units), 2)} ${lengthUnitLabel(units)}`)}
+      </g>
+    );
+  }
+  if ((mode === 'draw-line' || mode === 'draw-curve') && pathDraft.length > 0) {
+    const pts = hover ? [...pathDraft, hover] : [...pathDraft];
+    const closed = closePath && pts.length >= 3;
+    const d = mode === 'draw-curve' ? smoothPathD(pts, closed) : polylinePathD(pts, closed);
+    const last = pts[pts.length - 1]!;
+    const prev = pts[pts.length - 2];
+    let total = 0;
+    for (let i = 1; i < pathDraft.length; i++) total += distancePx(pathDraft[i - 1]!, pathDraft[i]!);
+    return (
+      <g pointerEvents="none" data-testid="draw-draft">
+        {pts.length > 1 && <path d={d} fill="none" stroke="var(--color-accent)" strokeWidth={st.width} strokeDasharray={`${unit * 0.6} ${unit * 0.4}`} />}
+        {pathDraft.map((p, i) => (
+          <circle key={i} cx={p.x} cy={p.y} r={i === 0 && pathDraft.length >= 3 ? unit * 0.9 : unit * 0.45} fill={i === 0 && pathDraft.length >= 3 ? 'var(--color-surface)' : 'var(--color-accent)'} stroke="var(--color-accent)" strokeWidth={unit * 0.2} />
+        ))}
+        {prev && label(last.x, last.y - unit * 1.2, `${len(distancePx(prev, last))} · total ${len(total + (hover ? distancePx(pathDraft[pathDraft.length - 1]!, hover) : 0))}`)}
+      </g>
+    );
+  }
+  return null;
+}
+
+/** Resize / rotate / point handles for the selected shape. */
+function ShapeHandles({
+  shape,
+  unit,
+  drawMpp,
+  onHandleDown,
+}: {
+  shape: LayoutShape;
+  unit: number;
+  drawMpp: number;
+  onHandleDown: (e: PointerEvent<SVGElement>, shape: LayoutShape, handle: ShapeHandle) => void;
+}) {
+  const r = unit * 0.6;
+  const hitR = unit * 1.3;
+  const square = (p: Point, handle: ShapeHandle, key: string, label: string) => (
+    <g key={key} onPointerDown={(e) => onHandleDown(e, shape, handle)} style={{ cursor: 'pointer' }} aria-label={label}>
+      <circle cx={p.x} cy={p.y} r={hitR} fill="transparent" />
+      <rect x={p.x - r} y={p.y - r} width={r * 2} height={r * 2} fill="var(--color-surface)" stroke="var(--color-accent)" strokeWidth={unit * 0.2} />
+    </g>
+  );
+  const rotator = (centre: Point, handlePoint: Point) => (
+    <g key="rot" onPointerDown={(e) => onHandleDown(e, shape, 'rotate')} style={{ cursor: 'grab' }} aria-label="Rotate">
+      <line x1={centre.x} y1={centre.y} x2={handlePoint.x} y2={handlePoint.y} stroke="var(--color-accent)" strokeWidth={unit * 0.12} strokeDasharray={`${unit * 0.3} ${unit * 0.3}`} pointerEvents="none" />
+      <circle cx={handlePoint.x} cy={handlePoint.y} r={hitR} fill="transparent" />
+      <circle cx={handlePoint.x} cy={handlePoint.y} r={r * 1.1} fill="var(--color-accent)" stroke="var(--color-surface)" strokeWidth={unit * 0.2} />
+    </g>
+  );
+  const b = shapeBounds(shape, drawMpp);
+  const outline = (
+    <rect
+      key="sel"
+      x={b.minX - unit * 0.6}
+      y={b.minY - unit * 0.6}
+      width={b.maxX - b.minX + unit * 1.2}
+      height={b.maxY - b.minY + unit * 1.2}
+      fill="none"
+      stroke="var(--color-accent)"
+      strokeWidth={unit * 0.12}
+      strokeDasharray={`${unit * 0.5} ${unit * 0.4}`}
+      pointerEvents="none"
+    />
+  );
+  const parts: ReactNode[] = [outline];
+  const c = shapeAnchor(shape);
+  switch (shape.kind) {
+    case 'rect': {
+      rectCorners(shape).forEach((p, i) => parts.push(square(p, { corner: i as 0 | 1 | 2 | 3 }, `c${i}`, `Resize corner ${i + 1}`)));
+      parts.push(rotator(c, localToPlan(c, shape.rotationDeg, { x: 0, y: -shape.height / 2 - unit * 3 })));
+      break;
+    }
+    case 'polyline':
+    case 'curve':
+      shape.points.forEach((p, i) => parts.push(square(p, { vertex: i }, `v${i}`, `Move point ${i + 1}`)));
+      break;
+    case 'opening': {
+      const w = shape.widthMetres / drawMpp;
+      const [left, right] = openingGeometry(shape, w).gap;
+      parts.push(square(left, { end: 0 }, 'e0', 'Move one end'), square(right, { end: 1 }, 'e1', 'Move the other end'));
+      parts.push(rotator(c, localToPlan(c, shape.rotationDeg, { x: 0, y: (shape.flip ? -1 : 1) * (unit * 2.5) })));
+      break;
+    }
+    case 'text':
+      parts.push(rotator(c, localToPlan(c, shape.rotationDeg, { x: 0, y: -shape.sizePx - unit * 2 })));
+      break;
+  }
+  return <g data-testid="shape-handles">{parts}</g>;
 }

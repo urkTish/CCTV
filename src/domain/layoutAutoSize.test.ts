@@ -144,7 +144,9 @@ describe('start a layout from the place', () => {
 
   it('label: shrinks to fit a narrow place, or sits above it when it would be too small', () => {
     const inside = placeLabelFit('Building', 200, 120, 400, 320, 160);
-    expect(inside).toEqual({ sizePx: 7.2, y: 160 });
+    expect(inside).toEqual({ sizePx: 10.8, y: 160 });
+    // A short, wide place: the height limits it (45% of 40 px = 18 px).
+    expect(placeLabelFit('Shed', 600, 40, 1200, 640, 320)).toEqual({ sizePx: 18, y: 320 });
     // A long name in a 1 m wide place: usual size, just above the place.
     const above = placeLabelFit('Pump house and generator room', 20, 20, 220, 220, 110);
     expect(above.sizePx).toBe(3.96);

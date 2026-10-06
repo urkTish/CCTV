@@ -408,13 +408,14 @@ export function startLayoutFromPlace(
 }
 
 /**
- * Size and height of the place's name label: the usual label size for the
- * canvas, shrunk to fit inside the place; if that would make it less than half
- * the usual size, it keeps the usual size and sits just above the place.
+ * Size and height of the place's name label: 1.5 × the usual label size for
+ * the canvas (it names the whole drawing), shrunk to fit inside the place; if
+ * that would make it less than half the usual size, it keeps the usual size
+ * and sits just above the place.
  */
 export function placeLabelFit(text: string, placeWidthPx: number, placeHeightPx: number, canvasWidthPx: number, canvasHeightPx: number, centreY: number): { sizePx: number; y: number } {
   const usual = (Math.max(canvasWidthPx, canvasHeightPx) / 100) * 1.8;
-  const fit = Math.min(usual, (placeWidthPx * 0.85) / (Math.max(1, text.length) * 0.6), placeHeightPx * 0.45);
+  const fit = Math.min(usual * 1.5, (placeWidthPx * 0.85) / (Math.max(1, text.length) * 0.6), placeHeightPx * 0.45);
   if (fit >= usual / 2) return { sizePx: round2(fit), y: centreY };
   return { sizePx: round2(usual), y: round2(centreY - placeHeightPx / 2 - usual * 0.9) };
 }

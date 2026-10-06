@@ -168,8 +168,8 @@ describe('draw a new layout (from the place size)', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Layout size: 20 × 16 m' }));
     expect(screen.getByTestId('canvas-panel-readout').textContent).toBe('Canvas 20 × 16 m · grid 1 m');
-    fireEvent.change(screen.getByLabelText('Add (m)'), { target: { value: '5' } });
-    fireEvent.change(screen.getByLabelText('On'), { target: { value: 'left' } });
+    fireEvent.change(screen.getByLabelText('Margin to add (m)'), { target: { value: '5' } });
+    fireEvent.change(screen.getByLabelText('Add margin on'), { target: { value: 'left' } });
     fireEvent.click(screen.getByRole('button', { name: 'Add margin' }));
     expect(mapSvg(document.body).getAttribute('viewBox')).toBe('0 0 500 320');
     expect(screen.getByTestId('canvas-readout').textContent).toBe('Canvas 25 × 16 m · grid 1 m');

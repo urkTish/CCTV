@@ -606,13 +606,13 @@ function CanvasPanel({
         distances and cable runs stay the same.
       </p>
       <div className="flex flex-wrap items-end gap-2">
-        <label className={labelClass}>
+        <label className={`${labelClass} w-28`}>
           Add ({u})
-          <NumberInput min={0} step={gridMetres} className={`${fieldClass} w-24`} value={show(amount)} onValueChange={(v) => setAmount(Number.isFinite(v) ? lengthToMetres(v, units) : Number.NaN)} />
+          <NumberInput min={0} step={gridMetres} aria-label={`Margin to add (${u})`} className={fieldClass} value={show(amount)} onValueChange={(v) => setAmount(Number.isFinite(v) ? lengthToMetres(v, units) : Number.NaN)} />
         </label>
         <label className={labelClass}>
           On
-          <select className={fieldClass} value={side} onChange={(e) => setSide(e.currentTarget.value as Side)}>
+          <select aria-label="Add margin on" className={fieldClass} value={side} onChange={(e) => setSide(e.currentTarget.value as Side)}>
             {(Object.keys(SIDE_LABEL) as Side[]).map((s) => (
               <option key={s} value={s}>
                 {s === 'all' ? 'Every side' : s[0]!.toUpperCase() + s.slice(1)}

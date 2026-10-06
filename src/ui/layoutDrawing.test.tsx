@@ -221,7 +221,10 @@ describe('drawing tools with the pointer', () => {
     up(svg);
     fireEvent.click(screen.getByLabelText('Lock drawing'));
     fireEvent.click(within(screen.getByRole('group', { name: 'Map tool' })).getByRole('button', { name: 'Select / move' }));
-    expect(svg.querySelector('[data-shape-id="area-1"]')!.getAttribute('pointer-events')).toBe('none');
+    const g = svg.querySelector('[data-shape-id="area-1"]')!;
+    expect(g.getAttribute('pointer-events')).toBe('none');
+    // No child may re-enable the pointer (an explicit pointer-events on a child overrides the group's).
+    expect([...g.querySelectorAll('[pointer-events]')].map((el) => el.getAttribute('pointer-events')).filter((v) => v !== 'none')).toEqual([]);
     expect(screen.queryByTestId('shape-handles')).toBeNull();
   });
 });

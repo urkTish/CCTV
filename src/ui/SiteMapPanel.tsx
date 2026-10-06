@@ -27,6 +27,7 @@ import {
   OPENING_VARIANTS,
   addShape,
   angleFromUp,
+  canvasCalibration,
   constrainAngle,
   describeShape,
   drawingMetresPerPx,
@@ -265,6 +266,9 @@ export function SiteMapPanel({
   const snapPx = snapOn ? gridPx : null;
   const snap = (p: Point) => r2(snapPoint(p, snapPx));
   const selectedShape = selectedShapeId ? shapeById(plan, selectedShapeId) : null;
+  // The scale a blank drawn layout set itself: its line runs along the top edge, so it is not drawn.
+  const canvasScale =
+    !plan.image && layout.canvas !== null && plan.calibration !== null && JSON.stringify(plan.calibration) === JSON.stringify(canvasCalibration(layout.canvas));
   const idBase = `lay${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
   // Over an image the fills let the plan show through and doors do not paint over it.
   const palette = plan.image ? { ...THEME_PALETTE, fillOpacity: 0.45, cutOpenings: false } : THEME_PALETTE;
@@ -820,6 +824,7 @@ export function SiteMapPanel({
                     setMode(m);
                     setRouteDraft([]);
                     cancelDrafts();
+                    if (m !== 'select') setSelectedShapeId(null);
                   }}
                   className={`inline-flex items-center gap-1.5 rounded-control border px-2.5 py-1.5 text-sm ${
                     mode === m
@@ -1033,7 +1038,8 @@ export function SiteMapPanel({
                   pointerEvents={mode === 'select' && !locked ? undefined : 'none'}
                   style={{ cursor: mode === 'select' && !locked ? 'move' : undefined }}
                 >
-                  <LayoutShapeGraphic shape={sh} palette={palette} unit={unit} metresPerPx={drawMpp} idBase={idBase} hit />
+                  {/* Hit areas only while shapes can be picked: their own pointer-events would override the group's "none". */}
+                  <LayoutShapeGraphic shape={sh} palette={palette} unit={unit} metresPerPx={drawMpp} idBase={idBase} hit={mode === 'select' && !locked} />
                 </g>
               ))}
 
@@ -1058,7 +1064,8 @@ export function SiteMapPanel({
                     <polyline
                       points={l.points.map((p) => `${p.x},${p.y}`).join(' ')}
                       fill="none"
-                      stroke={l.kind === 'drawn' ? 'var(--color-ink)' : 'var(--color-estimate)'}
+                      // Accent, not ink: a drawn layout's walls are ink, and a route must not read as a wall.
+                      stroke={l.kind === 'drawn' ? 'var(--color-accent)' : 'var(--color-estimate)'}
                       strokeWidth={unit * 0.3}
                       strokeDasharray={l.kind === 'estimated' ? `${unit} ${unit * 0.7}` : undefined}
                     />
@@ -1071,7 +1078,7 @@ export function SiteMapPanel({
                 );
               })}
 
-              {plan.calibration && (
+              {plan.calibration && !canvasScale && (
                 <line
                   x1={plan.calibration.a.x}
                   y1={plan.calibration.a.y}
@@ -1244,7 +1251,7 @@ const LEGEND: readonly { readonly label: string; readonly swatch: ReactNode }[] 
   { label: 'Field of view', swatch: <path d="M3 17 10 3l7 14z" fill="var(--color-brand)" fillOpacity="0.2" stroke="var(--color-brand)" /> },
   { label: 'NVR / rack', swatch: <rect x="4" y="4" width="12" height="12" fill="var(--color-ink)" /> },
   { label: 'Switch', swatch: <rect x="4" y="4" width="12" height="12" fill="var(--color-pass)" /> },
-  { label: 'Drawn route', swatch: <path d="M2 10h16" stroke="var(--color-ink)" strokeWidth="2.5" /> },
+  { label: 'Drawn route', swatch: <path d="M2 10h16" stroke="var(--color-accent)" strokeWidth="2.5" /> },
   { label: 'Estimated route', swatch: <path d="M2 10h16" stroke="var(--color-estimate)" strokeWidth="2.5" strokeDasharray="4 3" /> },
   { label: 'Drawn wall', swatch: <path d="M2 10h16" stroke="var(--color-ink)" strokeWidth="4" /> },
   {

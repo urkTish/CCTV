@@ -73,7 +73,8 @@ export function ReportMap({
             key={l.id}
             points={l.points.map((p) => `${p.x},${p.y}`).join(' ')}
             fill="none"
-            stroke={l.kind === 'drawn' ? '#10151c' : '#5b6878'}
+            // Dark blue, so a drawn route never reads as a drawn wall (black).
+            stroke={l.kind === 'drawn' ? '#2b3fa8' : '#5b6878'}
             strokeWidth={u * 0.3}
             strokeDasharray={l.kind === 'estimated' ? `${u} ${u * 0.7}` : undefined}
           />
@@ -130,11 +131,20 @@ export function ReportMap({
           </li>
           <li>
             <svg width="22" height="8" viewBox="0 0 22 8" aria-hidden="true">
-              <path d="M1 2h20" stroke="#10151c" strokeWidth="2" />
+              <path d="M1 2h20" stroke="#2b3fa8" strokeWidth="2" />
               <path d="M1 6h20" stroke="#5b6878" strokeWidth="2" strokeDasharray="4 3" />
             </svg>
             Cable route: drawn (solid) / estimated (dashed)
           </li>
+          {layoutShapes.length > 0 && (
+            <li>
+              <svg width="22" height="14" viewBox="0 0 22 14" aria-hidden="true">
+                <path d="M1 12h20" stroke="#10151c" strokeWidth="3" />
+                <path d="M4 12V3M4 3a9 9 0 0 1 9 9" fill="none" stroke="#10151c" strokeWidth="1" />
+              </svg>
+              Site layout as drawn by the engineer: walls, fences, doors and gates (not to construction accuracy)
+            </li>
+          )}
           {cameras.map((d) => (
             <li key={d.device.id}>
               <strong>{numberOf.get(d.device.id)}</strong> {d.label}

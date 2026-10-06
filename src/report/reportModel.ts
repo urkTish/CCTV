@@ -15,6 +15,7 @@ import { RAID_LABELS } from '../domain/storage.ts';
 import { buildBillOfMaterials, type BillOfMaterials, type BomLine } from '../engine/billOfMaterials.ts';
 import { buildOutputCard, type CardField } from '../engine/outputCard.ts';
 import { siteMapView, type SiteMapView } from '../engine/siteMapView.ts';
+import { drawingMetresPerPx, layoutOf, type LayoutShape } from '../domain/layoutShapes.ts';
 import { SEE_OPTIONS } from '../client/intakeMapping.ts';
 import { SEE_CHOICES } from '../client/intakeTypes.ts';
 import type { EngineerProfile } from '../state/engineerProfile.ts';
@@ -62,6 +63,10 @@ export interface ReportModel {
   readonly facts: readonly { readonly label: string; readonly value: string }[];
   readonly map: SiteMapView | null;
   readonly planImage: string | null;
+  /** The drawn layout's shapes (empty when nothing is drawn), drawn under the devices. */
+  readonly layoutShapes: readonly LayoutShape[];
+  /** Scale used to draw door and window widths on the report map. */
+  readonly metresPerPx: number;
   readonly areas: readonly ReportArea[];
   readonly system: {
     readonly recorder: string | null;
@@ -264,8 +269,13 @@ export function buildReport(project: Project, extras: ProjectExtras, profile: En
     preparedBy,
     summary: summaryParts.filter(Boolean).join(' '),
     facts,
-    map: project.sitePlan.image || project.sitePlan.devices.length ? siteMapView(project, design.results) : null,
+    map:
+      project.sitePlan.image || project.sitePlan.devices.length || layoutOf(project.sitePlan).shapes.length
+        ? siteMapView(project, design.results)
+        : null,
     planImage: project.sitePlan.image?.dataUri ?? null,
+    layoutShapes: layoutOf(project.sitePlan).shapes,
+    metresPerPx: drawingMetresPerPx(project.sitePlan.calibration),
     areas,
     system: {
       recorder: nvr ? `${nvr.evaluation.nvr.model} — ${nvr.evaluation.nvr.marketingName}` : null,

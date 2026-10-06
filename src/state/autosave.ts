@@ -109,5 +109,10 @@ export async function clearAutosave(store: AutosaveStore): Promise<AutosaveStatu
 
 /** True when an autosaved project holds a site plan worth offering to restore. */
 export function hasSiteMap(project: Project): boolean {
-  return project.sitePlan.image !== null || project.sitePlan.devices.length > 0;
+  const layout = project.sitePlan.layout;
+  return (
+    project.sitePlan.image !== null ||
+    project.sitePlan.devices.length > 0 ||
+    (layout !== undefined && (layout.canvas !== null || layout.shapes.length > 0))
+  );
 }

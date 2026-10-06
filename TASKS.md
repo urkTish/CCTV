@@ -141,3 +141,22 @@ dark.
 | U15 | Report model (pure, from `buildBillOfMaterials`) and an offline QR encoder | Unit tests; QR output decoded by an independent decoder | done — QR encoder written in-house (no dependency): 75/75 codes decoded by ZXing-C++, and all 7 codes decoded again from the printed PDF at 150 dpi |
 | U16 | Report view + A4 print CSS: cover, summary, map, areas, system, BOM, datasheets, assumptions, sign-off; draft watermark; Final behind confirmation with the stamp | jsdom tests per section; Chromium print-to-PDF checked page by page | done — 18-page A4 PDF via Chromium print for the 10-location project; header + “Page n of N” on every page; draft watermark; stamp only after the confirmation |
 | U17 | Close-out: README, ASSUMPTIONS, HANDOFF; lint, test, build; review own diff | Real output in the report | done — tsc 0, eslint 0, 523 / 523 tests (33 files), vite build ok (chunk-size advisory only) |
+
+---
+
+## Site layout drawing
+
+Owner request (2026-10-06): draw the site layout in the Site map when there is
+no floor plan to upload — rooms, walls, lines, curves, doors, labels, and what
+else helps a CCTV layout. Geometry in a pure, unit-tested module; schema
+extended backwards-compatibly; no new dependencies; checked in real Chromium.
+
+| # | Task | Verification | Status |
+|---|---|---|---|
+| D1 | Pure module `src/domain/layoutShapes.ts`: shape types (rectangle, polyline, smooth curve, door / double door / window / gate, text), blank canvas with automatic scale, grid + snap, 45° / square constraints, resize / rotate maths, door swing geometry, length / area, point-list text form, undo/redo history, zod schema | Unit tests | done — 30 tests |
+| D2 | Site-plan / project-file schema: optional `sitePlan.layout`; empty layout left out of the file; autosave, Admin status and report model aware of it | Round-trip, old-file, byte-identical and corrupt-shape tests | done — 5 tests; ASSUMPTIONS 13 |
+| D3 | Drawing tools in the Site map workspace: select / move / resize / rotate / delete, rectangle (Shift = square), line, curve, opening (click or drag along a wall), label; undo/redo; grid + snap; fills; lock drawing; "Draw a new layout" with W × H in metres | jsdom tests | pending |
+| D4 | Keyboard / list alternative for shapes: add, edit position / size / rotation / points / text / style, delete; focusable shapes with arrow keys, [ ], Delete | jsdom tests | pending |
+| D5 | Report site map draws the layout under the devices (greyscale-readable) | jsdom test | pending |
+| D6 | Real-browser check: draw a small site (building, rooms, doors, labels, curved fence), place cameras, check cable runs and the report map; desktop + phone, light + dark | Screenshots in the session scratchpad | pending |
+| D7 | Close-out: README, ASSUMPTIONS, HANDOFF; lint, test, build | Real output | pending |

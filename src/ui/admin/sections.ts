@@ -171,7 +171,8 @@ export function sectionStatuses(inputs: StatusInputs, warnings: readonly Project
   const placedCameras = mapView.devices.filter((d) => d.device.kind === 'camera').length;
   const hasNvr = plan.devices.some((d) => d.kind === 'nvr');
   let map: SectionStatus;
-  if (!plan.image && plan.devices.length === 0) map = { kind: 'not-started', text: 'No plan yet' };
+  const drawn = plan.layout !== undefined && (plan.layout.canvas !== null || plan.layout.shapes.length > 0);
+  if (!plan.image && !drawn && plan.devices.length === 0) map = { kind: 'not-started', text: 'No plan yet' };
   else if (mapView.unplaced.length > 0) map = { kind: 'in-progress', text: `${mapView.unplaced.length} to place` };
   else if (!hasNvr) map = { kind: 'in-progress', text: 'Place the NVR' };
   else if (plan.image && !plan.calibration) map = { kind: 'in-progress', text: 'Set the scale' };

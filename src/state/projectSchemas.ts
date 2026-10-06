@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { capabilitySchema } from '../data/schema.ts';
 import { nvrAnalyticsSchema, videoOutputResolutionSchema } from '../data/productSchemas.ts';
 import { DEFAULT_DESIGN_SETTINGS } from '../domain/designSettings.ts';
+import { siteLayoutSchema } from '../domain/layoutShapes.ts';
 
 const purposeSchema = z.enum(['monitor', 'detect', 'observe', 'recognise', 'identify', 'lpr', 'till']);
 
@@ -174,6 +175,10 @@ export const sitePlanSchema = z
     routes: z
       .array(z.object({ id: idSchema, fromId: idSchema, toId: idSchema, waypoints: z.array(pointSchema).max(500) }).strict())
       .max(2000),
+    // Drawn layout (rooms, walls, doors, labels, blank canvas). Optional: files
+    // saved before drawing existed have none, and a plan with nothing drawn is
+    // saved without it, so such files stay byte-identical (ASSUMPTIONS 13.2).
+    layout: siteLayoutSchema.optional(),
   })
   .strict()
   .superRefine((plan, ctx) => {

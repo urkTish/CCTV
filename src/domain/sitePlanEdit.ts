@@ -20,12 +20,16 @@ import {
   type Point,
   type SitePlan,
 } from './sitePlan.ts';
+import { canvasCalibration, canvasPx, layoutOf } from './layoutShapes.ts';
 
 /** Canvas used when no plan image is loaded: devices can still be placed and runs typed in. */
 export const BLANK_CANVAS = { widthPx: 1000, heightPx: 700 } as const;
 
+/** The plan image's size; else the drawn layout's canvas; else the blank default. */
 export function canvasSize(plan: SitePlan): { readonly widthPx: number; readonly heightPx: number } {
-  return plan.image ? { widthPx: plan.image.widthPx, heightPx: plan.image.heightPx } : BLANK_CANVAS;
+  if (plan.image) return { widthPx: plan.image.widthPx, heightPx: plan.image.heightPx };
+  const canvas = layoutOf(plan).canvas;
+  return canvas ? canvasPx(canvas) : BLANK_CANVAS;
 }
 
 export function canvasCentre(plan: SitePlan): Point {
@@ -61,8 +65,10 @@ export function replaceImage(plan: SitePlan, image: PlanImage): SitePlan {
   return { ...plan, image, calibration: null };
 }
 
+/** Without the image the scale goes too — unless a drawn layout's canvas supplies it. */
 export function removeImage(plan: SitePlan): SitePlan {
-  return { ...plan, image: null, calibration: null };
+  const canvas = layoutOf(plan).canvas;
+  return { ...plan, image: null, calibration: canvas ? canvasCalibration(canvas) : null };
 }
 
 /** Throws `SitePlanError` for a zero-length line or a non-positive length. */

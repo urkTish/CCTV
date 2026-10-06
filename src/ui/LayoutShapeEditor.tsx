@@ -1,8 +1,9 @@
 /**
  * Editing drawn layout shapes without a pointer: the fields for one shape
  * (shared by the Site map's side panel and the shape list, so the two cannot
- * drift apart), the shape list with its "Add …" buttons, and the form that
- * starts a blank drawn layout from the site's size in metres.
+ * drift apart), the shape list with its "Add …" buttons, the form that starts
+ * a drawn layout from the place's size (canvas, grid and scale automatic), and
+ * the canvas panel that adds margin later.
  *
  * Every edit is a pure function from `domain/layoutShapes.ts`.
  */
@@ -12,19 +13,28 @@ import { useId, useState } from 'react';
 import {
   AREA_FILL_LABEL,
   AREA_FILLS,
-  DEFAULT_GRID_METRES,
+  DEFAULT_PLACE_NAME,
   LINE_STYLE_LABEL,
   LINE_STYLES,
   MAX_CANVAS_METRES,
+  MAX_LABEL_CHARS,
+  MAX_PLACE_METRES,
   MIN_CANVAS_METRES,
+  MIN_MARGIN_METRES,
+  MIN_PLACE_METRES,
   OPENING_LABEL,
   OPENING_VARIANTS,
   addShape,
+  autoCanvasForPlace,
+  ceilToStep,
   defaultShape,
   describeShape,
   duplicateShape,
+  extendLayoutCanvas,
+  fitCanvasToShapes,
   formatPoints,
   layoutOf,
+  layoutOverflowMetres,
   moveShapeTo,
   parsePoints,
   removeLayoutCanvas,
@@ -36,9 +46,12 @@ import {
   shapeAnchor,
   shapeAreaPx2,
   shapeLengthPx,
+  startLayoutFromPlace,
   updateShape,
   type AreaFill,
+  type AutoCanvas,
   type DrawTool,
+  type LayoutCanvas,
   type LayoutShape,
   type LineStyle,
   type OpeningVariant,
@@ -46,6 +59,7 @@ import {
 import type { Point, SitePlan } from '../domain/sitePlan.ts';
 import { lengthFromMetres, lengthToMetres, lengthUnitLabel, round } from '../domain/units.ts';
 import type { UnitSystemState } from '../state/projectTypes.ts';
+import { canvasReadout, overflowText } from './format.ts';
 import { Button, NumberInput } from './primitives.tsx';
 
 export type Edit = (f: (p: SitePlan) => SitePlan) => boolean;
@@ -436,9 +450,13 @@ export function LayoutShapeList({
   );
 }
 
+
 /**
- * Start a blank drawn layout (or change its size): the site's width × height
- * and the grid square, which together set the scale — no calibration step.
+ * Start a drawn layout, or change its canvas. With no canvas yet it asks only
+ * for the PLACE (the building or area itself) and its name; the canvas, grid
+ * and scale follow automatically, and the place is drawn for the engineer.
+ * Once there is a canvas it offers "Add margin", "Extend canvas to fit" and,
+ * under Advanced, the exact canvas size and grid.
  */
 export function LayoutCanvasForm({
   plan,
@@ -450,48 +468,192 @@ export function LayoutCanvasForm({
   plan: SitePlan;
   units: UnitSystemState;
   edit: Edit;
-  onDone: (text: string) => void;
+  /** `selectId`: a shape to select (the place drawn for the engineer). */
+  onDone: (text: string, selectId?: string) => void;
   onCancel: () => void;
 }) {
   const layout = layoutOf(plan);
+  return layout.canvas ? (
+    <CanvasPanel plan={plan} canvas={layout.canvas} gridMetres={layout.gridMetres} units={units} edit={edit} onDone={onDone} onCancel={onCancel} />
+  ) : (
+    <NewLayoutForm units={units} edit={edit} onDone={onDone} onCancel={onCancel} />
+  );
+}
+
+function NewLayoutForm({ units, edit, onDone, onCancel }: { units: UnitSystemState; edit: Edit; onDone: (text: string, selectId?: string) => void; onCancel: () => void }) {
   const u = lengthUnitLabel(units);
-  const [w, setW] = useState(layout.canvas?.widthMetres ?? 40);
-  const [h, setH] = useState(layout.canvas?.heightMetres ?? 25);
-  const [grid, setGrid] = useState(layout.gridMetres ?? DEFAULT_GRID_METRES);
-  const show = (m: number) => round(lengthFromMetres(m, units), 2);
+  const show = (m: number, dp = 2) => round(lengthFromMetres(m, units), dp);
+  const [w, setW] = useState(10);
+  const [d, setD] = useState(6);
+  const [name, setName] = useState('');
+  const previewId = useId();
+  let preview: { ok: true; auto: AutoCanvas } | { ok: false; reason: string };
+  try {
+    preview = { ok: true, auto: autoCanvasForPlace(w, d) };
+  } catch (err) {
+    preview = { ok: false, reason: err instanceof Error ? err.message : 'Check the size.' };
+  }
   const apply = () => {
-    const ok = edit((p) => setGridMetres(setLayoutCanvas(p, w, h), grid));
-    if (ok) onDone(`Drawn layout ${show(w)} × ${show(h)} ${u}, grid ${show(grid)} ${u}. The scale is set from this size — draw rooms, walls and doors with the tools above the map.`);
+    const box: { r: ReturnType<typeof startLayoutFromPlace> | null } = { r: null };
+    const ok = edit((p) => {
+      box.r = startLayoutFromPlace(p, { widthMetres: w, depthMetres: d, name });
+      return box.r.plan;
+    });
+    const r = box.r;
+    if (!ok || !r) return;
+    const placeName = name.trim() || DEFAULT_PLACE_NAME;
+    onDone(
+      `${placeName} ${show(w)} × ${show(d)} ${u} drawn in the middle of the canvas. ${canvasReadout(r.auto.canvas, r.auto.gridMetres, units)}, at least ${show(r.auto.marginMetres, 1)} ${u} of margin on every side for a fence, gate, car park or cameras. The scale is set — select the ${placeName.toLowerCase()} to edit, move or delete it.`,
+      r.placeId,
+    );
   };
   return (
     <fieldset className="mt-3 rounded-control border border-[var(--color-border)] p-3">
-      <legend className="px-1 text-sm font-semibold text-[var(--color-ink)]">{layout.canvas ? 'Drawn layout size' : 'Draw a new layout'}</legend>
+      <legend className="px-1 text-sm font-semibold text-[var(--color-ink)]">Draw a new layout</legend>
       <p className="mb-2 text-xs text-[var(--color-ink-3)]">
-        Enter the size of the area to draw (the whole site, with a margin). The scale follows from it, so distances and cable runs work
-        straight away. Between {show(MIN_CANVAS_METRES)} and {show(MAX_CANVAS_METRES)} {u}.
+        Enter the size of the building or area itself — not the whole drawing. The canvas is made bigger automatically, with room on every side to add a
+        fence, a gate, a car park or perimeter cameras later, and the scale follows from it, so distances and cable runs work straight away. Each side{' '}
+        {show(MIN_PLACE_METRES)}–{show(MAX_PLACE_METRES, 0)} {u}.
       </p>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         <label className={labelClass}>
-          Site width ({u})
-          <NumberInput min={0} className={fieldClass} value={show(w)} onValueChange={(v) => Number.isFinite(v) && setW(lengthToMetres(v, units))} />
+          Place width ({u})
+          <NumberInput min={0} step={0.5} aria-describedby={previewId} className={fieldClass} value={show(w)} onValueChange={(v) => setW(Number.isFinite(v) ? lengthToMetres(v, units) : Number.NaN)} />
         </label>
         <label className={labelClass}>
-          Site height ({u})
-          <NumberInput min={0} className={fieldClass} value={show(h)} onValueChange={(v) => Number.isFinite(v) && setH(lengthToMetres(v, units))} />
+          Place depth ({u})
+          <NumberInput min={0} step={0.5} aria-describedby={previewId} className={fieldClass} value={show(d)} onValueChange={(v) => setD(Number.isFinite(v) ? lengthToMetres(v, units) : Number.NaN)} />
         </label>
-        <label className={labelClass}>
-          Grid square ({u})
-          <NumberInput min={0} step={0.5} className={fieldClass} value={show(grid)} onValueChange={(v) => Number.isFinite(v) && setGrid(lengthToMetres(v, units))} />
+        <label className={`col-span-2 sm:col-span-1 ${labelClass}`}>
+          Name (optional)
+          <input className={fieldClass} maxLength={MAX_LABEL_CHARS} value={name} placeholder={DEFAULT_PLACE_NAME} onChange={(e) => setName(e.currentTarget.value)} />
         </label>
       </div>
+      <p id={previewId} data-testid="auto-canvas-preview" aria-live="polite" className="mt-2 text-xs text-[var(--color-ink-2)]">
+        {preview.ok
+          ? `${canvasReadout(preview.auto.canvas, preview.auto.gridMetres, units)} · at least ${show(preview.auto.marginMetres, 1)} ${u} around the place`
+          : preview.reason}
+      </p>
       <div className="mt-2 flex flex-wrap gap-2">
-        <Button variant="primary" onClick={apply}>
-          {layout.canvas ? 'Apply size' : 'Start drawing'}
+        <Button variant="primary" icon="square" onClick={apply}>
+          Draw layout
         </Button>
         <Button variant="ghost" onClick={onCancel}>
           Cancel
         </Button>
-        {layout.canvas && (
+      </div>
+    </fieldset>
+  );
+}
+
+type Side = 'all' | 'left' | 'right' | 'top' | 'bottom';
+const SIDE_LABEL: Readonly<Record<Side, string>> = { all: 'every side', left: 'the left', right: 'the right', top: 'the top', bottom: 'the bottom' };
+
+function CanvasPanel({
+  plan,
+  canvas,
+  gridMetres,
+  units,
+  edit,
+  onDone,
+  onCancel,
+}: {
+  plan: SitePlan;
+  canvas: LayoutCanvas;
+  gridMetres: number;
+  units: UnitSystemState;
+  edit: Edit;
+  onDone: (text: string) => void;
+  onCancel: () => void;
+}) {
+  const u = lengthUnitLabel(units);
+  const show = (m: number, dp = 2) => round(lengthFromMetres(m, units), dp);
+  const [amount, setAmount] = useState(() => Math.max(MIN_MARGIN_METRES, ceilToStep(5 * gridMetres, gridMetres)));
+  const [side, setSide] = useState<Side>('all');
+  const [w, setW] = useState(canvas.widthMetres);
+  const [h, setH] = useState(canvas.heightMetres);
+  const [grid, setGrid] = useState(gridMetres);
+  const overflow = layoutOverflowMetres(plan);
+  const over = overflowText(overflow, units);
+  const done = (p: SitePlan, what: string) => {
+    const l = layoutOf(p);
+    onDone(`${what} ${l.canvas ? canvasReadout(l.canvas, l.gridMetres, units) : ''}.`);
+  };
+  const addMargin = () => {
+    if (!(amount > 0)) return;
+    const a = (s: Exclude<Side, 'all'>) => (side === 'all' || side === s ? amount : 0);
+    const box: { p: SitePlan | null } = { p: null };
+    if (edit((p) => (box.p = extendLayoutCanvas(p, { left: a('left'), right: a('right'), top: a('top'), bottom: a('bottom') }))) && box.p) {
+      done(box.p, `Added ${show(amount, 1)} ${u} on ${SIDE_LABEL[side]}; nothing moved relative to anything else.`);
+    }
+  };
+  const fit = () => {
+    const box: { p: SitePlan | null } = { p: null };
+    if (edit((p) => (box.p = fitCanvasToShapes(p))) && box.p) done(box.p, 'The canvas now holds every shape.');
+  };
+  const applyExact = () => {
+    const box: { p: SitePlan | null } = { p: null };
+    if (edit((p) => (box.p = setGridMetres(setLayoutCanvas(p, w, h), grid))) && box.p) done(box.p, 'Canvas size set.');
+  };
+  return (
+    <fieldset className="mt-3 rounded-control border border-[var(--color-border)] p-3">
+      <legend className="px-1 text-sm font-semibold text-[var(--color-ink)]">Canvas and grid</legend>
+      <p className="mb-2 text-sm text-[var(--color-ink)]" data-testid="canvas-panel-readout">
+        {canvasReadout(canvas, gridMetres, units)}
+      </p>
+      <p className="mb-2 text-xs text-[var(--color-ink-3)]">
+        Need more room for a fence, a gate, a car park or more cameras? Add margin to the canvas. Everything already drawn or placed moves together, so
+        distances and cable runs stay the same.
+      </p>
+      <div className="flex flex-wrap items-end gap-2">
+        <label className={`${labelClass} w-28`}>
+          Add ({u})
+          <NumberInput min={0} step={gridMetres} aria-label={`Margin to add (${u})`} className={fieldClass} value={show(amount)} onValueChange={(v) => setAmount(Number.isFinite(v) ? lengthToMetres(v, units) : Number.NaN)} />
+        </label>
+        <label className={labelClass}>
+          On
+          <select aria-label="Add margin on" className={fieldClass} value={side} onChange={(e) => setSide(e.currentTarget.value as Side)}>
+            {(Object.keys(SIDE_LABEL) as Side[]).map((s) => (
+              <option key={s} value={s}>
+                {s === 'all' ? 'Every side' : s[0]!.toUpperCase() + s.slice(1)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <Button icon="plus" disabled={!(amount > 0)} onClick={addMargin}>
+          Add margin
+        </Button>
+      </div>
+      {over && (
+        <p className="mt-2 text-xs text-[var(--color-ink-2)]">
+          Drawn shapes reach past the canvas edge ({over}).{' '}
+          <Button size="sm" variant="secondary" onClick={fit}>
+            Extend canvas to fit
+          </Button>
+        </p>
+      )}
+      <details className="mt-3 text-sm">
+        <summary className="cursor-pointer font-medium text-[var(--color-accent)]">Advanced: exact canvas size and grid</summary>
+        <p className="mt-2 text-xs text-[var(--color-ink-3)]">
+          The canvas grows or shrinks from its top-left corner; shapes keep their place and devices outside a smaller canvas are pulled inside.{' '}
+          {show(MIN_CANVAS_METRES)}–{show(MAX_CANVAS_METRES, 0)} {u}.
+        </p>
+        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <label className={labelClass}>
+            Canvas width ({u})
+            <NumberInput min={0} className={fieldClass} value={show(w)} onValueChange={(v) => setW(Number.isFinite(v) ? lengthToMetres(v, units) : Number.NaN)} />
+          </label>
+          <label className={labelClass}>
+            Canvas height ({u})
+            <NumberInput min={0} className={fieldClass} value={show(h)} onValueChange={(v) => setH(Number.isFinite(v) ? lengthToMetres(v, units) : Number.NaN)} />
+          </label>
+          <label className={labelClass}>
+            Grid square ({u})
+            <NumberInput min={0} step={0.5} className={fieldClass} value={show(grid)} onValueChange={(v) => setGrid(Number.isFinite(v) ? lengthToMetres(v, units) : Number.NaN)} />
+          </label>
+        </div>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <Button onClick={applyExact}>Apply size</Button>
           <Button
             variant="ghost"
             icon="trash"
@@ -501,7 +663,12 @@ export function LayoutCanvasForm({
           >
             Remove blank canvas
           </Button>
-        )}
+        </div>
+      </details>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Button variant="ghost" onClick={onCancel}>
+          Close
+        </Button>
       </div>
     </fieldset>
   );

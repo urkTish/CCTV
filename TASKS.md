@@ -155,8 +155,22 @@ extended backwards-compatibly; no new dependencies; checked in real Chromium.
 |---|---|---|---|
 | D1 | Pure module `src/domain/layoutShapes.ts`: shape types (rectangle, polyline, smooth curve, door / double door / window / gate, text), blank canvas with automatic scale, grid + snap, 45° / square constraints, resize / rotate maths, door swing geometry, length / area, point-list text form, undo/redo history, starting shapes, zod schema | Unit tests | done — 33 tests |
 | D2 | Site-plan / project-file schema: optional `sitePlan.layout`; empty layout left out of the file; autosave, Admin status and report model aware of it | Round-trip, old-file, byte-identical and corrupt-shape tests | done — 5 file tests + 1 status test; ASSUMPTIONS 13 |
-| D3 | Drawing tools in the Site map workspace: select / move / resize / rotate / delete, rectangle (Shift = square), line, curve, opening (click or drag along a wall), label; undo/redo; grid + snap; fills; lock drawing; "Draw a new layout" with W × H in metres | jsdom tests | done — `src/ui/layoutDrawing.test.tsx` (15 tests, pointer events against a mocked SVG box) |
+| D3 | Drawing tools in the Site map workspace: select / move / resize / rotate / delete, rectangle (Shift = square), line, curve, opening (click or drag along a wall), label; undo/redo; grid + snap; fills; lock drawing; "Draw a new layout" with W × H in metres | jsdom tests | done — `src/ui/layoutDrawing.test.tsx` (15 tests, pointer events against a mocked SVG box); the W × H start form was replaced by the place-size form in D9 (W × H stays under *Advanced*) |
 | D4 | Keyboard / list alternative for shapes: add, edit position / size / rotation / points / text / style, delete; focusable shapes with arrow keys, [ ], Delete | jsdom tests | done — "Drawn layout" card; same fields as the side panel (`LayoutShapeEditor.tsx`) |
 | D5 | Report site map draws the layout under the devices (greyscale-readable) | jsdom test | done — shared renderer `LayoutShapesSvg.tsx` with a print palette |
 | D6 | Real-browser check: draw a small site (building, rooms, doors, labels, curved fence), place cameras, check cable runs and the report map; desktop + phone, light + dark | Screenshots in the session scratchpad | done — Chromium 1440 px / 380 px, light and dark, mouse and emulated touch; fixed three issues it found (ASSUMPTIONS 13.8–13.9; shapes caught the pointer while drawing) |
 | D7 | Close-out: README, ASSUMPTIONS, HANDOFF; lint, test, build | Real output | done — tsc 0, eslint 0, 578 / 578 tests (35 files), vite build ok (chunk-size advisory only) |
+
+### Layout sized from the place (owner request, 2026-10-06)
+
+"Rather than entering the size of the area to draw, make it automatic relative
+to the size of the room": enter the place's size, get a layout with margins to
+add a fence or main gate later. Decisions in ASSUMPTIONS 13.11–13.14.
+
+| # | Task | Verification | Status |
+|---|---|---|---|
+| D8 | Pure sizing rule: margin max(5 m, 50% of the longer side), grid 0.5 / 1 / 2 / 5 / 10 m by size, canvas in whole squares; `startLayoutFromPlace` (centred building rectangle + name label, one edit); `extendLayoutCanvas` (any side, everything moves together), `layoutOverflowMetres` / `fitCanvasToShapes` | Unit tests | done — `src/domain/layoutAutoSize.test.ts` (20 tests: 10 × 6, 3 × 3, 120 × 80, rounding, limits, label fit, file round trip, runs unchanged after extending) |
+| D9 | "Draw a new layout" form asks only for place width × depth and an optional name, with a live canvas / grid preview; the place is drawn and selected (one undo step) | jsdom tests | done — `layoutDrawing.test.tsx`; the drawing tests' helper now starts from a 20 × 5 m place (→ the same 40 × 25 m canvas) and deletes the generated shapes, so every earlier assertion still runs unchanged |
+| D10 | Grow later: *Canvas and grid* panel (Add margin on every side / one side; Advanced exact size and grid; remove canvas), readout "Canvas W × H m · grid G m" under the map, *Extend canvas to fit* notice when a shape reaches past the edge | jsdom tests | done — explicit button, not auto-extend while dragging (ASSUMPTIONS 13.14) |
+| D11 | Real-browser check: 10 × 6, 3 × 3, 120 × 80 m; fence + gate + car park in the margin; cameras and a drawn route; cable runs by hand; add margin / fit; old file opens unchanged; imperial; autosave; 1440 px and 380 px, light and dark | Screenshots in the session scratchpad (`autosize/`) | done — no console errors, no failed requests, no horizontal scroll; fixed two things it found (place label too small on a phone; margin input too wide) |
+| D12 | Close-out: README, ASSUMPTIONS, HANDOFF, TASKS; lint, test, build | Real output | done — see HANDOFF |

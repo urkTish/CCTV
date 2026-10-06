@@ -8,8 +8,12 @@
  * devices, so every distance still comes from the plan's one calibration.
  *
  * A blank drawn layout has a fixed scale (`LAYOUT_PX_PER_METRE`): the engineer
- * types the site's width × height in metres, and the calibration is set from
- * that, so the cable maths works on a drawn layout exactly as on an image.
+ * types the PLACE's width × depth in metres (the building or area itself), the
+ * canvas and grid are sized from it with margins all round
+ * (`autoCanvasForPlace`), and the calibration is set from the canvas, so the
+ * cable maths works on a drawn layout exactly as on an image. The canvas can
+ * be grown later on any side without moving anything relative to anything
+ * else (`extendLayoutCanvas`).
  */
 
 import { z } from 'zod';
@@ -306,6 +310,188 @@ export function setGridMetres(plan: SitePlan, gridMetres: number): SitePlan {
     throw new SitePlanError('The grid spacing must be more than 0 and at most 100 m.');
   }
   return { ...plan, layout: { ...layoutOf(plan), gridMetres } };
+}
+
+// ---------------------------------------------------------------------------
+// Automatic canvas from the place size (ASSUMPTIONS 13.11–13.13)
+// ---------------------------------------------------------------------------
+
+/** The place (building or area) the engineer types: each side 1–500 m. */
+export const MIN_PLACE_METRES = 1;
+export const MAX_PLACE_METRES = 500;
+/** Margin per side = max(MIN_MARGIN_METRES, MARGIN_FRACTION × the place's longer side). */
+export const MIN_MARGIN_METRES = 5;
+export const MARGIN_FRACTION = 0.5;
+/**
+ * Grid square by the place's longer side: up to 5 m → 0.5 m, up to 30 m → 1 m,
+ * up to 80 m → 2 m, up to 200 m → 5 m, larger → 10 m. Keeps about 15–100
+ * squares along the canvas's longer side, so the grid stays readable at any size.
+ */
+export const AUTO_GRID_STEPS: readonly { readonly upToMetres: number; readonly gridMetres: number }[] = [
+  { upToMetres: 5, gridMetres: 0.5 },
+  { upToMetres: 30, gridMetres: 1 },
+  { upToMetres: 80, gridMetres: 2 },
+  { upToMetres: 200, gridMetres: 5 },
+  { upToMetres: Number.POSITIVE_INFINITY, gridMetres: 10 },
+];
+export const DEFAULT_PLACE_NAME = 'Building';
+
+/** `v` rounded up to a whole number of `step`s (tolerant of float noise), to 6 decimals. */
+export function ceilToStep(v: number, step: number): number {
+  return Number((Math.ceil(v / step - 1e-9) * step).toFixed(6));
+}
+
+/** The grid square for a place whose longer side is `longestMetres`. */
+export function autoGridMetres(longestMetres: number): number {
+  return (AUTO_GRID_STEPS.find((s) => longestMetres <= s.upToMetres) ?? AUTO_GRID_STEPS[AUTO_GRID_STEPS.length - 1]!).gridMetres;
+}
+
+export interface AutoCanvas {
+  readonly canvas: LayoutCanvas;
+  readonly gridMetres: number;
+  /** The margin rule's value per side, before the canvas is rounded to whole squares. */
+  readonly marginMetres: number;
+}
+
+function checkPlace(widthMetres: number, depthMetres: number): void {
+  for (const [name, v] of [
+    ['width', widthMetres],
+    ['depth', depthMetres],
+  ] as const) {
+    if (!Number.isFinite(v) || v < MIN_PLACE_METRES || v > MAX_PLACE_METRES) {
+      throw new SitePlanError(`The place ${name} must be between ${MIN_PLACE_METRES} and ${MAX_PLACE_METRES} m.`);
+    }
+  }
+}
+
+/**
+ * The canvas for a place of `widthMetres × depthMetres`: the grid square from
+ * `autoGridMetres`, a margin on every side of max(5 m, 50% of the longer side)
+ * rounded up to whole grid squares, and each canvas side rounded up to whole
+ * grid squares. 10 × 6 m → 20 × 16 m, grid 1 m; 3 × 3 m → 13 × 13 m, grid
+ * 0.5 m; 120 × 80 m → 240 × 200 m, grid 5 m.
+ */
+export function autoCanvasForPlace(widthMetres: number, depthMetres: number): AutoCanvas {
+  checkPlace(widthMetres, depthMetres);
+  const longest = Math.max(widthMetres, depthMetres);
+  const gridMetres = autoGridMetres(longest);
+  const marginMetres = ceilToStep(Math.max(MIN_MARGIN_METRES, MARGIN_FRACTION * longest), gridMetres);
+  const side = (m: number) => Math.min(MAX_CANVAS_METRES, ceilToStep(m + 2 * marginMetres, gridMetres));
+  return { canvas: { widthMetres: side(widthMetres), heightMetres: side(depthMetres) }, gridMetres, marginMetres };
+}
+
+/**
+ * Start a drawn layout from the place's size, as ONE edit (one undo step): the
+ * automatic canvas and grid (`autoCanvasForPlace`), the scale from the canvas,
+ * the place drawn as a closed rectangle (wall line, building fill) centred on
+ * the canvas, and a label with its name in the middle. Both are ordinary
+ * shapes — edit, move or delete them like any other. Refused while a plan
+ * image is loaded, like `setLayoutCanvas`.
+ */
+export function startLayoutFromPlace(
+  plan: SitePlan,
+  place: { readonly widthMetres: number; readonly depthMetres: number; readonly name?: string },
+): { readonly plan: SitePlan; readonly placeId: string; readonly labelId: string; readonly auto: AutoCanvas } {
+  const auto = autoCanvasForPlace(place.widthMetres, place.depthMetres);
+  const name = (place.name ?? '').trim().slice(0, MAX_LABEL_CHARS) || DEFAULT_PLACE_NAME;
+  let next = setGridMetres(setLayoutCanvas(plan, auto.canvas.widthMetres, auto.canvas.heightMetres), auto.gridMetres);
+  const { widthPx, heightPx } = canvasPx(auto.canvas);
+  const centre = { x: widthPx / 2, y: heightPx / 2 };
+  const w = place.widthMetres * LAYOUT_PX_PER_METRE;
+  const h = place.depthMetres * LAYOUT_PX_PER_METRE;
+  const rect = addShape(next, { kind: 'rect', id: 'new', cx: centre.x, cy: centre.y, width: w, height: h, rotationDeg: 0, stroke: 'wall', fill: 'building' });
+  next = rect.plan;
+  const fit = placeLabelFit(name, w, h, widthPx, heightPx, centre.y);
+  // Keys in the order the file schema lists them, so a saved file re-saves byte-identically.
+  const label = addShape(next, { kind: 'text', id: 'new', x: centre.x, y: fit.y, text: name, sizePx: fit.sizePx, rotationDeg: 0 });
+  return { plan: label.plan, placeId: rect.shape.id, labelId: label.shape.id, auto };
+}
+
+/**
+ * Size and height of the place's name label: 1.5 × the usual label size for
+ * the canvas (it names the whole drawing), shrunk to fit inside the place; if
+ * that would make it less than half the usual size, it keeps the usual size
+ * and sits just above the place.
+ */
+export function placeLabelFit(text: string, placeWidthPx: number, placeHeightPx: number, canvasWidthPx: number, canvasHeightPx: number, centreY: number): { sizePx: number; y: number } {
+  const usual = (Math.max(canvasWidthPx, canvasHeightPx) / 100) * 1.8;
+  const fit = Math.min(usual * 1.5, (placeWidthPx * 0.85) / (Math.max(1, text.length) * 0.6), placeHeightPx * 0.45);
+  if (fit >= usual / 2) return { sizePx: round2(fit), y: centreY };
+  return { sizePx: round2(usual), y: round2(centreY - placeHeightPx / 2 - usual * 0.9) };
+}
+
+const round2 = (v: number) => Math.round(v * 100) / 100;
+
+/** Metres to add on each side of the canvas. */
+export interface CanvasSides {
+  readonly left: number;
+  readonly right: number;
+  readonly top: number;
+  readonly bottom: number;
+}
+
+/**
+ * Grow (or, with negative values, trim) the blank canvas on any side. Adding
+ * on the left or top moves EVERYTHING — shapes, devices, route bends and a
+ * hand-set calibration line — by the same amount, so nothing moves relative to
+ * anything else and every distance stays the same. The canvas's own scale
+ * follows the new canvas. Refused with no blank canvas, or past the limits.
+ */
+export function extendLayoutCanvas(plan: SitePlan, sides: CanvasSides): SitePlan {
+  const layout = layoutOf(plan);
+  const old = layout.canvas;
+  if (!old || plan.image) throw new SitePlanError('There is no blank drawn layout to extend.');
+  const vals = [sides.left, sides.right, sides.top, sides.bottom];
+  if (!vals.every((v) => Number.isFinite(v))) throw new SitePlanError('Enter how many metres to add.');
+  if (vals.every((v) => v === 0)) return plan;
+  const canvas = checkCanvas(Number((old.widthMetres + sides.left + sides.right).toFixed(6)), Number((old.heightMetres + sides.top + sides.bottom).toFixed(6)));
+  const dx = Math.round(sides.left * LAYOUT_PX_PER_METRE);
+  const dy = Math.round(sides.top * LAYOUT_PX_PER_METRE);
+  const shift = <P extends Point>(p: P): P => ({ ...p, x: p.x + dx, y: p.y + dy });
+  const ownScale = plan.calibration !== null && JSON.stringify(plan.calibration) === JSON.stringify(canvasCalibration(old));
+  const calibration = ownScale || plan.calibration === null ? canvasCalibration(canvas) : { ...plan.calibration, a: shift(plan.calibration.a), b: shift(plan.calibration.b) };
+  const { widthPx, heightPx } = canvasPx(canvas);
+  const inside = <P extends Point>(p: P): P => ({ ...p, x: clampTo(p.x, widthPx), y: clampTo(p.y, heightPx) });
+  return {
+    ...plan,
+    calibration,
+    devices: plan.devices.map((d) => inside(shift(d))),
+    routes: plan.routes.map((r) => ({ ...r, waypoints: r.waypoints.map((w) => inside(shift(w))) })),
+    layout: { ...layout, canvas, shapes: layout.shapes.map((s) => translateShape(s, dx, dy)) },
+  };
+}
+
+/**
+ * How far drawn shapes reach past each edge of the blank canvas, in metres
+ * (0 where they stay inside). Devices cannot leave the canvas, so only shapes
+ * count.
+ */
+export function layoutOverflowMetres(plan: SitePlan): CanvasSides {
+  const layout = layoutOf(plan);
+  const none = { left: 0, right: 0, top: 0, bottom: 0 };
+  if (!layout.canvas || plan.image || layout.shapes.length === 0) return none;
+  const mpp = 1 / LAYOUT_PX_PER_METRE;
+  const { widthPx, heightPx } = canvasPx(layout.canvas);
+  const b = layout.shapes.map((s) => shapeBounds(s, mpp));
+  const r = (px: number) => Math.max(0, Number((px * mpp).toFixed(6)));
+  return {
+    left: r(-Math.min(...b.map((x) => x.minX))),
+    right: r(Math.max(...b.map((x) => x.maxX)) - widthPx),
+    top: r(-Math.min(...b.map((x) => x.minY))),
+    bottom: r(Math.max(...b.map((x) => x.maxY)) - heightPx),
+  };
+}
+
+/**
+ * Extend the canvas so every shape is inside it again, plus one grid square on
+ * each side that needed it (rounded to whole grid squares). Returns the plan
+ * unchanged when nothing reaches past the edge.
+ */
+export function fitCanvasToShapes(plan: SitePlan): SitePlan {
+  const o = layoutOverflowMetres(plan);
+  const g = layoutOf(plan).gridMetres;
+  const grow = (v: number) => (v > 0 ? ceilToStep(v, g) + g : 0);
+  return extendLayoutCanvas(plan, { left: grow(o.left), right: grow(o.right), top: grow(o.top), bottom: grow(o.bottom) });
 }
 
 // ---------------------------------------------------------------------------

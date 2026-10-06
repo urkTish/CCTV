@@ -1,5 +1,55 @@
 # Handoff — site layout drawing
 
+## Layout sized from the place (cloud session 7, 2026-10-06) — COMPLETE
+
+Owner request: "make it automatic relative to the size of the room — I enter
+the place's area (e.g. 10 m by 6 m) and it generates the layout with enough
+margins". Tasks D8–D12 in TASKS.md, decisions in ASSUMPTIONS 13.11–13.14.
+**tsc 0, eslint 0, 602 / 602 tests (36 files), vite build ok** (chunk-size
+advisory only).
+
+- **Sizing rule** (pure, `src/domain/layoutShapes.ts`): margin per side =
+  max(5 m, 50% of the place's longer side), rounded up to whole grid squares;
+  canvas sides rounded up to whole squares; grid 0.5 / 1 / 2 / 5 / 10 m for a
+  longer side up to 5 / 30 / 80 / 200 / 500 m. 10 × 6 m → 20 × 16 m, grid 1 m;
+  3 × 3 m → 13 × 13 m, grid 0.5 m; 120 × 80 m → 240 × 200 m, grid 5 m. Place
+  sides 1–500 m. Scale stays 20 px/m from the canvas, as before.
+- **Start form**: place width × depth + optional name (default "Building"), live
+  preview "Canvas 20 × 16 m · grid 1 m · at least 5 m around the place". Drawing
+  it is ONE undo step: canvas, grid, scale, a centred closed building rectangle
+  of the place's size and a name label; the rectangle is then selected.
+- **Later**: readout "Canvas W × H m · grid G m" under the map; *Canvas and grid*
+  panel (from the "Layout size" button or *Add margin…*) adds margin on every
+  side or one side — everything moves together, runs unchanged; *Extend canvas
+  to fit* appears when a shape reaches past the edge (explicit button, not
+  auto-extend while dragging); *Advanced* = exact canvas size + grid, remove
+  canvas.
+- **Compatibility**: no schema change — the generated outline and label are
+  ordinary shapes. Old files with a hand-sized canvas open unchanged (jsdom test
+  + the previous release's 60 × 40 m file in the browser, re-saved with an
+  identical site plan).
+- **Tests**: `src/domain/layoutAutoSize.test.ts` (20), 6 new / reworked jsdom
+  tests in `src/ui/layoutDrawing.test.tsx`. The drawing tests' helper now starts
+  from a 20 × 5 m place (→ the same blank 40 × 25 m canvas, grid 1 m) and
+  deletes the generated shapes, so every earlier assertion still runs; the two
+  tests of the old W × H form were rewritten for the place form (limit message
+  is now "place width must be between 1 and 500 m").
+- **Checked in real Chromium** (Playwright; 1440 px and 380 px, light and dark):
+  10 × 6, 3 × 3, 120 × 80 m; fence (closed by clicking the first point), 4 m
+  gate, door, car park and labels in the margin; NVR + cameras + one drawn
+  route; runs checked by hand (drawn 11 m → 20 m installed; estimated 14.8 /
+  11.6 m; 120 × 80 m: 112.2 / 138.2 m estimated → TIA fail flagged); add margin
+  bottom and left → runs identical; overflow notice → fit → undo / redo; phone
+  fence by taps; imperial (33 × 20 ft); autosave restore; old file. No console
+  errors, failed requests or horizontal scroll. Fixed from it: place label too
+  small on a phone (now 1.5 × label size), margin input too wide.
+- **Not checked**: other browsers, a real phone (Chromium touch emulation only),
+  the printed report with a generated layout (on-screen report map checked).
+- **Resume at:** nothing pending. Scripts and screenshots in the session
+  scratchpad (`autosize/`), not in the repo.
+
+---
+
 ## Site layout drawing (cloud session 6, 2026-10-06) — COMPLETE
 
 Owner request: draw the site in the Site map when there is no plan to upload.

@@ -1,3 +1,45 @@
+# Handoff — site layout drawing
+
+## Site layout drawing (cloud session 6, 2026-10-06) — COMPLETE
+
+Owner request: draw the site in the Site map when there is no plan to upload.
+Tasks D1–D7 in TASKS.md. Decisions in ASSUMPTIONS 13. **tsc 0, eslint 0,
+578 / 578 tests (35 files), vite build ok.**
+
+- **Pure module** `src/domain/layoutShapes.ts`: rectangle, line / polygon, smooth
+  curve (Catmull–Rom → cubic Bézier), door / double door / window / gate, label;
+  blank canvas in metres that sets the calibration (20 px/m); grid snapping;
+  45° / square constraints; resize-from-corner and rotation maths; door swing
+  geometry; length and area; `x,y` point-list parsing; undo history; zod schema.
+- **Schema**: optional `sitePlan.layout`; a plan with nothing drawn is saved
+  without it (old files byte-identical, still open in an older app); a file
+  with drawings is refused by an older app with a clear reason. File version
+  stays 1. Autosave, Admin status and the report know about it.
+- **UI**: drawing row in the Site map toolbar (`SiteMapPanel.tsx`), shape
+  fields / list / blank-canvas form (`LayoutShapeEditor.tsx`), shared renderer
+  (`LayoutShapesSvg.tsx`, `planPalette.ts`) used by the editor and the report.
+  New colour tokens `--color-plan-*` (light, dark, over an image).
+- **Checked in real Chromium** (Playwright, 1440 px and 380 px, light and dark):
+  drew a 60 × 40 m depot with the mouse (building, rooms, wall, car park, curved
+  fence, doors, double door, window, two gates, six labels), placed an NVR, a
+  switch and five cameras, drew one route — device table and Cabling section
+  numbers checked by hand (drawn route 52 m → 61 m installed; estimated
+  17.03 m × 1.3 = 22.1 m); undo / redo; selected-shape panel; save → file has
+  18 shapes and the canvas; open the file on a phone, draw a wall by taps and a
+  room by a touch drag; trace over an uploaded, click-calibrated PNG; autosave
+  restore of a drawn-only layout; report map. No console errors, no failed
+  requests, no horizontal scroll. Fixed from the check: routes were black like
+  walls (now blue), the canvas's own calibration line showed along the top edge,
+  shapes caught the pointer while drawing / when locked.
+- **Not checked**: other browsers; a real phone (only Chromium touch
+  emulation); printing the report to PDF with a drawn layout (the on-screen
+  report map was checked); very large layouts (performance with hundreds of
+  shapes).
+- **Resume at:** nothing pending. Browser scripts and screenshots are in the
+  session scratchpad (`draw/`), not in the repo.
+
+---
+
 # Handoff — where the UI/UX redesign stands
 
 ## UI/UX redesign (cloud session 5, 2026-10-05) — COMPLETE

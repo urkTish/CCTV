@@ -15,6 +15,7 @@ import { locationSchema, settingsOrDefault, sitePlanSchema } from './projectSche
 import type { Location, Project, UnitSystemState } from './projectTypes.ts';
 import { EMPTY_SITE_PLAN, type SitePlan } from '../domain/sitePlan.ts';
 import { pruneCameras } from '../domain/sitePlanEdit.ts';
+import { isEmptyLayout } from '../domain/layoutShapes.ts';
 
 /** Identifies our files, so a random `.json` is rejected with a clear reason. */
 export const PROJECT_FILE_FORMAT = 'contractech-cctv-project';
@@ -64,6 +65,21 @@ export type ProjectFileResult =
   | { readonly ok: true; readonly opened: OpenedProject; readonly notices: readonly string[] }
   | { readonly ok: false; readonly reason: string };
 
+/**
+ * The site plan as saved: a layout with nothing drawn is left out, so a plan
+ * without drawings saves exactly as it did before drawing existed (and still
+ * opens in an older copy of the app).
+ */
+function savedSitePlan(plan: SitePlan): SitePlan {
+  if (!('layout' in plan)) return plan;
+  if (isEmptyLayout(plan.layout)) {
+    const { layout: _omitted, ...rest } = plan;
+    void _omitted;
+    return rest;
+  }
+  return plan;
+}
+
 /** The project as a pretty-printed JSON document. Deterministic: no timestamps. */
 export function serializeProjectFile(project: Project, units: UnitSystemState): string {
   const payload = {
@@ -74,7 +90,7 @@ export function serializeProjectFile(project: Project, units: UnitSystemState): 
     locations: project.locations,
     activeLocationId: project.activeLocationId,
     settings: project.settings,
-    sitePlan: project.sitePlan,
+    sitePlan: savedSitePlan(project.sitePlan),
   };
   return JSON.stringify(payload, null, 2);
 }

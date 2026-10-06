@@ -9,6 +9,8 @@
  * cable maths then falls back to its flagged placeholder and says why.
  */
 
+import type { SiteLayout } from './layoutShapes.ts';
+
 export interface Point {
   readonly x: number;
   readonly y: number;
@@ -84,6 +86,12 @@ export interface SitePlan {
   readonly calibration: Calibration | null;
   readonly devices: readonly PlacedDevice[];
   readonly routes: readonly CableRoute[];
+  /**
+   * The drawn layout (rooms, walls, doors, labels…) and, with no image, the
+   * blank canvas it is drawn on. Absent in plans saved before drawing existed;
+   * read it with `layoutOf()` (`domain/layoutShapes.ts`).
+   */
+  readonly layout?: SiteLayout;
 }
 
 export const EMPTY_SITE_PLAN: SitePlan = { image: null, calibration: null, devices: [], routes: [] };

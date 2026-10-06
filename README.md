@@ -89,6 +89,26 @@ site with the required attribution; two clicks on it measure a distance that can
 be used as the plan's calibration length. Leaflet loads only when it is turned on
 (ASSUMPTIONS 11.6).
 
+**Drawing the site** (no plan to upload, or to trace over one): *Draw a new
+layout* asks for the site's width × height in metres and a grid square; the
+scale follows from it (1 m = 20 px), so cones, distances and cable runs work
+with no calibration step. The second toolbar row draws rectangles / rooms (Shift
+for a square), straight lines and walls (Shift for 45°; click the first point to
+close an area), smooth curves through clicked points (fences, kerbs), doors,
+double doors, windows and gates (drag along a wall, or click for the usual
+width; turn and flip them in the panel) and text labels. Line styles: wall, thin
+line, fence, dashed boundary; closed shapes can be filled as room, building, car
+park (hatched), grass or paving. In *Select / move*, drag a shape to move it and
+its handles to resize, turn or move points; arrow keys nudge a focused shape by
+one grid square, `[` `]` turn it, Delete removes it; Ctrl+Z / Ctrl+Y undo and
+redo. *Snap to grid*, *Grid* and *Lock drawing* (so devices on top are easy to
+drag) are toggles. The *Drawn layout* card below the map adds and edits every
+shape without a pointer (position, size, rotation, points as `x,y` text, text,
+style, delete). Room areas and fence lengths are shown. On a phone: drag for
+rectangles, tap points then *Finish* for lines and curves; fine edits are in the
+panel below the map. Drawn shapes are saved in the project file and the
+autosave, and drawn on the report's site map (ASSUMPTIONS 13).
+
 **Saving**: the shareable link carries every location and setting but **not the
 map** (the image is too big for a URL; the UI says so). *Save project* writes a
 `.json` file with the plan image embedded; *Open project* validates it field by
@@ -169,6 +189,7 @@ src/
     cabling.ts      run lengths, TIA-568 checks, bin packing
     sitePlan.ts     site-plan types and scale maths
     sitePlanEdit.ts pure edits to the plan + FOV-cone geometry
+    layoutShapes.ts drawn site layout: shapes, geometry, blank canvas, schema
     planImage.ts    PNG/JPEG header reading for uploads
     osmMap.ts       OpenStreetMap tile-policy constants, measuring maths
   data/

@@ -141,7 +141,7 @@ be walked in order on any device.
 | 8 | **Report** | Preview of the client report; *Print / Save as PDF*; Draft ↔ Final (behind a confirmation) | Client name, validity, prepared-by (from Settings) | — |
 | — | **Settings** (nav footer) | Engineer name, title, phone, email (stored in this browser) | — | — |
 
-**Status rules** (pure function, unit-tested): Site map — not started (no image,
+**Status rules** (pure function, unit-tested): Site map — not started (no image, no drawn layout,
 no devices), in progress (some cameras unplaced or no scale), complete, or needs
 attention (map warnings). Locations — needs attention when any location has no
 model, an input error, a fail/marginal verdict or calculation warnings.

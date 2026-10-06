@@ -4,10 +4,14 @@
  * The map is readable in greyscale: cameras are numbered circles, the recorder
  * a square marked R, switches diamonds marked S; drawn cable routes are solid
  * and estimated ones dashed; fields of view are outlined with a dashed edge as
- * well as tinted. A legend lists every number.
+ * well as tinted. A legend lists every number. A drawn layout (rooms, walls,
+ * fences, doors, labels) is drawn under the devices in print colours.
  */
 
+import type { LayoutShape } from '../domain/layoutShapes.ts';
 import type { SiteMapView } from '../engine/siteMapView.ts';
+import { LayoutShapesSvg } from '../ui/LayoutShapesSvg.tsx';
+import { PRINT_PALETTE } from '../ui/planPalette.ts';
 import { encodeQr, qrPath } from './qr.ts';
 
 export function QrSvg({ text, label }: { text: string; label: string }) {
@@ -21,7 +25,17 @@ export function QrSvg({ text, label }: { text: string; label: string }) {
   );
 }
 
-export function ReportMap({ view, image }: { view: SiteMapView; image: string | null }) {
+export function ReportMap({
+  view,
+  image,
+  layoutShapes = [],
+  metresPerPx = 0.05,
+}: {
+  view: SiteMapView;
+  image: string | null;
+  layoutShapes?: readonly LayoutShape[];
+  metresPerPx?: number;
+}) {
   const { widthPx: w, heightPx: h } = view;
   const u = Math.max(w, h) / 100;
   const cameras = view.devices.filter((d) => d.device.kind === 'camera');
@@ -29,7 +43,18 @@ export function ReportMap({ view, image }: { view: SiteMapView; image: string | 
   return (
     <figure className="report-map" style={{ margin: 0 }}>
       <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={`Site plan with ${cameras.length} cameras and ${view.devices.length - cameras.length} other devices`}>
-        {image ? <image href={image} x={0} y={0} width={w} height={h} /> : <rect x={0} y={0} width={w} height={h} fill="#f1f3f7" />}
+        {image ? (
+          <image href={image} x={0} y={0} width={w} height={h} />
+        ) : (
+          <rect x={0} y={0} width={w} height={h} fill={layoutShapes.length ? '#ffffff' : '#f1f3f7'} />
+        )}
+        <LayoutShapesSvg
+          shapes={layoutShapes}
+          palette={image ? { ...PRINT_PALETTE, fillOpacity: 0.45, cutOpenings: false } : PRINT_PALETTE}
+          unit={u}
+          metresPerPx={metresPerPx}
+          idBase="report-layout"
+        />
         {cameras.map((d) =>
           d.cone.length > 2 ? (
             <polygon
@@ -48,7 +73,8 @@ export function ReportMap({ view, image }: { view: SiteMapView; image: string | 
             key={l.id}
             points={l.points.map((p) => `${p.x},${p.y}`).join(' ')}
             fill="none"
-            stroke={l.kind === 'drawn' ? '#10151c' : '#5b6878'}
+            // Dark blue, so a drawn route never reads as a drawn wall (black).
+            stroke={l.kind === 'drawn' ? '#2b3fa8' : '#5b6878'}
             strokeWidth={u * 0.3}
             strokeDasharray={l.kind === 'estimated' ? `${u} ${u * 0.7}` : undefined}
           />
@@ -105,11 +131,20 @@ export function ReportMap({ view, image }: { view: SiteMapView; image: string | 
           </li>
           <li>
             <svg width="22" height="8" viewBox="0 0 22 8" aria-hidden="true">
-              <path d="M1 2h20" stroke="#10151c" strokeWidth="2" />
+              <path d="M1 2h20" stroke="#2b3fa8" strokeWidth="2" />
               <path d="M1 6h20" stroke="#5b6878" strokeWidth="2" strokeDasharray="4 3" />
             </svg>
             Cable route: drawn (solid) / estimated (dashed)
           </li>
+          {layoutShapes.length > 0 && (
+            <li>
+              <svg width="22" height="14" viewBox="0 0 22 14" aria-hidden="true">
+                <path d="M1 12h20" stroke="#10151c" strokeWidth="3" />
+                <path d="M4 12V3M4 3a9 9 0 0 1 9 9" fill="none" stroke="#10151c" strokeWidth="1" />
+              </svg>
+              Site layout as drawn by the engineer: walls, fences, doors and gates (not to construction accuracy)
+            </li>
+          )}
           {cameras.map((d) => (
             <li key={d.device.id}>
               <strong>{numberOf.get(d.device.id)}</strong> {d.label}

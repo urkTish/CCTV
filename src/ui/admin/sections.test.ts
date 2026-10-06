@@ -86,6 +86,16 @@ describe('sectionStatuses', () => {
     expect(s.bom.kind).toBe(i.bom.complete ? 'complete' : 'blocked');
   });
 
+  it('a drawn layout counts as a started map even with no image and no devices', () => {
+    const p = defaultProject();
+    const drawn: Project = {
+      ...p,
+      sitePlan: { ...p.sitePlan, layout: { canvas: { widthMetres: 30, heightMetres: 20 }, gridMetres: 1, shapes: [] } },
+    };
+    const i = inputs(drawn);
+    expect(sectionStatuses(i, collectWarnings(i)).map).toEqual({ kind: 'in-progress', text: '1 to place' });
+  });
+
   it('a location without a model blocks Locations and says how many', () => {
     const p: Project = {
       ...defaultProject(),

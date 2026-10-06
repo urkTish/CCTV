@@ -8,6 +8,8 @@ import {
 } from './projectFile.ts';
 import { defaultLocation, defaultProject, type Project } from './projectTypes.ts';
 import type { SitePlan } from '../domain/sitePlan.ts';
+import { EMPTY_LAYOUT, type SiteLayout } from '../domain/layoutShapes.ts';
+import { hasSiteMap } from './autosave.ts';
 
 // 1×1 transparent PNG — a real, decodable image, small enough to read.
 const PNG_1PX =
@@ -133,5 +135,74 @@ describe('project file save/open (K3)', () => {
   it('derives a safe file name', () => {
     expect(projectFileName(projectWithMap())).toBe('Warehouse-Phase-2.json');
     expect(projectFileName({ ...defaultProject(), name: '///' })).toBe('cctv-project.json');
+  });
+});
+
+describe('project file: drawn site layout (schema extension)', () => {
+  const layout: SiteLayout = {
+    canvas: { widthMetres: 40, heightMetres: 25 },
+    gridMetres: 0.5,
+    shapes: [
+      { kind: 'rect', id: 'area-1', cx: 200, cy: 150, width: 300, height: 200, rotationDeg: 0, stroke: 'wall', fill: 'building' },
+      { kind: 'polyline', id: 'line-1', points: [{ x: 50, y: 50 }, { x: 350, y: 50 }], closed: false, stroke: 'partition', fill: 'none' },
+      { kind: 'curve', id: 'curve-1', points: [{ x: 0, y: 400 }, { x: 300, y: 450 }, { x: 790, y: 400 }], closed: false, stroke: 'fence', fill: 'none' },
+      { kind: 'opening', id: 'opening-1', variant: 'door', cx: 200, cy: 250, widthMetres: 0.9, rotationDeg: 0, flip: true },
+      { kind: 'text', id: 'label-1', x: 200, y: 150, text: 'Warehouse', sizePx: 24, rotationDeg: 0 },
+    ],
+  };
+
+  function drawnProject(): Project {
+    const p = defaultProject();
+    return {
+      ...p,
+      sitePlan: {
+        image: null,
+        calibration: { a: { x: 0, y: 0 }, b: { x: 800, y: 0 }, metres: 40 },
+        devices: [{ kind: 'nvr', id: 'nvr-1', label: 'Rack', x: 100, y: 100 }],
+        routes: [],
+        layout,
+      },
+    };
+  }
+
+  it('round-trips a drawn layout exactly, and re-saves byte-identically', () => {
+    const p = drawnProject();
+    const text = serializeProjectFile(p, 'metric');
+    const result = parseProjectFile(text);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.opened.project).toEqual(p);
+    expect(serializeProjectFile(result.opened.project, 'metric')).toBe(text);
+  });
+
+  it('opens an old file (no layout key) with no layout, and saves it without one', () => {
+    const old = serializeProjectFile(projectWithMap(), 'metric');
+    expect(old).not.toMatch(/"layout"/);
+    const result = parseProjectFile(old);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect('layout' in result.opened.project.sitePlan).toBe(false);
+    expect(serializeProjectFile(result.opened.project, 'metric')).toBe(old);
+  });
+
+  it('leaves an empty layout out of the file, so it still opens in an older copy of the app', () => {
+    const p = projectWithMap();
+    const withEmpty = { ...p, sitePlan: { ...p.sitePlan, layout: EMPTY_LAYOUT } };
+    expect(serializeProjectFile(withEmpty, 'metric')).toBe(serializeProjectFile(p, 'metric'));
+  });
+
+  it('rejects a corrupt shape, naming the field', () => {
+    const doc = JSON.parse(serializeProjectFile(drawnProject(), 'metric')) as {
+      sitePlan: { layout: { shapes: Record<string, unknown>[] } };
+    };
+    doc.sitePlan.layout.shapes[3]!.widthMetres = -2;
+    const result = reparse(doc);
+    expect(!result.ok && result.reason).toMatch(/sitePlan\.layout\.shapes\.3\.widthMetres/);
+  });
+
+  it('offers a drawn layout without devices for autosave restore', () => {
+    const p = drawnProject();
+    expect(hasSiteMap({ ...p, sitePlan: { ...p.sitePlan, devices: [] } })).toBe(true);
+    expect(hasSiteMap(defaultProject())).toBe(false);
   });
 });

@@ -124,6 +124,20 @@ const PATHS = {
   ),
   send: <path d="M21 3 10 14M21 3l-7 18-4-7-7-4z" />,
   edit: <path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4" />,
+  // Site layout drawing tools.
+  square: <rect x="4.5" y="5.5" width="15" height="13" rx="0.5" />,
+  polyline: <path d="M4 18 9 7l6 8 5-9" />,
+  curve: <path d="M4 18C6 6 12 5 13 12s5 6 7-6" />,
+  door: <path d="M4 20h16M6 20V5M6 5a15 15 0 0 1 14 15" />,
+  text: <path d="M5 6V4h14v2M12 4v16M9 20h6" />,
+  undo: <path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3" />,
+  redo: <path d="m15 14 5-5-5-5M20 9H10a6 6 0 0 0 0 12h3" />,
+  copy: (
+    <>
+      <rect x="8" y="8" width="12" height="12" rx="1.5" />
+      <path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8" />
+    </>
+  ),
 } as const satisfies Record<string, ReactNode>;
 
 export type IconName = keyof typeof PATHS;

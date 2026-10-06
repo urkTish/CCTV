@@ -1,6 +1,7 @@
 /**
- * Site map editor (M1–M5): upload a plan — or draw the layout on a blank canvas
- * whose size sets the scale — calibrate it, place cameras, the NVR and
+ * Site map editor (M1–M5): upload a plan — or draw the layout from the size of
+ * the building or area, on a canvas sized (with margins) and scaled
+ * automatically — calibrate it, place cameras, the NVR and
  * switches, draw cable routes, and draw the site itself (rooms, walls, fences,
  * curves, doors, windows, gates, labels) with undo / redo and a snapping grid.
  * Tables and lists do all of it from the keyboard. An optional OpenStreetMap
@@ -32,7 +33,9 @@ import {
   describeShape,
   drawingMetresPerPx,
   gridSpacingPx,
+  fitCanvasToShapes,
   layoutOf,
+  layoutOverflowMetres,
   localToPlan,
   moveShapeTo,
   openingFromDrag,
@@ -87,6 +90,7 @@ import { OsmReferenceMap } from './OsmReferenceMap.tsx';
 import { Icon, type IconName } from './icons.tsx';
 import { Button, Card, EstimateBadge, NumberInput } from './primitives.tsx';
 import { LayoutCanvasForm, LayoutShapeList, ShapeActions, ShapeFields } from './LayoutShapeEditor.tsx';
+import { canvasReadout, overflowText } from './format.ts';
 import { GridLines, LayoutDefs, LayoutShapeGraphic } from './LayoutShapesSvg.tsx';
 import { THEME_PALETTE, lineStroke } from './planPalette.ts';
 
@@ -267,6 +271,8 @@ export function SiteMapPanel({
   const snap = (p: Point) => r2(snapPoint(p, snapPx));
   const selectedShape = selectedShapeId ? shapeById(plan, selectedShapeId) : null;
   // The scale a blank drawn layout set itself: its line runs along the top edge, so it is not drawn.
+  /** Sides drawn shapes reach past the blank canvas ("left 2 m, top 1 m"), or ''. */
+  const overflow = overflowText(layoutOverflowMetres(plan), units);
   const canvasScale =
     !plan.image && layout.canvas !== null && plan.calibration !== null && JSON.stringify(plan.calibration) === JSON.stringify(canvasCalibration(layout.canvas));
   const idBase = `lay${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
@@ -673,7 +679,7 @@ export function SiteMapPanel({
       {/* --- plan and scale ---------------------------------------------------- */}
       <Card
         title="Plan and scale"
-        subtitle="Upload a floor or site plan (PNG or JPG) and set its scale from a dimension you know — or, with no plan, draw the layout on a blank canvas sized in metres."
+        subtitle="Upload a floor or site plan (PNG or JPG) and set its scale from a dimension you know — or, with no plan, enter the size of the building or area and the layout is drawn for you, with room around it and the scale set."
       >
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex flex-wrap items-end gap-3">
@@ -741,10 +747,16 @@ export function SiteMapPanel({
             units={units}
             edit={edit}
             onCancel={() => setCanvasFormOpen(false)}
-            onDone={(text) => {
+            onDone={(text, selectId) => {
               setCanvasFormOpen(false);
               setMessage({ kind: 'info', text });
-              if (!layout.canvas) chooseDrawTool('draw-rect');
+              if (selectId) {
+                // The place was drawn for the engineer: select it, ready to edit, move or delete.
+                setMode('select');
+                setRouteDraft([]);
+                cancelDrafts();
+                selectShape(selectId);
+              }
             }}
           />
         )}
@@ -1155,6 +1167,27 @@ export function SiteMapPanel({
               )}
             </svg>
             </div>
+            {layout.canvas && !plan.image && (
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-ink-2)]">
+                <span data-testid="canvas-readout" className="font-medium">
+                  {canvasReadout(layout.canvas, layout.gridMetres, units)}
+                </span>
+                {overflow && (
+                  <span className="inline-flex flex-wrap items-center gap-2 text-[var(--color-marginal)]">
+                    <Icon name="alert" size={14} />
+                    Drawing reaches past the canvas edge ({overflow}).
+                    <Button size="sm" variant="secondary" onClick={() => edit(fitCanvasToShapes)}>
+                      Extend canvas to fit
+                    </Button>
+                  </span>
+                )}
+                {!overflow && !canvasFormOpen && (
+                  <Button size="sm" variant="ghost" icon="plus" onClick={() => setCanvasFormOpen(true)}>
+                    Add margin…
+                  </Button>
+                )}
+              </div>
+            )}
             {view.warnings.map((w) => (
               <p key={w} className="mt-2 flex gap-1.5 text-xs text-[var(--color-marginal)]">
                 <Icon name="alert" size={14} />

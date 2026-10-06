@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 /**
- * Site layout drawing, driven through the real App: the blank "draw a new
- * layout" canvas and its automatic scale, every drawing tool with the pointer,
+ * Site layout drawing, driven through the real App: "draw a new layout" from
+ * the place's size (automatic canvas, grid, margins and scale, the place drawn
+ * for the engineer), adding margin later, every drawing tool with the pointer,
  * undo / redo, keyboard editing of shapes, the shape list (the no-pointer
  * alternative), cable maths on a drawn layout, the report map, and a project
  * file with drawings opening again.
@@ -35,17 +36,39 @@ function mockBox(svg: SVGSVGElement) {
   svg.getBoundingClientRect = () => ({ left: 0, top: 0, x: 0, y: 0, width: w!, height: h!, right: w!, bottom: h!, toJSON: () => ({}) });
 }
 
-/** Render, open the Site map, and start a 40 × 25 m drawn layout (800 × 500 px at 20 px/m). */
-function startLayout() {
+/** Fill in "Draw a new layout" with the place's size (and name) and draw it. */
+function drawPlace(width: string, depth: string, name?: string) {
+  fireEvent.click(screen.getByRole('button', { name: 'Draw a new layout' }));
+  fireEvent.change(screen.getByLabelText('Place width (m)'), { target: { value: width } });
+  fireEvent.change(screen.getByLabelText('Place depth (m)'), { target: { value: depth } });
+  if (name !== undefined) fireEvent.change(screen.getByLabelText('Name (optional)'), { target: { value: name } });
+  fireEvent.click(screen.getByRole('button', { name: 'Draw layout' }));
+}
+
+/** Render, open the Site map, and draw a place of `width × depth` m; the SVG reports a box the size of its viewBox. */
+function startPlace(width: string, depth: string, name?: string) {
   const r = render(<App />);
   goTo('Site map');
-  fireEvent.click(screen.getByRole('button', { name: 'Draw a new layout' }));
-  fireEvent.change(screen.getByLabelText('Site width (m)'), { target: { value: '40' } });
-  fireEvent.change(screen.getByLabelText('Site height (m)'), { target: { value: '25' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Start drawing' }));
+  drawPlace(width, depth, name);
   const svg = mapSvg(r.container);
   mockBox(svg);
   return { ...r, svg };
+}
+
+/**
+ * A blank 40 × 25 m drawn layout (800 × 500 px at 20 px/m, grid 1 m) with the
+ * rectangle tool: a 20 × 5 m place gets 10 m of margin each side; the place
+ * and its label drawn for us are deleted from the shape list, so the drawing
+ * tests start from an empty canvas.
+ */
+function startLayout() {
+  const r = startPlace('20', '5');
+  for (const name of [/^Delete Label “Building”/, /^Delete Building 20\.0 × 5\.0 m/]) {
+    fireEvent.click(within(shapeList()!).getByRole('button', { name }));
+  }
+  expect(shapeList()).toBeNull();
+  tool('Rectangle');
+  return r;
 }
 
 function tool(name: string) {
@@ -60,24 +83,127 @@ const down = (el: Element, x: number, y: number, extra: object = {}) => fireEven
 const move = (el: Element, x: number, y: number, extra: object = {}) => fireEvent.pointerMove(el, { clientX: x, clientY: y, pointerId: 1, ...extra });
 const up = (el: Element) => fireEvent.pointerUp(el, { pointerId: 1 });
 
-describe('draw a new layout (blank canvas)', () => {
-  it('sets the scale from the site size, shows the grid and opens the rectangle tool', () => {
-    const { svg } = startLayout();
-    expect(svg.getAttribute('viewBox')).toBe('0 0 800 500');
-    expect(screen.getByTestId('plan-scale').textContent).toBe('1 px = 0.05 m · 100 px = 5 m');
-    expect(screen.getByTestId('layout-grid')).toBeTruthy();
-    expect(within(screen.getByRole('group', { name: 'Drawing tool' })).getByRole('button', { name: 'Rectangle' }).getAttribute('aria-pressed')).toBe('true');
-    expect(screen.getByRole('status').textContent).toMatch(/Drawn layout 40 × 25 m, grid 1 m/);
-    expect(screen.getByRole('button', { name: 'Layout size: 40 × 25 m' })).toBeTruthy();
-  });
-
-  it('refuses a size outside the limits with a message', () => {
+describe('draw a new layout (from the place size)', () => {
+  it('asks only for the place, shows the canvas it will get, and draws the place centred with its name', () => {
     render(<App />);
     goTo('Site map');
     fireEvent.click(screen.getByRole('button', { name: 'Draw a new layout' }));
-    fireEvent.change(screen.getByLabelText('Site width (m)'), { target: { value: '1' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Start drawing' }));
-    expect(screen.getByRole('alert').textContent).toMatch(/between 2 and 1000 m/);
+    // No canvas size and no grid field: only the place and its name.
+    expect(screen.queryByLabelText(/Canvas width|Site width|Grid square/)).toBeNull();
+    fireEvent.change(screen.getByLabelText('Place width (m)'), { target: { value: '10' } });
+    fireEvent.change(screen.getByLabelText('Place depth (m)'), { target: { value: '6' } });
+    expect(screen.getByTestId('auto-canvas-preview').textContent).toBe('Canvas 20 × 16 m · grid 1 m · at least 5 m around the place');
+    fireEvent.change(screen.getByLabelText('Name (optional)'), { target: { value: 'Workshop' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Draw layout' }));
+
+    const svg = mapSvg(document.body);
+    expect(svg.getAttribute('viewBox')).toBe('0 0 400 320');
+    expect(screen.getByTestId('plan-scale').textContent).toBe('1 px = 0.05 m · 100 px = 5 m');
+    expect(screen.getByTestId('layout-grid')).toBeTruthy();
+    expect(screen.getByTestId('canvas-readout').textContent).toBe('Canvas 20 × 16 m · grid 1 m');
+    expect(screen.getByRole('button', { name: 'Layout size: 20 × 16 m' })).toBeTruthy();
+    expect(screen.getByRole('status').textContent).toMatch(/^Workshop 10 × 6 m drawn in the middle of the canvas\. Canvas 20 × 16 m · grid 1 m, at least 5 m of margin/);
+
+    // The place: a closed building rectangle centred on the canvas, and its name; selected, ready to edit.
+    const list = shapeList()!;
+    expect(within(list).getAllByRole('listitem')).toHaveLength(2);
+    expect(within(list).getByText(/^Building 10\.0 × 6\.0 m/)).toBeTruthy();
+    expect(within(list).getByText('Label “Workshop”')).toBeTruthy();
+    expect(within(svg as unknown as HTMLElement).getByText('Workshop')).toBeTruthy();
+    expect(screen.getByRole('complementary', { name: 'Selected shape' })).toBeTruthy();
+    expect((screen.getAllByLabelText('x of area-1 (px)')[0] as HTMLInputElement).value).toBe('200');
+    expect((screen.getAllByLabelText('y of area-1 (px)')[0] as HTMLInputElement).value).toBe('160');
+    expect(screen.getByTestId('shape-measure').textContent).toMatch(/Perimeter: 32 m · Area: 60 m²/);
+    expect(within(screen.getByRole('group', { name: 'Map tool' })).getByRole('button', { name: 'Select / move' }).getAttribute('aria-pressed')).toBe('true');
+
+    // One undo step takes it all away; redo brings it all back.
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+    expect(shapeList()).toBeNull();
+    expect(screen.getByRole('button', { name: 'Draw a new layout' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Undo' }).hasAttribute('disabled')).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Redo' }));
+    expect(within(shapeList()!).getAllByRole('listitem')).toHaveLength(2);
+    expect(screen.getByTestId('canvas-readout').textContent).toBe('Canvas 20 × 16 m · grid 1 m');
+  });
+
+  it('names the place "Building" by default and picks the grid by size: 3 × 3 m and 120 × 80 m', () => {
+    render(<App />);
+    goTo('Site map');
+    fireEvent.click(screen.getByRole('button', { name: 'Draw a new layout' }));
+    fireEvent.change(screen.getByLabelText('Place width (m)'), { target: { value: '3' } });
+    fireEvent.change(screen.getByLabelText('Place depth (m)'), { target: { value: '3' } });
+    expect(screen.getByTestId('auto-canvas-preview').textContent).toBe('Canvas 13 × 13 m · grid 0.5 m · at least 5 m around the place');
+    fireEvent.change(screen.getByLabelText('Place width (m)'), { target: { value: '120' } });
+    fireEvent.change(screen.getByLabelText('Place depth (m)'), { target: { value: '80' } });
+    expect(screen.getByTestId('auto-canvas-preview').textContent).toBe('Canvas 240 × 200 m · grid 5 m · at least 60 m around the place');
+    fireEvent.click(screen.getByRole('button', { name: 'Draw layout' }));
+    expect(mapSvg(document.body).getAttribute('viewBox')).toBe('0 0 4800 4000');
+    expect(screen.getByTestId('canvas-readout').textContent).toBe('Canvas 240 × 200 m · grid 5 m');
+    expect(within(shapeList()!).getByText('Label “Building”')).toBeTruthy();
+    expect(within(shapeList()!).getByText(/^Building 120\.0 × 80\.0 m/)).toBeTruthy();
+  });
+
+  it('refuses a place outside the limits with a message', () => {
+    render(<App />);
+    goTo('Site map');
+    fireEvent.click(screen.getByRole('button', { name: 'Draw a new layout' }));
+    fireEvent.change(screen.getByLabelText('Place width (m)'), { target: { value: '0.5' } });
+    expect(screen.getByTestId('auto-canvas-preview').textContent).toMatch(/place width must be between 1 and 500 m/);
+    fireEvent.click(screen.getByRole('button', { name: 'Draw layout' }));
+    expect(screen.getByRole('alert').textContent).toMatch(/place width must be between 1 and 500 m/);
+    expect(shapeList()).toBeNull();
+  });
+
+  it('adds margin later on one side without moving anything relative to anything else', () => {
+    startPlace('10', '6');
+    fireEvent.click(screen.getByRole('button', { name: 'Add NVR / rack' })); // at the centre (200, 160)
+    fireEvent.click(screen.getByRole('button', { name: 'Place Main gate' }));
+    fireEvent.change(screen.getByLabelText('x of Main gate (px)'), { target: { value: '0' } });
+    fireEvent.change(screen.getByLabelText('y of Main gate (px)'), { target: { value: '160' } });
+    fireEvent.blur(screen.getByLabelText('x of Main gate (px)'));
+    fireEvent.blur(screen.getByLabelText('y of Main gate (px)'));
+    // 200 px = 10 m straight × 1.3 routing factor = 13 m on the generated scale.
+    const runOf = () => within(within(screen.getByRole('table', { name: /Placed devices/ })).getByRole('rowheader', { name: /^Main gate/ }).closest('tr')!);
+    expect(runOf().getByText('13 m')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Layout size: 20 × 16 m' }));
+    expect(screen.getByTestId('canvas-panel-readout').textContent).toBe('Canvas 20 × 16 m · grid 1 m');
+    fireEvent.change(screen.getByLabelText('Add (m)'), { target: { value: '5' } });
+    fireEvent.change(screen.getByLabelText('On'), { target: { value: 'left' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Add margin' }));
+    expect(mapSvg(document.body).getAttribute('viewBox')).toBe('0 0 500 320');
+    expect(screen.getByTestId('canvas-readout').textContent).toBe('Canvas 25 × 16 m · grid 1 m');
+    expect(screen.getByRole('status').textContent).toMatch(/Added 5 m on the left/);
+    // Everything moved 5 m (100 px) right together; the run is unchanged.
+    expect((screen.getAllByLabelText('x of area-1 (px)')[0] as HTMLInputElement).value).toBe('300');
+    expect((screen.getByLabelText('x of Main gate (px)') as HTMLInputElement).value).toBe('100');
+    expect(runOf().getByText('13 m')).toBeTruthy();
+    // One undo step.
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+    expect(screen.getByTestId('canvas-readout').textContent).toBe('Canvas 20 × 16 m · grid 1 m');
+  });
+
+  it('offers to extend the canvas when a shape reaches past its edge', () => {
+    startPlace('10', '6');
+    fireEvent.click(screen.getByRole('button', { name: 'Add line / wall' }));
+    const pts = within(shapeList()!).getByLabelText('Points of line-1');
+    fireEvent.change(pts, { target: { value: '-40,10 470,10' } });
+    fireEvent.blur(pts);
+    fireEvent.click(screen.getByRole('button', { name: 'Extend canvas to fit' }));
+    // left 2 m → 3 m, right 3.5 m → 5 m (whole squares plus one).
+    expect(screen.getByTestId('canvas-readout').textContent).toBe('Canvas 28 × 16 m · grid 1 m');
+    expect(screen.queryByRole('button', { name: 'Extend canvas to fit' })).toBeNull();
+    expect((within(shapeList()!).getByLabelText('Points of line-1') as HTMLTextAreaElement).value).toBe('20,10 530,10');
+  });
+
+  it('sets an exact canvas size and grid under Advanced', () => {
+    startPlace('10', '6');
+    fireEvent.click(screen.getByRole('button', { name: 'Layout size: 20 × 16 m' }));
+    fireEvent.change(screen.getByLabelText('Canvas width (m)'), { target: { value: '30' } });
+    fireEvent.change(screen.getByLabelText('Grid square (m)'), { target: { value: '0.5' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Apply size' }));
+    expect(screen.getByTestId('canvas-readout').textContent).toBe('Canvas 30 × 16 m · grid 0.5 m');
+    expect((screen.getAllByLabelText('x of area-1 (px)')[0] as HTMLInputElement).value).toBe('200');
   });
 
   it('measures cable runs on the drawn layout like on a calibrated plan', () => {
@@ -324,5 +450,9 @@ describe('drawn layout in the report and the project file', () => {
     goTo('Site map');
     expect(within(shapeList()!).getByText('Label “Gatehouse”')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Layout size: 30 × 20 m' })).toBeTruthy();
+    // Opens unchanged: same canvas, grid and shapes; no generated outline is added.
+    expect(screen.getByTestId('canvas-readout').textContent).toBe('Canvas 30 × 20 m · grid 1 m');
+    expect(within(shapeList()!).getAllByRole('listitem')).toHaveLength(1);
+    expect(mapSvg(document.body).getAttribute('viewBox')).toBe('0 0 600 400');
   });
 });

@@ -52,8 +52,9 @@ import { BomSection } from './BomSection.tsx';
 import { JumpPalette, type JumpTarget } from './JumpPalette.tsx';
 import { LocationDetail, LocationList } from './LocationsSection.tsx';
 import { OverviewSection } from './OverviewSection.tsx';
-import { collectWarnings, SECTIONS, sectionDef, sectionStatuses, type SectionId } from './sections.ts';
+import { collectWarnings, isToolSection, SECTIONS, sectionDef, sectionStatuses, type SectionId } from './sections.ts';
 import { ReportSection } from './ReportSection.tsx';
+import { CameraFinderSection } from './CameraFinderSection.tsx';
 import { SettingsSection } from './SettingsSection.tsx';
 
 const NAV_PREF_KEY = 'contractech-cctv.nav-collapsed';
@@ -473,6 +474,9 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
         />
       );
       break;
+    case 'finder':
+      content = <CameraFinderSection />;
+      break;
     case 'settings':
       content = <SettingsSection profile={profile} onProfile={setProfile} />;
       break;
@@ -538,7 +542,7 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
               </Notice>
             </div>
           )}
-          <SectionFrame def={sectionDef(section)} status={section === 'settings' ? null : statuses[section]} actions={actions} headingRef={headingRef} prev={section === 'settings' ? null : prev} next={section === 'settings' ? null : next} onNavigate={navigate}>
+          <SectionFrame def={sectionDef(section)} status={isToolSection(section) ? null : statuses[section]} actions={actions} headingRef={headingRef} prev={isToolSection(section) ? null : prev} next={isToolSection(section) ? null : next} onNavigate={navigate}>
             {content}
           </SectionFrame>
           <footer className="mt-10 border-t print:hidden border-[var(--color-border)] pt-4 text-xs text-[var(--color-ink-3)]">

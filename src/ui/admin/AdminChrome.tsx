@@ -15,7 +15,7 @@ import type { UnitSystemState } from '../../state/projectTypes.ts';
 import { Icon } from '../icons.tsx';
 import { StatusBadge } from '../primitives.tsx';
 import { STATUS_STYLE } from '../uiStyles.ts';
-import { SETTINGS_SECTION, type SectionDef, type SectionId, type SectionStatus } from './sections.ts';
+import { FINDER_SECTION, SETTINGS_SECTION, type SectionDef, type SectionId, type SectionStatus } from './sections.ts';
 
 export type Theme = 'system' | 'light' | 'dark';
 
@@ -249,6 +249,7 @@ export function AdminNav({
           ))}
         </ol>
         <ul className="grid gap-0.5 border-t border-[var(--color-border)] p-2">
+          <NavItem def={FINDER_SECTION} status={null} active={active === 'finder'} collapsed={collapsed} onClick={() => onNavigate('finder')} />
           <NavItem def={SETTINGS_SECTION} status={null} active={active === 'settings'} collapsed={collapsed} onClick={() => onNavigate('settings')} />
           <li className="hidden lg:block">
             <button

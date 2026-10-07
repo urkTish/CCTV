@@ -16,7 +16,7 @@ import type { Project } from '../../state/projectTypes.ts';
 import type { IconName } from '../icons.tsx';
 import type { StatusKind } from '../uiStyles.ts';
 
-export type SectionId = 'overview' | 'map' | 'locations' | 'recording' | 'network' | 'cabling' | 'bom' | 'report' | 'settings';
+export type SectionId = 'overview' | 'map' | 'locations' | 'recording' | 'network' | 'cabling' | 'bom' | 'report' | 'finder' | 'settings';
 
 export interface SectionDef {
   readonly id: SectionId;
@@ -46,7 +46,22 @@ export const SETTINGS_SECTION: SectionDef = {
   description: 'Your name and contact details for the report. Stored in this browser only.',
 };
 
+/** A stand-alone tool, outside the project workflow: cameras for a recorder the client already has. */
+export const FINDER_SECTION: SectionDef = {
+  id: 'finder',
+  label: 'Camera finder',
+  short: 'Finder',
+  icon: 'search',
+  description: 'Pick a recorder (NVR) and what the camera must do; get the catalogue cameras that work with it.',
+};
+
+/** Sections outside the workflow: no status, no previous / next. */
+export function isToolSection(id: SectionId): boolean {
+  return id === 'settings' || id === 'finder';
+}
+
 export function sectionDef(id: SectionId): SectionDef {
+  if (id === 'finder') return FINDER_SECTION;
   return SECTIONS.find((s) => s.id === id) ?? SETTINGS_SECTION;
 }
 
@@ -226,5 +241,5 @@ export function sectionStatuses(inputs: StatusInputs, warnings: readonly Project
 
   const report: SectionStatus = inputs.reportFinal ? { kind: 'complete', text: 'Final' } : { kind: 'in-progress', text: 'Draft' };
 
-  return { overview, map, locations, recording, network, cabling, bom: bomStatus, report, settings: { kind: 'not-started', text: '' } };
+  return { overview, map, locations, recording, network, cabling, bom: bomStatus, report, finder: { kind: 'not-started', text: '' }, settings: { kind: 'not-started', text: '' } };
 }

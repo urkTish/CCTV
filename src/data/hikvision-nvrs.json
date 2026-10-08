@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "datasetVerifiedOn": "2026-10-05",
-  "source": "Every entry was read off the official Hikvision NVR datasheet PDF named in its datasheetUrl (assets.hikvision.com), via text extraction. Fields the datasheet does not state are null. priceTier is editorial. formFactor is 'desktop' for any chassis narrower than 19-inch rack width, even where Hikvision's title calls it 1U; the note says so.",
+  "datasetVerifiedOn": "2026-10-08",
+  "source": "Every entry was read off the official Hikvision NVR datasheet PDF named in its datasheetUrl (assets.hikvision.com), via text extraction. Fields the datasheet does not state are null. priceTier is editorial. formFactor is 'desktop' for any chassis narrower than 19-inch rack width, even where Hikvision's title calls it 1U; the note says so. One exception: a discontinued model whose datasheet PDF Hikvision no longer publishes was read off its official hikvision.com specification page, named in its datasheetUrl.",
   "items": [
     {
       "id": "ds-7104ni-q1-4p", "model": "DS-7104NI-Q1/4P", "marketingName": "Value 7 Series 4-ch PoE NVR", "series": "Value 7 (Q1)",
@@ -325,6 +325,23 @@
       "powerSupply": "100 to 240 VAC, 50 to 60 Hz, redundant power supply", "consumptionWattsWithoutHdd": 50,
       "dimensions": "442 x 498 x 146 mm", "weightKg": null, "operatingTempMinC": -10, "operatingTempMaxC": 55,
       "notes": "The largest recorder in this set: 16 hot-plug bays (256 TB raw at 16 TB per bay), RAID and N+M hot spare, redundant power. Same 400 Mbps incoming ceiling as the M8."
+    },
+    {
+      "id": "ds-9664ni-i16", "model": "DS-9664NI-I16", "marketingName": "I Series 64-ch 3U 4K 16-bay RAID NVR (discontinued)", "series": "I",
+      "datasheetUrl": "https://www.hikvision.com/en/products/IP-Products/Network-Video-Recorders/Ultra-Series/ds-9664ni-i16/",
+      "verifiedOn": "2026-10-08", "priceTier": "premium", "discontinued": true,
+      "channels": 64, "incomingBandwidthMbps": 320, "outgoingBandwidthMbps": 256, "maxRecordingResolutionMp": 12,
+      "decodingCapability": "1-ch@32 MP (30 fps)/2-ch@12 MP (20fps)/4-ch@8 MP (25fps)/8-ch@4 MP (30fps)/16-ch@1080p (30fps)",
+      "sataBays": 16, "maxHddCapacityTb": 10, "esata": true, "raidLevels": ["0", "1", "5", "6", "10"], "hotSpare": true,
+      "poePorts": 0, "poeBudgetWatts": null, "poeStandards": [],
+      "networkInterfaces": 2, "networkSpeedMbps": 1000,
+      "hdmiOutputs": 2, "maxHdmiResolution": "4K", "vgaOutputs": 2,
+      "analytics": ["anpr", "people-counting"],
+      "formFactor": "3U", "rackWidth19in": true, "redundantPsu": false,
+      "alarmInputs": 16, "alarmOutputs": 8, "onvif": null,
+      "powerSupply": "100 to 240 VAC, 50 to 60 Hz", "consumptionWattsWithoutHdd": 45,
+      "dimensions": "445 x 496 x 146 mm", "weightKg": 12.5, "operatingTempMinC": -10, "operatingTempMaxC": 55,
+      "notes": "Discontinued: in the catalogue so existing sites can be matched in the Camera finder; never picked for a new design. Hikvision no longer publishes its datasheet PDF, so this entry was read off the official product specification page. Records up to 12 MP per channel (32/24 MP only on channel 1 in ultra-HD mode). Incoming bandwidth drops to 200 Mbps with RAID on, and RAID needs drives of at least 4 TB. ANPR and people counting via specialist cameras."
     }
   ]
 }

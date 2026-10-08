@@ -184,3 +184,14 @@ describe('storage ↔ recorder compatibility (I4)', () => {
     expect(result.notices.join(' ')).toMatch(/not in the catalogue/);
   });
 });
+
+describe('discontinued recorders', () => {
+  it('never recommends a discontinued recorder for a new design, but evaluates it when pinned', () => {
+    const free = recommendNvr(requirement({ cameraCount: 40, incomingMbps: 120 }), nvrs, hdds);
+    const ids = [free.primary, ...free.alternatives].map((r) => r?.evaluation.nvr.id);
+    expect(ids).not.toContain('ds-9664ni-i16');
+    expect(free.rejections.map((r) => r.nvr.id)).not.toContain('ds-9664ni-i16');
+    const pinned = recommendNvr(requirement({ pinnedNvrId: 'ds-9664ni-i16' }), nvrs, hdds);
+    expect(pinned.primary?.evaluation.nvr.id).toBe('ds-9664ni-i16');
+  });
+});

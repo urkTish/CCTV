@@ -222,7 +222,7 @@ src/
 
 ## The data
 
-38 Hikvision cameras, 19 NVRs, 11 PoE switches and 23 hard drives (Seagate
+38 Hikvision cameras, 20 NVRs (one discontinued, kept for existing sites), 11 PoE switches and 23 hard drives (Seagate
 SkyHawk, WD Purple, one Hikvision drive shown but not recommended), every
 specification read off the manufacturer datasheet
 linked in the entry. No spec came from memory. Fields a datasheet does not state

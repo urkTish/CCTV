@@ -80,3 +80,11 @@ describe('camera finder', () => {
     expect(() => findCamerasForNvr(request({ quantity: 0 }))).toThrow(CameraFinderError);
   });
 });
+
+describe('camera finder on a discontinued recorder', () => {
+  it('matches cameras to an existing DS-9664NI-I16 site', () => {
+    const r = findCamerasForNvr(request({ nvrId: 'ds-9664ni-i16', minMegapixels: 8, focalLengthMm: 4 }));
+    expect(r.matches.length).toBeGreaterThan(0);
+    expect(r.matches.every((m) => m.megapixels >= 8 && m.megapixels <= 12)).toBe(true);
+  });
+});

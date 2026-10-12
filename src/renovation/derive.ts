@@ -10,11 +10,13 @@ import type { IconName } from '../ui/icons.tsx';
 import type { StatusKind } from '../ui/uiStyles.ts';
 import { buildBoq, paymentSchedule, priceRange, type Boq, type PaymentSchedule, type PriceRange } from './boq.ts';
 import { measureShape, isClosedArea, type PlanMeasure } from './geometry.ts';
+import { hasContent } from '../pictures/pictureSection.ts';
+import { completionStatus } from './completion.ts';
 import { assumedTotal, LEGAL_PLACEHOLDER, SAFETY_ITEMS, type PortalData, type Room } from './model.ts';
 import { buildProgramme, type Programme } from './programme.ts';
 import { projectQuantities, type ProjectQuantities } from './quantities.ts';
 
-export type RnSectionId = 'rn-overview' | 'rn-client' | 'map' | 'rn-survey' | 'rn-spec' | 'rn-library' | 'rn-quantities' | 'rn-boq' | 'rn-visuals' | 'rn-proposal';
+export type RnSectionId = 'rn-overview' | 'rn-client' | 'map' | 'rn-survey' | 'rn-spec' | 'rn-library' | 'rn-quantities' | 'rn-boq' | 'rn-visuals' | 'rn-concepts' | 'rn-proposal' | 'rn-completion';
 
 export interface RnSectionDef {
   readonly id: RnSectionId;
@@ -34,7 +36,9 @@ export const RN_SECTIONS: readonly RnSectionDef[] = [
   { id: 'rn-quantities', label: 'Quantities', short: 'Quantities', icon: 'square', description: 'Every quantity per room with the formula behind it, and the materials to order rounded up to packs, boxes, bags and boards.' },
   { id: 'rn-boq', label: 'BOQ & programme', short: 'BOQ', icon: 'list', description: 'The bill of quantities by room or by trade, with totals, VAT and the payment schedule; and the programme from the productivities.' },
   { id: 'rn-visuals', label: 'Visuals', short: 'Visuals', icon: 'camera', description: 'Export the brief pack, import the generated “after” images, pair them, check them and approve them. Every visual is labelled Illustrative.' },
+  { id: 'rn-concepts', label: 'Concepts', short: 'Concepts', icon: 'image', description: 'The proposal’s Concept chapter: picture sections — a title, the picture (photo, drawing or render) and a description — printed in this order, each labelled Concept / Illustrative.' },
   { id: 'rn-proposal', label: 'Proposal', short: 'Proposal', icon: 'report', description: 'The branded A4 renovation proposal: preview, print or save as PDF, and the deliberate switch from Draft to Final.' },
+  { id: 'rn-completion', label: 'Completion report', short: 'Completion', icon: 'clipboard-check', description: 'The photo report at handover: made in one click from the proposal, then add the actual photos, mark each item done or snag, and issue it with the client sign-off.' },
 ];
 
 export function rnSectionDef(id: RnSectionId): RnSectionDef {
@@ -88,7 +92,7 @@ export function deriveRenovation(portal: PortalData | undefined, plan: SitePlan,
   const line = portal?.renovation ?? null;
   const empty: RnStatus = { kind: 'not-started', text: 'Not started' };
   if (!portal || !line) {
-    const statuses = Object.fromEntries(['rn-overview', 'rn-client', 'map', 'rn-survey', 'rn-spec', 'rn-library', 'rn-quantities', 'rn-boq', 'rn-visuals', 'rn-proposal'].map((id) => [id, empty])) as Record<RnSectionId, RnStatus>;
+    const statuses = Object.fromEntries(RN_SECTIONS.map((x) => x.id).map((id) => [id, empty])) as Record<RnSectionId, RnStatus>;
     return { quantities: null, boq: null, programme: null, payments: null, range: null, firm: false, warnings: [], statuses, finalBlockers: [], planOf };
   }
   const quantities = projectQuantities(portal, planOf);
@@ -142,6 +146,13 @@ export function deriveRenovation(portal: PortalData | undefined, plan: SitePlan,
   if (line.narrative.text.trim() && !line.narrative.reviewed) add({ id: 'narrative', severity: 'attention', text: 'The imported narrative has not been reviewed; it is left out of the proposal until it is.', section: 'rn-visuals' });
   if (line.designRoundsUsed > line.settings.freeDesignRounds) add({ id: 'rounds', severity: 'attention', text: `${line.designRoundsUsed} design rounds used; ${line.settings.freeDesignRounds} are free (owner setting).`, section: 'rn-visuals' });
 
+  // Concepts and the completion report (optional data)
+  const concepts = (line.concepts ?? []).filter(hasContent);
+  const noPicture = concepts.filter((c) => c.images.length === 0);
+  if (noPicture.length) add({ id: 'concepts-no-picture', severity: 'attention', text: `${plural(noPicture.length, 'concept section')} without a picture.`, section: 'rn-concepts' });
+  const snags = line.completion?.items.filter((i) => i.status === 'snag') ?? [];
+  if (snags.length) add({ id: 'completion-snags', severity: 'attention', text: `${plural(snags.length, 'snag')} outstanding in the completion report.`, section: 'rn-completion' });
+
   // Final blockers (spec 4.5, Q8, Q5, Q6)
   const finalBlockers: { text: string; section: RnSectionId | 'settings' }[] = [];
   for (const s of SAFETY_ITEMS) {
@@ -176,6 +187,8 @@ export function deriveRenovation(portal: PortalData | undefined, plan: SitePlan,
     'rn-quantities': quantities && specified.length ? (quantities.warnings.length ? { kind: 'attention', text: `${quantities.warnings.length} to check` } : { kind: 'complete', text: `${quantities.order.length} to order` }) : { kind: 'not-started', text: 'Nothing yet' },
     'rn-boq': !boq || specified.length === 0 ? { kind: 'not-started', text: 'Nothing yet' } : boq.complete ? { kind: boq.sampleRateLines ? 'attention' : 'complete', text: boq.sampleRateLines ? 'Sample rates' : 'Complete' } : { kind: 'blocked', text: `${plural(boq.incompleteReasons.length, 'gap')}` },
     'rn-visuals': status('rn-visuals', { kind: 'complete', text: `${approved.length} approved` }, line.views.length > 0 || line.assets.length > 0, 'No photos'),
+    'rn-concepts': concepts.length === 0 ? { kind: 'not-started', text: 'Optional' } : noPicture.length ? { kind: 'attention', text: `${noPicture.length} without a picture` } : { kind: 'complete', text: plural(concepts.length, 'section') },
+    'rn-completion': completionStatus(line.completion),
     'rn-proposal': line.proposal.status === 'final' ? { kind: 'complete', text: `Final${line.proposal.revision ? ` Rev ${line.proposal.revision}` : ''}` } : { kind: 'in-progress', text: 'Draft' },
   };
 

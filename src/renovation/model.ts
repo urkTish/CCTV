@@ -15,6 +15,7 @@
 
 import { z } from 'zod';
 
+import { completionReportSchema, pictureSectionsSchema } from '../pictures/pictureSection.ts';
 import { librarySchema, type Library } from './library.ts';
 
 export const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected a YYYY-MM-DD date');
@@ -643,6 +644,14 @@ export const renovationLineSchema = z
     crews: z.record(z.enum(TRADES), z.number().int().min(1).max(20)),
     designRoundsUsed: z.number().int().min(0).max(50),
     proposal: proposalStateSchema,
+    /**
+     * The proposal's Concept chapter (picture sections). Optional: absent in
+     * files from earlier releases and until the first section is added, so
+     * those files open and re-save byte for byte.
+     */
+    concepts: pictureSectionsSchema.optional(),
+    /** The completion / photo report, once generated from the proposal. Optional, as above. */
+    completion: completionReportSchema.optional(),
   })
   .strict();
 export type RenovationLine = z.infer<typeof renovationLineSchema>;

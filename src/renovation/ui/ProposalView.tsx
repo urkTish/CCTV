@@ -3,11 +3,12 @@
  * branding as the CCTV report (it reuses report.css, the running header, the
  * Draft watermark and the SignOff block with the company stamp).
  *
- *   Cover · 1 Summary · 2 Your new home · 3 Mood board · 4 Before and after ·
- *   5 Survey findings · 6 Scope of work · 7 Finishes and colour schedule ·
- *   8 Bill of quantities · 9 Programme · 10 Exclusions · 11 Assumptions and
- *   notes · 12 Warranty · 13 Payment schedule · 14 Terms, validity and the
- *   visuals disclaimer · 15 Approval
+ *   Cover · Summary · Your new home (when reviewed) · Mood board · Concept
+ *   (when there are concept sections) · Before and after · Survey findings ·
+ *   Scope of work · Finishes and colour schedule · Bill of quantities ·
+ *   Programme · Exclusions · Assumptions and notes · Warranty · Payment
+ *   schedule · Terms, validity and the visuals disclaimer · Approval.
+ *   Chapters are numbered as they print.
  */
 
 import '../../report/report.css';
@@ -18,6 +19,7 @@ import type { ReactNode } from 'react';
 import { COMPANY_NAME, LOGO_INTRINSIC, LOGO_LIGHT_URL } from '../../brand.ts';
 import { longDate } from '../../report/reportModel.ts';
 import { SignOff } from '../../report/SignOff.tsx';
+import { ConceptChapter } from '../../pictures/ui/PictureSectionPrint.tsx';
 import { inkOn } from '../briefs.ts';
 import { money, moneyRound } from '../format.ts';
 import type { GalleryPair, ProposalModel } from '../proposal.ts';
@@ -226,6 +228,12 @@ export function ProposalView({ model: m }: { model: ProposalModel }) {
                 )}
                 <p className="small muted">Colour swatches are screen and print approximations of the codes above — please check the physical samples.</p>
               </Section>
+
+              {m.concepts.length > 0 && (
+                <Section n={next()} title="Concept">
+                  <ConceptChapter sections={m.concepts} lang={m.lang} roomName={m.roomName} />
+                </Section>
+              )}
 
               <Section n={next()} title="Before and after">
                 {m.rooms.map((r) => (

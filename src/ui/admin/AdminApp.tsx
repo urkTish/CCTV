@@ -17,6 +17,7 @@ import { SERVICE_LINE_LABEL, type ServiceLine } from '../../renovation/model.ts'
 import { addRenovationLine, ensurePortal, loadHouseLibrary } from '../../renovation/rnState.ts';
 import { LibrarySection } from '../../renovation/ui/LibrarySection.tsx';
 import { RnClientSection, RnOverview } from '../../renovation/ui/OverviewSections.tsx';
+import { CompletionSection, ConceptsSection } from '../../renovation/ui/PictureSections.tsx';
 import { ProposalSection } from '../../renovation/ui/ProposalSection.tsx';
 import { BoqSection, QuantitiesSection } from '../../renovation/ui/QuantitiesBoq.tsx';
 import { RnSettingsCard } from '../../renovation/ui/RnSettingsCard.tsx';
@@ -609,6 +610,24 @@ export function AdminApp({ intakePayload = null, renovationPayload = null }: { i
       break;
     case 'rn-visuals':
       if (portal?.renovation) content = <VisualsSection portal={portal} onPortal={onPortal} derived={rn} onNavigate={navigate} projectName={project.name} engineerName={profile.name} />;
+      break;
+    case 'rn-concepts':
+      if (portal?.renovation) content = <ConceptsSection portal={portal} onPortal={onPortal} derived={rn} onNavigate={navigate} />;
+      break;
+    case 'rn-completion':
+      if (portal?.renovation)
+        content = (
+          <CompletionSection
+            portal={portal}
+            onPortal={onPortal}
+            derived={rn}
+            onNavigate={navigate}
+            projectName={project.name}
+            clientName={extras.clientName}
+            clientContact={extras.clientContact}
+            profile={profile}
+          />
+        );
       break;
     case 'rn-proposal':
       if (portal?.renovation)

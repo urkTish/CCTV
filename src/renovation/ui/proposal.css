@@ -169,3 +169,26 @@
 .rn-report .rn-boq td:nth-child(2) {
   width: 55%;
 }
+
+/* The completion / photo report: same paper, its own footer. */
+.rn-report.cr-report {
+  page: cr;
+}
+
+@page cr {
+  size: A4;
+  margin: 14mm 14mm 16mm;
+
+  @bottom-left {
+    content: 'ContracTech — Completion report';
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 8pt;
+    color: #5b6878;
+  }
+  @bottom-right {
+    content: 'Page ' counter(page) ' of ' counter(pages);
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 8pt;
+    color: #5b6878;
+  }
+}

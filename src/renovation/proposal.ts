@@ -10,6 +10,7 @@
  *   - furniture is captioned "for illustration, not included" (Q10).
  */
 
+import { hasContent, type PictureSection } from '../pictures/pictureSection.ts';
 import type { EngineerProfile } from '../state/engineerProfile.ts';
 import type { BoqGroup } from './boq.ts';
 import { FURNITURE_CAPTION, paletteInUse, scheduleRows, type ScheduleRow } from './briefs.ts';
@@ -57,6 +58,10 @@ export interface ProposalModel {
   readonly narrative: string | null;
   readonly mood: { readonly title: string; readonly words: string; readonly palette: readonly { name: string; code: string; hex: string; where: readonly string[] }[]; readonly materials: readonly string[] };
   readonly rooms: readonly ProposalRoom[];
+  /** The Concept chapter: picture sections with something to print, in the engineer's order. */
+  readonly concepts: readonly PictureSection[];
+  readonly lang: 'en' | 'ar';
+  readonly roomName: (id: string | null) => string;
   readonly findings: readonly { readonly room: string; readonly text: string; readonly action: string; readonly fixNow: boolean }[];
   readonly safety: readonly { readonly text: string; readonly action: string }[];
   readonly schedule: readonly ScheduleRow[];
@@ -180,6 +185,9 @@ export function buildProposal(portal: PortalData, d: RnDerived, opts: { projectN
       materials,
     },
     rooms,
+    concepts: (line.concepts ?? []).filter(hasContent),
+    lang: s.proposalLanguage,
+    roomName: (id) => (id ? (portal.rooms.find((r) => r.id === id)?.name ?? '') : ''),
     findings,
     safety,
     schedule: scheduleRows(portal),

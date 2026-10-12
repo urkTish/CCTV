@@ -81,7 +81,7 @@ export function RnOverview({
         <h3 id="rn-totals" className="mb-2 text-sm font-semibold tracking-wide text-[var(--color-ink-3)] uppercase">
           Totals
         </h3>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 @5xl/section:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 @5xl/section:grid-cols-6">
           <Tile label="Rooms" value={String(portal.rooms.length)} note={`${num(area, 1)} m² of floor`} onClick={() => onNavigate('rn-survey')} />
           <Tile
             label={derived.firm ? 'Total incl. VAT' : 'Estimate (range)'}
@@ -92,6 +92,7 @@ export function RnOverview({
           <Tile label="Programme" value={derived.programme?.totalDays ? `${num(derived.programme.totalDays, 1)} days` : '—'} note="working days, one crew per trade" onClick={() => onNavigate('rn-boq')} />
           <Tile label="Visuals" value={`${approved} / ${line.views.length}`} note="views with an approved after image" onClick={() => onNavigate('rn-visuals')} />
           <Tile label="Proposal" value={line.proposal.status === 'final' ? 'Final' : 'Draft'} note={`${derived.finalBlockers.length} item${derived.finalBlockers.length === 1 ? '' : 's'} before Final`} onClick={() => onNavigate('rn-proposal')} />
+          <Tile label="Completion" value={derived.statuses['rn-completion'].text} note={line.completion ? (line.completion.state.status === 'final' ? 'photo report issued' : 'photo report, draft') : 'made from the proposal at handover'} onClick={() => onNavigate('rn-completion')} />
         </div>
       </section>
       <div className="grid gap-4 @4xl/section:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">

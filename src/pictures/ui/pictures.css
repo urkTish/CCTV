@@ -1,0 +1,195 @@
+/*
+ * Picture sections in print (inside .report, so the report tokens --r-* apply).
+ * A section is a "plate": figure number + title, the picture(s) with their
+ * burned-in label, then the description. The title block and the pictures
+ * never split across pages; the whole section stays together when it fits.
+ */
+
+.ps {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  padding-top: 8pt;
+  margin-top: 10pt;
+  border-top: 0.75pt solid var(--r-rule);
+}
+.ps:first-of-type {
+  border-top: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
+.ps-keep {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.report .ps-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2pt 8pt;
+  margin: 0 0 3pt;
+  font-size: 12.5pt;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+/* The plate number: small caps in the accent, set like a drawing-sheet reference. */
+.ps-fig {
+  font-size: 8pt;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--r-accent);
+  border: 0.75pt solid var(--r-accent);
+  border-radius: 2pt;
+  padding: 0.5pt 4pt;
+  align-self: center;
+}
+.ps-status {
+  margin-left: auto;
+  font-size: 8pt;
+  font-weight: 700;
+  padding: 1pt 6pt;
+  border-radius: 8pt;
+  border: 0.75pt solid currentColor;
+  align-self: center;
+}
+.ps-status-done {
+  color: var(--r-pass);
+}
+.ps-status-snag {
+  color: var(--r-fail);
+}
+.ps-status-in-progress,
+.ps-status-proposed {
+  color: var(--r-marginal);
+}
+.report .ps-meta {
+  font-size: 8.5pt;
+  color: var(--r-ink-3);
+  margin: 0 0 4pt;
+}
+.ps-grid {
+  display: grid;
+  gap: 5pt;
+  margin: 2pt 0 6pt;
+}
+.ps-cols-1 {
+  grid-template-columns: minmax(0, 1fr);
+}
+.ps-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.ps-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.ps-figure {
+  margin: 0;
+  break-inside: avoid;
+}
+.ps-img {
+  position: relative;
+  background: var(--r-soft);
+  border-radius: 2pt;
+  overflow: hidden;
+}
+.ps-img img {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+}
+.ps-cols-1 .ps-img img {
+  width: auto;
+  height: auto;
+  max-height: 120mm;
+}
+.ps-cols-2 .ps-img img {
+  width: 100%;
+  height: 62mm;
+  object-fit: contain;
+}
+.ps-cols-3 .ps-img img {
+  width: 100%;
+  height: 46mm;
+  object-fit: contain;
+}
+/* Shown only until the label is burned into the pixels (or where no canvas exists). */
+.ps-label-overlay {
+  position: absolute;
+  left: 4pt;
+  bottom: 4pt;
+  background: rgb(16 21 28 / 0.72);
+  color: #fff;
+  font-size: 7.5pt;
+  font-weight: 600;
+  padding: 2pt 5pt;
+  border-radius: 1.5pt;
+}
+.ps-tag {
+  position: absolute;
+  top: 4pt;
+  left: 4pt;
+  background: rgb(255 255 255 / 0.92);
+  color: var(--r-ink);
+  font-size: 7.5pt;
+  font-weight: 700;
+  padding: 1pt 5pt;
+  border-radius: 2pt;
+}
+.ps-tag-after {
+  background: var(--r-pass);
+  color: #fff;
+}
+.ps-tag-during {
+  background: var(--r-marginal);
+  color: #fff;
+}
+.ps-figure figcaption {
+  font-size: 8pt;
+  color: var(--r-ink-2);
+  margin-top: 2pt;
+}
+.report .ps-noimage {
+  font-size: 8.5pt;
+  color: var(--r-ink-3);
+  border: 0.75pt dashed var(--r-rule);
+  padding: 8pt;
+  text-align: center;
+}
+.ps-desc p,
+.ps-desc ul {
+  margin-bottom: 4pt;
+}
+.report .ps-work {
+  font-size: 8.5pt;
+  color: var(--r-ink-2);
+}
+.ps-signoff {
+  display: grid;
+  grid-template-columns: auto 1fr 0.6fr;
+  gap: 10pt;
+  align-items: end;
+  font-size: 8.5pt;
+  margin-top: 6pt;
+  color: var(--r-ink-2);
+}
+.ps-sigline {
+  border-top: 0.75pt solid var(--r-ink);
+  padding-top: 2pt;
+  margin-top: 14pt;
+  font-size: 7.5pt;
+  color: var(--r-ink-3);
+}
+
+@media screen and (max-width: 639.98px) {
+  .ps-cols-2,
+  .ps-cols-3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ps-cols-2 .ps-img img,
+  .ps-cols-3 .ps-img img {
+    height: auto;
+    max-height: 70vw;
+  }
+  .ps-signoff {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

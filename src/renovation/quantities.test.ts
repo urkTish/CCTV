@@ -211,6 +211,7 @@ describe('room and project quantities', () => {
     const wall = q.order.find((o) => o.kind === 'paint-L' && o.colourId === 'col-ral-9001')!;
     expect(wall.net.value).toBeCloseTo(9.7146 * 2, 3);
     expect(wall.purchase.formula).toMatch(/19.43 L needed → 1 × 18 L \+ 2 × 1 L = 20 L/);
+    expect(wall.packs).toBe('1 × 18 L + 2 × 1 L');
     expect(wall.rooms).toEqual(['Bedroom', 'Bedroom 2']);
     const tiles = q.order.find((o) => o.kind === 'tiles')!;
     expect(tiles.purchase.value).toBe(30); // 120 tiles ÷ 4

@@ -72,6 +72,7 @@ export function QuantitiesSection({ derived, onNavigate }: RnSectionProps) {
                       <span className="font-mono font-semibold text-[var(--color-ink)]">
                         {num(o.purchase.value)} {o.purchase.unit}
                       </span>
+                      {o.packs && <span className="block text-xs text-[var(--color-ink-2)]">{o.packs}</span>}
                       <FigureExplain f={o.purchase} label={`${o.name} to buy`} />
                     </div>
                   </td>

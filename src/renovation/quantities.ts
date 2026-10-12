@@ -475,6 +475,8 @@ export interface OrderLine {
   readonly net: Figure;
   /** What to buy, rounded up to packs / boxes / bags. */
   readonly purchase: Figure;
+  /** Paint: the packs to buy, e.g. "1 × 18 L + 1 × 1 L". */
+  readonly packs: string | null;
   readonly rooms: readonly string[];
 }
 
@@ -509,10 +511,14 @@ export function projectQuantities(portal: PortalData, planOf: PlanLookup = () =>
     const roomNames = [...new Set(list.map((n) => portal.rooms.find((r) => r.id === n.roomId)?.name ?? n.roomId))];
     const net = figure(total, first.amount.unit, `Σ rooms = ${list.map((n) => num(n.amount.value)).join(' + ')} = ${num(total)} ${first.amount.unit}`, list.flatMap((n) => n.amount.constants));
     let purchase: Figure;
+    let packs: string | null = null;
     switch (first.kind) {
-      case 'paint-L':
-        purchase = mat ? choosePacks(total, mat.packSizesL, lib).figure : net;
+      case 'paint-L': {
+        const c = mat ? choosePacks(total, mat.packSizesL, lib) : null;
+        purchase = c ? c.figure : net;
+        packs = c && c.packs.length ? c.packs.map((x) => `${x.count} × ${num(x.sizeL)} L`).join(' + ') : null;
         break;
+      }
       case 'tiles': {
         const per = mat?.tilesPerBox ?? null;
         purchase = per ? figure(ceilSafe(total / per), 'boxes', `Boxes = ceil(${num(total)} tiles ÷ ${per} per box) = ${ceilSafe(total / per)}`) : net;
@@ -536,6 +542,7 @@ export function projectQuantities(portal: PortalData, planOf: PlanLookup = () =>
       kind: first.kind,
       net,
       purchase,
+      packs,
       rooms: roomNames,
     });
   }

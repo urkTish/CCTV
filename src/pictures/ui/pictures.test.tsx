@@ -124,7 +124,7 @@ describe('picture-section editor', () => {
     expect(latest[0]!.images).toHaveLength(1);
   });
 
-  it('evidence photos get a role and a date taken; Mark done sets the date', async () => {
+  it('evidence photos get a role and a date taken; Mark done takes the After photo date', async () => {
     render(<Harness kind="actual" />);
     fireEvent.click(screen.getByRole('button', { name: 'Add the first item' }));
     const file = new File([jpegWithGps()], 'after.jpg', { type: 'image/jpeg', lastModified: Date.UTC(2026, 9, 20, 12) });
@@ -134,7 +134,8 @@ describe('picture-section editor', () => {
     expect(screen.getByText('Actual photo — before · 20 Oct 2026')).toBeTruthy();
     fireEvent.change(screen.getByLabelText('Shows'), { target: { value: 'after' } });
     fireEvent.click(screen.getByRole('button', { name: 'Mark done' }));
-    expect(latest[0]).toMatchObject({ status: 'done', doneOn: '2026-10-12' });
+    // Marked done on the After photo's date, not on the day the engineer clicks.
+    expect(latest[0]).toMatchObject({ status: 'done', doneOn: '2026-10-20' });
     expect(latest[0]!.images[0]!.role).toBe('after');
   });
 });

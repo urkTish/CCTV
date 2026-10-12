@@ -42,7 +42,7 @@ export function ConceptsSection({ portal, onPortal, derived, onNavigate }: RnSec
     );
   const printable = concepts.filter(hasContent).length;
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 print:hidden">
       <Card
         title="Concept chapter"
         subtitle="Each section prints in the proposal as its title, then the picture(s), then the description — in the order below."
@@ -87,7 +87,7 @@ export function CompletionSection({ portal, onPortal, derived, onNavigate, proje
 
   if (!report || !model) {
     return (
-      <div className="grid gap-4">
+      <div className="grid gap-4 print:hidden">
         <Card title="Create the completion report">
           <p className="text-sm text-[var(--color-ink-2)]">
             One click makes a photo report from the proposal: one item per concept section, and one per room with work in the bill of quantities that no concept section covers. Titles, descriptions, room and BOQ links and the survey’s before photos are filled in, so
@@ -194,11 +194,13 @@ export function CompletionSection({ portal, onPortal, derived, onNavigate, proje
       </div>
 
       {final ? (
+        <div className="print:hidden">
         <Notice kind="info" title="This report is Final">
           Return it to draft to change its items; the next issue gets the next revision letter.
         </Notice>
+        </div>
       ) : (
-        <>
+        <div className="grid gap-4 print:hidden">
           <Card title="Project summary" subtitle="Optional words under the generated facts (items completed, snags, dates, who did the work).">
             <Text
               label="Summary"
@@ -226,7 +228,7 @@ export function CompletionSection({ portal, onPortal, derived, onNavigate, proje
               }
             />
           </div>
-        </>
+        </div>
       )}
 
       <div className="overflow-x-auto rounded-card bg-[var(--color-surface-3)] p-2 sm:p-6 print:overflow-visible print:bg-transparent print:p-0">

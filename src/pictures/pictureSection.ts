@@ -376,3 +376,16 @@ export const completionReportSchema = z
   })
   .strict();
 export type CompletionReport = z.infer<typeof completionReportSchema>;
+
+/** The date to record when an item is marked done: the latest After photo's date, else today. */
+export function doneDateFor(s: PictureSection, today: string): string {
+  const dates = s.images.filter((i) => i.role === 'after' && i.takenOn).map((i) => i.takenOn!).sort();
+  return dates[dates.length - 1] ?? today;
+}
+
+/** What is outstanding on a snag: a line starting "Snag:" in the description, else its first line. */
+export function snagNote(s: PictureSection): string {
+  const lines = s.description.split('\n').map((l) => l.replace(BULLET, '').trim()).filter(Boolean);
+  const tagged = lines.find((l) => /^snag\b[:\s-]*/i.test(l));
+  return (tagged ? tagged.replace(/^snag\b[:\s-]*/i, '') : lines[0]) ?? '';
+}

@@ -210,3 +210,29 @@ Decisions in ASSUMPTIONS 15. CCTV engine, data files and
 | RN-P5 | Proposal: print the by-trade BOQ as an appendix (today: Admin only, the proposal says "on request"); render the T4 mood-board layout (3 × 3 cells) from Claude's answer — today the portal prints its own palette chips and the materials list. | pending |
 | RN-P6 | Ctrl K jump palette: list renovation sections, rooms and defects (it lists the CCTV sections and locations; choosing one switches to the CCTV line). | pending |
 | RN-P7 | Checks not done: a real phone (Chromium touch emulation only), browsers other than Chromium, a real image model's output (placeholder images were used), a real client timing the questionnaire. | pending |
+
+## Concept sections and photo report (2026-10-12)
+
+Brief: `docs/backlog-concept-and-completion-reports.md` (owner: start now).
+Decisions in ASSUMPTIONS 16. CCTV engine, data files and
+`buildBillOfMaterials` untouched; no new dependencies.
+
+| # | Task | Verification | Status |
+|---|---|---|---|
+| PR1 | Reusable picture-section block: strict schema (title, 1–6 pictures with caption / role / date taken, layout 1-up / 2-up / before-after, rich-text description, room and BOQ / scope links, status, done-on / by, sign-off tick), pure helpers (add, move, duplicate, remove, roles, columns, labels, rich text, bullets, EXIF date) | `src/pictures/pictureSection.test.ts` (16) | done |
+| PR2 | Editor: add, reorder (drag handle, up / down buttons, Alt + ↑ / ↓), duplicate, delete with Undo, upload button + drag-and-drop, compression and metadata stripping on import, captions, roles, dates, links, Mark done / snag | jsdom `src/pictures/ui/pictures.test.tsx` (4 editor tests); Chromium 1440 / 380, light / dark | done |
+| PR3 | Proposal Concept chapter (renovation; `ConceptChapter` reusable by civil and maintenance): Title → Picture(s) → Description, "Concept / Illustrative" burned in for print, no section split across pages; Admin → Renovation → Concepts with a status | jsdom (DOM order, label); unit (model carries concepts); Chromium: 5 sections with placeholder renders, reordered by keyboard, buttons and mouse drag, printed (18 pages; every plate on one page) | done |
+| PR4 | Completion / photo report: one-click creation from the proposal (concept items + uncovered rooms + general works, before photos pre-filled), cover, project summary, completed items with before / during / after, dates and who, outstanding snags, client sign-off per item and at the end; Draft / Final with stamp and revisions; Admin → Renovation → Completion report with a status, Overview tile | unit `src/renovation/completion.test.ts`; jsdom (create, mark done / snag, Final blocked); Chromium: Draft and Final PDFs (8 pages each) | done |
+| PR5 | Backward compatibility: optional data; old CCTV project / workspace and a Phase 1 renovation workspace (written by fe10261) re-save byte for byte; round trip with concepts and a completion report; tampered field refused with its path | `completion.test.ts` (4 file tests) | done |
+| PR6 | Draft cover on page 1 (Phase 1 print bug found in this check) | Chromium PDFs: cover on page 1 for draft and final, proposal and completion report | done |
+| PR7 | Close-out: README, ASSUMPTIONS 16, HANDOFF, about-the-portal-services, backlog status; tsc, lint, tests, build | Real output in HANDOFF | done |
+
+### Pending
+
+| # | What is left | Status |
+|---|---|---|
+| PR-P1 | Use the block in the CCTV report and in the civil / maintenance lines when they are built (maintenance service report: fault → repair → result; the renovation before / after gallery). | pending |
+| PR-P2 | Arabic for the editor and the printed chapter / report text (the burned-in labels already follow the proposal language; the rest is English, as for the Phase 1 Admin — RN-P2). | pending |
+| PR-P3 | Checks not done: a real phone (Chromium touch emulation only; drag reorder is desktop-only — phones use the buttons), browsers other than Chromium, dropping files from a real OS file manager (the drop zone was checked in Chromium with a synthetic DataTransfer: highlight on dragover, picture imported on drop), auto-scroll while dragging a section past the window edge (headless Chromium does not auto-scroll; the buttons and Alt + ↑ / ↓ cover long lists). | pending |
+| PR-P4 | Owner to confirm ASSUMPTIONS 16.7 (what becomes a completion item; creating from a draft proposal allowed with a warning). | pending |
+

@@ -192,3 +192,44 @@
     color: #5b6878;
   }
 }
+
+/*
+ * The renovation covers carry a hero picture and, on a draft, the ribbon: in
+ * print they are tightened so the whole cover fits on page 1 (before, a draft
+ * cover spilled to page 2 and left page 1 with the ribbon alone).
+ */
+@media print {
+  .rn-report .report-cover.rn-cover {
+    min-height: 236mm;
+  }
+  .rn-cover .cover-logo {
+    margin-top: 6mm;
+  }
+  .rn-report .report-cover .cover-title {
+    margin: 10mm 0 3mm;
+  }
+  .rn-cover .cover-band {
+    margin: 6mm 0;
+  }
+  .rn-hero img {
+    max-height: 88mm;
+  }
+  /*
+   * Chromium pushed the whole cover to page 2 when the in-flow Draft ribbon
+   * preceded the logo, even with room to spare (checked by printing to PDF
+   * with and without each element). Taking the ribbon out of the flow, with
+   * the logo set clear of it, keeps the draft cover on page 1.
+   */
+  .rn-cover > div {
+    position: relative;
+  }
+  .rn-cover .report-draft-ribbon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+  .rn-cover .report-draft-ribbon + .cover-logo {
+    margin-top: 14mm;
+  }
+}

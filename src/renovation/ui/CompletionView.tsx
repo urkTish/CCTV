@@ -15,7 +15,7 @@ import type { ReactNode } from 'react';
 
 import { COMPANY_NAME, LOGO_INTRINSIC, LOGO_LIGHT_URL } from '../../brand.ts';
 import { PictureSectionPrint, RichText } from '../../pictures/ui/PictureSectionPrint.tsx';
-import { SECTION_STATUS_LABEL, type PictureSection } from '../../pictures/pictureSection.ts';
+import { SECTION_STATUS_LABEL, snagNote, type PictureSection } from '../../pictures/pictureSection.ts';
 import { longDate } from '../../report/reportModel.ts';
 import { SignOff } from '../../report/SignOff.tsx';
 import type { CompletionModel } from '../completion.ts';
@@ -136,7 +136,7 @@ export function CompletionView({ model: m, items }: { model: CompletionModel; it
                               {fig(s)} — {s.title || 'Untitled'}
                             </td>
                             <td>{m.roomName(s.roomId) || '—'}</td>
-                            <td>{s.description.split('\n').find((l) => l.trim())?.replace(/^\s*[-•*]\s+/, '') ?? '—'}</td>
+                            <td>{snagNote(s) || '—'}</td>
                           </tr>
                         ))}
                       </tbody>

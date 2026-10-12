@@ -21,6 +21,7 @@ import { Button, EmptyState, Notice } from '../../ui/primitives.tsx';
 import {
   addImage,
   addSection,
+  doneDateFor,
   duplicateSection,
   exifDateTaken,
   IMAGE_ROLE_LABEL,
@@ -356,8 +357,8 @@ function SectionCard({
         >
           <Icon name="grip" size={18} />
         </span>
-        <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-control border border-[var(--color-accent)] px-1.5 font-mono text-xs font-bold text-[var(--color-accent)]">{n}</span>
-        <div className="order-last w-full min-w-0 sm:order-none sm:w-auto sm:flex-1">
+        <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:flex-1">
+          <span className="inline-flex h-7 min-w-7 shrink-0 items-center justify-center rounded-control border border-[var(--color-accent)] px-1.5 font-mono text-xs font-bold text-[var(--color-accent)]">{n}</span>
           <label htmlFor={titleId} className="sr-only">
             Title of {noun.toLowerCase()} {n}
           </label>
@@ -369,11 +370,11 @@ function SectionCard({
             maxLength={200}
             placeholder={kind === 'concept' ? 'Title, e.g. “Living room — feature wall”' : 'Title of the completed item'}
             onChange={(e) => set({ title: e.currentTarget.value.slice(0, 200) })}
-            className="w-full rounded-control border border-transparent bg-transparent px-2 py-1.5 text-base font-semibold text-[var(--color-ink)] hover:border-[var(--color-border)] focus:border-[var(--color-accent)] focus:outline-none"
+            className="min-w-0 flex-1 rounded-control border border-[var(--color-border)] bg-transparent px-2 py-1.5 text-base font-semibold text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none sm:border-transparent sm:hover:border-[var(--color-border)]"
           />
         </div>
         <div className="w-36 shrink-0">
-          <Select<SectionStatus> label={`Status of ${noun.toLowerCase()} ${n}`} hideLabel value={s.status} options={SECTION_STATUSES.map((v) => ({ value: v, label: SECTION_STATUS_LABEL[v] }))} onChange={(v) => set({ status: v, doneOn: v === 'done' && !s.doneOn ? today : s.doneOn })} />
+          <Select<SectionStatus> label={`Status of ${noun.toLowerCase()} ${n}`} hideLabel value={s.status} options={SECTION_STATUSES.map((v) => ({ value: v, label: SECTION_STATUS_LABEL[v] }))} onChange={(v) => set({ status: v, doneOn: v === 'done' && !s.doneOn ? doneDateFor(s, today) : s.doneOn })} />
         </div>
         <div className="ms-auto flex items-center">
           <span data-move-up>
@@ -469,7 +470,7 @@ function SectionCard({
                   {s.images.length ? 'add more pictures' : 'upload pictures'}
                 </label>
               </p>
-              <p className="text-xs text-[var(--color-ink-3)]">JPEG or PNG · location data is removed and large pictures are reduced</p>
+              <p className="text-xs text-[var(--color-ink-3)]">JPEG or PNG · location data is removed and large pictures are reduced{kind === 'actual' ? ' · the date taken is kept' : ''}</p>
               <input
                 id={fileId}
                 type="file"
@@ -554,7 +555,7 @@ function SectionCard({
               <Check label="Print a client sign-off line under this item" checked={s.signOff} onChange={(v) => set({ signOff: v })} />
               {s.status !== 'done' && (
                 <div className="flex flex-wrap gap-2">
-                  <Button size="sm" icon="check" onClick={() => set({ status: 'done', doneOn: s.doneOn ?? today })}>
+                  <Button size="sm" icon="check" onClick={() => set({ status: 'done', doneOn: s.doneOn ?? doneDateFor(s, today) })}>
                     Mark done
                   </Button>
                   {s.status !== 'snag' && (

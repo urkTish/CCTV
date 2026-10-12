@@ -160,11 +160,23 @@ simple items; they are not designed by the portal.
 6. **Proposal:** before the site survey the client sees a **price range,
    "subject to survey"**; the firm price follows the survey. Two rounds of design
    changes are included free.
+7. **Concepts in the proposal:** the engineer can add *concept sections* — a
+   title, a picture brought from outside (a photo, a drawing or a render) and a
+   short description — printed in the proposal's **Concept** chapter as title,
+   picture, description, each picture labelled **"Concept / Illustrative"**.
+8. **Completion / photo report at handover:** made in one click from the
+   proposal, so nothing is typed twice. For every item it shows the actual
+   **before / during / after** photos with the date each was taken, who did the
+   work and its status; outstanding **snags** are listed at the end, and the
+   client signs off per item (optional) and at the end. It is issued Final with
+   the company stamp, like the proposal.
 
 **How to talk about it:**
 - Say "illustrative visuals", never "photos of your finished home". The finishes
   schedule and the bill of quantities are what is contracted, not the pictures.
 - Furniture in the pictures is "for illustration, not included".
+- Concept pictures are ideas, not promises; completion-report photos are the
+  evidence ("actual photo" and the date are printed on each).
 - Do not quote a price from the questionnaire: it gives the client an estimate
   of areas and working days only.
 - The rates in the portal today are **sample rates** until ContracTech enters its

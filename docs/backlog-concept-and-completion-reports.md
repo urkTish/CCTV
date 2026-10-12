@@ -1,7 +1,16 @@
 # Backlog: concept sections in proposals, and photo completion reports
 
-**Status:** queued by the owner on 2026-10-12. Start after Renovation Phase 1 is
-done.
+**Status:** PARTIALLY DONE (2026-10-12) — built for the **renovation** line:
+the reusable picture-section block (`src/pictures/`), the proposal's Concept
+chapter (Admin → Renovation → Concepts) and the completion / photo report
+(Admin → Renovation → Completion report). All three acceptance criteria below
+are met for renovation and were checked in Chromium (see TASKS "Concept
+sections and photo report", decisions in ASSUMPTIONS 16). **Not done yet:**
+civil and maintenance (those lines do not exist yet; the block and the
+`ConceptChapter` are ready for them), the CCTV report, the maintenance service
+report and the renovation before / after gallery rebuilt on the block, and
+Arabic for the editor and printed text (TASKS PR-P1 … PR-P4).
+Queued by the owner on 2026-10-12.
 **Applies to:** civil works, maintenance and renovation proposals and reports.
 CCTV may adopt it later.
 

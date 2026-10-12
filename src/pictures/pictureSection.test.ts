@@ -4,6 +4,8 @@ import { photoFromBytes, hasExif } from '../renovation/photos.ts';
 import {
   addImage,
   addSection,
+  doneDateFor,
+  snagNote,
   completionReportSchema,
   duplicateSection,
   exifDateTaken,
@@ -124,6 +126,24 @@ describe('picture section: creating and editing', () => {
     expect(hasContent(s)).toBe(false);
     expect(hasContent({ ...s, description: 'x' })).toBe(true);
     expect(statusCounts([s, { ...s, status: 'done' }, { ...s, status: 'snag' }])).toEqual({ proposed: 0, 'in-progress': 1, done: 1, snag: 1 });
+  });
+});
+
+describe('completion helpers', () => {
+  it('dates a done item by its latest After photo, else today', () => {
+    let s = newPictureSection('i', 'actual');
+    expect(doneDateFor(s, '2026-10-12')).toBe('2026-10-12');
+    s = addImage(s, { ...img, role: 'before', takenOn: '2026-09-01' });
+    s = addImage(s, { ...img, role: 'after', takenOn: '2026-11-03' });
+    s = addImage(s, { ...img, role: 'after', takenOn: '2026-11-02' });
+    expect(doneDateFor(s, '2026-10-12')).toBe('2026-11-03');
+  });
+
+  it('takes the snag note from a "Snag:" line, else the first line', () => {
+    const s = newPictureSection('i', 'actual');
+    expect(snagNote({ ...s, description: 'Cove light.\n\n- 2700 K\n- Snag: two light patches' })).toBe('two light patches');
+    expect(snagNote({ ...s, description: '- Grout colour wrong\n- re-do' })).toBe('Grout colour wrong');
+    expect(snagNote(s)).toBe('');
   });
 });
 

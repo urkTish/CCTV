@@ -267,8 +267,8 @@ decisions in `ASSUMPTIONS.md` section 15.
   *Open project* opens a renovation intake as a draft in which every value the
   client did not measure is marked "assumed from client intake — please
   confirm". Sections: Overview · Client & intake · Site map (shared) · Survey ·
-  Specification · Library · Quantities · BOQ & programme · Visuals · Proposal;
-  Settings adds the renovation market, pricing, milestones and legal texts.
+  Specification · Library · Quantities · BOQ & programme · Visuals · Concepts ·
+  Proposal · Completion report; Settings adds the renovation market, pricing, milestones and legal texts.
 - **Every number traced** — quantities follow spec section 6 (worked examples
   reproduced by `src/renovation/quantities.test.ts`), each with "How this was
   calculated"; rules of thumb are Unverified; prices come only from library
@@ -283,8 +283,30 @@ decisions in `ASSUMPTIONS.md` section 15.
   with the stamp only once the safety checklist, the survey, own rates and the
   legal texts are done; before the survey the client sees a price range,
   "subject to survey".
+- **Concepts** (added 2026-10-12, `docs/backlog-concept-and-completion-reports.md`)
+  — the proposal's *Concept* chapter. *Add concept section*, then upload or
+  drop a photo, drawing or render (JPEG / PNG; location data removed and large
+  pictures reduced on import, kept in the project file), give it a title and a
+  description (a blank line = new paragraph, "- " = bullet, or the *Bullets*
+  button), and optionally link a room and a BOQ line. Layouts: 1-up, 2-up or a
+  before / after pair, with a caption under each picture. Reorder by dragging
+  the handle, with the arrow buttons, or Alt + ↑ / ↓; duplicate; delete (with
+  Undo). Each section prints as **title → picture(s) → description**, labelled
+  "Concept / Illustrative", and a page break never separates a title from its
+  picture.
+- **Completion report** — the photo report at handover. *Create completion
+  report from the proposal* makes one item per concept section and one per room
+  with BOQ work no concept covers, pre-filled with the title, description, links
+  and the survey's before photo. Add the actual during / after photos (their
+  date taken is read before the metadata is removed, and printed as "Actual
+  photo · date"), set who did the work, and *Mark done* or *Mark as snag*. It
+  prints a cover, a project summary, the completed items, the outstanding snags
+  and the client acceptance block (and, if ticked, a sign-off line per item).
+  Draft / Final, the stamp and revision letters work as for the proposal; Final
+  needs every item done or snag and every done item to have an After photo.
 
-Code: `src/renovation/` (pure modules + tests) and `src/renovation/ui/`.
+Code: `src/renovation/` (pure modules + tests) and `src/renovation/ui/`; the
+reusable picture-section block (model, editor, print) is in `src/pictures/`.
 
 ## Not built (yet)
 

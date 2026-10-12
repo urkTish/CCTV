@@ -1,3 +1,59 @@
+# Handoff — Concept sections and the completion / photo report (cloud session 9, 2026-10-12) — DONE for renovation
+
+Owner request: implement `docs/backlog-concept-and-completion-reports.md` now.
+Tasks PR1–PR7 and pending PR-P1…PR-P4 in TASKS ("Concept sections and photo
+report"); decisions in ASSUMPTIONS 16. **tsc 0, eslint 0, 706 / 706 tests
+(45 files; 30 new in 3 files), vite build ok** (chunk-size advisory only). No
+new dependencies. CCTV engine, data files and `buildBillOfMaterials` untouched.
+
+- **Where the code is:** `src/pictures/` — the reusable block:
+  `pictureSection.ts` (schema + pure helpers, incl. the EXIF date reader and
+  the rich-text parser), `ui/PictureSectionEditor.tsx`,
+  `ui/PictureSectionPrint.tsx` (plate + `ConceptChapter`), `ui/useBurnedLabel.ts`,
+  `ui/pictures.css`. Renovation wiring: `src/renovation/completion.ts`
+  (generate from the proposal, Final blockers, status, report model),
+  `ui/PictureSections.tsx` (Concepts and Completion report sections),
+  `ui/CompletionView.tsx` (the A4 report), `derive.ts` (two new sections and
+  statuses), `proposal.ts` / `ProposalView.tsx` (Concept chapter),
+  `model.ts` (two optional fields), `AdminApp.tsx`, `OverviewSections.tsx`
+  (Completion tile), `icons.tsx` (image, clipboard-check, grip, arrows).
+- **How to use:** Admin → Renovation → **Concepts** → *Add concept section* →
+  upload or drop a picture, title, description, optional room / BOQ link →
+  reorder (drag the handle, arrows, Alt + ↑ / ↓) → **Proposal** shows the
+  Concept chapter. At handover: **Completion report** → *Create completion
+  report from the proposal* → add the after (and during) photos, *Mark done* /
+  *Mark as snag*, who did it, optional per-item sign-off → *Issue as final…*.
+- **Files:** `concepts` and `completion` are optional; earlier files re-save byte
+  for byte (new fixture `src/renovation/fixtures/phase1-renovation-workspace.json`,
+  written by fe10261's own code).
+- **Checked in real Chromium** (Playwright; 1440 px and 380 px; light and
+  dark): the Phase 1 test apartment, proposal returned to draft → 5 concept
+  sections with placeholder renders (one 2-up, one before/after pair, captions,
+  room and BOQ links) → reordered by Alt + ↑ ×4, an arrow button and a mouse
+  drag → proposal printed (Draft, 18 pages; every concept's title, pictures and
+  last description line on one page; labels burned in) → Final again → completion
+  report created (6 items, before photos pre-filled) → 7 after / during photos
+  with EXIF dates and GPS imported (dates read, EXIF gone, ≤ 1600 px) → 5 done,
+  1 snag, per-item sign-off → Draft and Final PDFs (8 pages each, snag table and
+  plate, stamp on Final only) → saved file reopened on a phone (reorder with
+  44 px buttons, upload) and in dark mode; file drop with a synthetic
+  DataTransfer. No console errors, no failed requests, no horizontal scroll.
+- **Fixed from the browser check:** a Phase 1 bug — a renovation Draft's cover
+  printed on page 2 with page 1 holding only the ribbon (ASSUMPTIONS 16.11);
+  the completion screen's controls printed above the report; *Mark done* took
+  today instead of the After photo's date; the snag table showed the first
+  description line instead of the "Snag:" line; on a phone the title sat under
+  the status and buttons.
+- **Not checked:** a real phone, other browsers, files dropped from a real OS
+  file manager, auto-scroll while dragging past the window edge, Arabic text in
+  the editor (labels only), real photos (placeholders drawn by a script).
+- **Owner to confirm:** ASSUMPTIONS 16.7 (what becomes a completion item;
+  allowed from a draft proposal with a warning).
+- **Resume at:** TASKS PR-P1…PR-P4. Scripts, screenshots and PDFs in the session
+  scratchpad (`photoreport/`), not in the repo.
+
+---
+
 # Handoff — Renovation Phase 1 (cloud session 8, 2026-10-12) — COMPLETE, with pending items
 
 Owner request: build Phase 1 ("See your renovated home", renovation only) of

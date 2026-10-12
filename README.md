@@ -14,6 +14,11 @@ on the optional OpenStreetMap view on the site map (off by default).
 
 ## Running it
 
+On Windows, double-click `start-app.cmd`. It starts the app and opens
+http://localhost:5173 in the browser; keep its window open while you use the app.
+(In PowerShell, plain `npm` is blocked by the default script policy; use
+`npm.cmd run dev` instead.)
+
 Node 20 or newer.
 
 ```

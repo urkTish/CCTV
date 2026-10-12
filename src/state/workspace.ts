@@ -17,6 +17,7 @@
 import { z } from 'zod';
 
 import { clientAnswersSchema, type ClientAnswers } from '../client/intakeTypes.ts';
+import { portalSchema, type PortalData } from '../renovation/model.ts';
 import { engineerProfileSchema, type EngineerProfile } from './engineerProfile.ts';
 import { parseProjectFile, serializeProjectFile, PROJECT_FILE_FORMAT, type OpenedProject } from './projectFile.ts';
 import type { Project, UnitSystemState } from './projectTypes.ts';
@@ -52,6 +53,12 @@ export interface ProjectExtras {
   readonly validityDays: number;
   readonly report: ReportState;
   readonly intake: IntakeProvenance | null;
+  /**
+   * The shared spine and the other service lines (client and site details,
+   * rooms, photos, the renovation line). Optional and absent for a CCTV-only
+   * project, so such a project's file is byte for byte what it was before.
+   */
+  readonly portal?: PortalData;
 }
 
 export const DEFAULT_EXTRAS: ProjectExtras = {
@@ -89,6 +96,7 @@ export const extrasSchema = z
       })
       .strict()
       .nullable(),
+    portal: portalSchema.optional(),
   })
   .strict();
 
@@ -100,8 +108,12 @@ export function hasExtras(extras: ProjectExtras): boolean {
 export function serializeWorkspace(project: Project, units: UnitSystemState, extras: ProjectExtras): string {
   const projectText = serializeProjectFile(project, units);
   if (!hasExtras(extras)) return projectText;
+  // The portal is written in its schema's key order, so a file saved, opened
+  // and saved again is byte-identical whatever order the app built it in.
+  const portal = extras.portal ? portalSchema.safeParse(extras.portal) : null;
+  const out = portal?.success ? { ...extras, portal: portal.data } : extras;
   return JSON.stringify(
-    { format: WORKSPACE_FORMAT, v: WORKSPACE_VERSION, project: JSON.parse(projectText) as unknown, extras },
+    { format: WORKSPACE_FORMAT, v: WORKSPACE_VERSION, project: JSON.parse(projectText) as unknown, extras: out },
     null,
     2,
   );

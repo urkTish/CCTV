@@ -1,0 +1,223 @@
+{
+  "format": "contractech-cctv-workspace",
+  "v": 1,
+  "project": {
+    "format": "contractech-cctv-project",
+    "v": 1,
+    "name": "Old depot",
+    "units": "imperial",
+    "locations": [
+      {
+        "id": "loc-1",
+        "name": "Gate",
+        "purpose": "recognise",
+        "geometry": {
+          "mountHeightMetres": 3,
+          "targetDistanceMetres": 10,
+          "nearestDistanceMetres": null,
+          "widthSource": "width",
+          "sceneWidthMetres": 6,
+          "roomLengthMetres": 12,
+          "roomWidthMetres": 6,
+          "targetHeightMetres": 1.6,
+          "overlapAllowance": 0.15
+        },
+        "environment": {
+          "site": "outdoor",
+          "mountSurface": "wall",
+          "vandalExposure": false,
+          "ambientLight": "low-light",
+          "colourAtNight": false,
+          "strongBacklight": false,
+          "specialConditions": []
+        },
+        "requirements": {
+          "audioRequired": false,
+          "twoWayAudioRequired": false,
+          "requiredCapabilities": [],
+          "budgetTier": "any",
+          "retentionDays": 30,
+          "motionLevel": "moderate",
+          "lensPreference": "any",
+          "ptzAcceptable": false,
+          "cameraCount": 1,
+          "codec": "h265plus",
+          "fps": 25
+        }
+      },
+      {
+        "id": "loc-2",
+        "name": "Yard",
+        "purpose": "recognise",
+        "geometry": {
+          "mountHeightMetres": 3,
+          "targetDistanceMetres": 10,
+          "nearestDistanceMetres": null,
+          "widthSource": "width",
+          "sceneWidthMetres": 6,
+          "roomLengthMetres": 12,
+          "roomWidthMetres": 6,
+          "targetHeightMetres": 1.6,
+          "overlapAllowance": 0.15
+        },
+        "environment": {
+          "site": "outdoor",
+          "mountSurface": "wall",
+          "vandalExposure": false,
+          "ambientLight": "low-light",
+          "colourAtNight": false,
+          "strongBacklight": false,
+          "specialConditions": []
+        },
+        "requirements": {
+          "audioRequired": false,
+          "twoWayAudioRequired": false,
+          "requiredCapabilities": [],
+          "budgetTier": "any",
+          "retentionDays": 30,
+          "motionLevel": "moderate",
+          "lensPreference": "any",
+          "ptzAcceptable": false,
+          "cameraCount": 1,
+          "codec": "h265plus",
+          "fps": 25
+        }
+      }
+    ],
+    "activeLocationId": "loc-1",
+    "settings": {
+      "storage": {
+        "schedule": {
+          "mode": "continuous",
+          "motionDutyPercent": 30,
+          "scheduledHoursPerDay": 12
+        },
+        "raidLevel": "none",
+        "hotSpare": false,
+        "headroomPercent": 20,
+        "formattingOverheadPercent": 5
+      },
+      "recorder": {
+        "channelHeadroomPercent": 25,
+        "monitors": 1,
+        "outputResolution": "1080p",
+        "formFactor": "any",
+        "redundantPsu": false,
+        "poeMode": "auto",
+        "analytics": null,
+        "pinnedNvrId": null
+      },
+      "switches": {
+        "poeHeadroomPercent": 25,
+        "management": "auto",
+        "uplink": "auto",
+        "sparePortsPercent": 20
+      },
+      "cabling": {
+        "rackDropMetres": 3,
+        "serviceLoopMetres": 3,
+        "wastePercent": 10,
+        "boxMetres": 305,
+        "connectorsPerRun": 2,
+        "patchCordsPerRun": 1,
+        "routingFactor": 1.3,
+        "unplacedRunMetres": 40
+      }
+    },
+    "sitePlan": {
+      "image": null,
+      "calibration": {
+        "a": {
+          "x": 0,
+          "y": 0
+        },
+        "b": {
+          "x": 400,
+          "y": 0
+        },
+        "metres": 20
+      },
+      "devices": [],
+      "routes": [],
+      "layout": {
+        "canvas": {
+          "widthMetres": 20,
+          "heightMetres": 16
+        },
+        "gridMetres": 1,
+        "shapes": [
+          {
+            "kind": "rect",
+            "id": "area-1",
+            "cx": 200,
+            "cy": 160,
+            "width": 200,
+            "height": 120,
+            "rotationDeg": 0,
+            "stroke": "wall",
+            "fill": "building"
+          },
+          {
+            "kind": "text",
+            "id": "label-1",
+            "x": 200,
+            "y": 160,
+            "text": "Depot",
+            "sizePx": 10.8,
+            "rotationDeg": 0
+          }
+        ]
+      }
+    }
+  },
+  "extras": {
+    "clientName": "Northgate",
+    "clientContact": "",
+    "prices": {
+      "camera:x": 10
+    },
+    "currency": "SAR",
+    "validityDays": 30,
+    "report": {
+      "status": "draft",
+      "finalisedOn": null,
+      "preparedBy": null
+    },
+    "intake": {
+      "submittedOn": "2026-10-04",
+      "answers": {
+        "site": {
+          "premises": "shop",
+          "siteName": "",
+          "contactName": "",
+          "contactPhone": "",
+          "contactEmail": ""
+        },
+        "areas": [
+          {
+            "id": "a1",
+            "name": "Area 1",
+            "cameraCount": 1,
+            "see": "activity",
+            "place": "outdoor",
+            "night": "some",
+            "distance": "5to15"
+          }
+        ],
+        "recording": {
+          "retention": "1m",
+          "recorderPlace": "unsure",
+          "cabinetSpace": "any",
+          "power": "auto"
+        },
+        "budget": "balanced"
+      },
+      "assumed": {
+        "loc-1": {
+          "geometry.mountHeightMetres": "Not asked."
+        }
+      },
+      "clientWords": {}
+    }
+  }
+}

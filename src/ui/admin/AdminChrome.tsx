@@ -82,7 +82,9 @@ export function AdminHeader({
   onOpenNav,
   onOpenPalette,
   navOpen,
+  title = 'CCTV Design',
 }: {
+  title?: string;
   projectName: string;
   units: UnitSystemState;
   onUnits: (u: UnitSystemState) => void;
@@ -107,7 +109,7 @@ export function AdminHeader({
         </button>
         <Logo />
         <div className="min-w-0 md:border-l md:border-[var(--color-border)] md:pl-3">
-          <h1 className="sr-only text-sm leading-tight font-semibold text-[var(--color-ink)] md:not-sr-only">CCTV Design</h1>
+          <h1 className="sr-only text-sm leading-tight font-semibold text-[var(--color-ink)] md:not-sr-only">{title}</h1>
           <p className="hidden truncate text-xs text-[var(--color-ink-3)] md:block" title={projectName}>
             {projectName}
           </p>
@@ -139,7 +141,7 @@ function NavItem({
   collapsed,
   onClick,
 }: {
-  def: SectionDef;
+  def: SectionDef<string>;
   status: SectionStatus | null;
   active: boolean;
   collapsed: boolean;
@@ -181,7 +183,7 @@ function NavItem({
   );
 }
 
-export function AdminNav({
+export function AdminNav<I extends string = SectionId>({
   active,
   statuses,
   onNavigate,
@@ -191,16 +193,19 @@ export function AdminNav({
   onCloseDrawer,
   onOpenPalette,
   sections,
+  lineSwitcher,
 }: {
-  active: SectionId;
-  statuses: Readonly<Record<SectionId, SectionStatus>>;
-  onNavigate: (id: SectionId) => void;
+  active: I | 'settings';
+  statuses: Readonly<Partial<Record<I, SectionStatus>>>;
+  onNavigate: (id: I | 'settings') => void;
   collapsed: boolean;
   onToggleCollapsed: () => void;
   drawerOpen: boolean;
   onCloseDrawer: () => void;
   onOpenPalette: () => void;
-  sections: readonly SectionDef[];
+  sections: readonly SectionDef<I>[];
+  /** The service-line switcher (CCTV / Renovation), shown above the sections. */
+  lineSwitcher?: ReactNode;
 }) {
   const ref = useRef<HTMLElement | null>(null);
   useEffect(() => {
@@ -236,12 +241,13 @@ export function AdminNav({
             Jump to…
           </button>
         </div>
+        {lineSwitcher}
         <ol className="grid flex-1 content-start gap-0.5 overflow-y-auto p-2">
           {sections.map((def) => (
             <NavItem
               key={def.id}
               def={def}
-              status={statuses[def.id]}
+              status={statuses[def.id] ?? null}
               active={active === def.id}
               collapsed={collapsed}
               onClick={() => onNavigate(def.id)}
@@ -269,7 +275,7 @@ export function AdminNav({
 }
 
 /** The frame of one section: heading with status, description, content, previous / next. */
-export function SectionFrame({
+export function SectionFrame<I extends string = SectionId>({
   def,
   status,
   actions,
@@ -279,14 +285,14 @@ export function SectionFrame({
   next,
   onNavigate,
 }: {
-  def: SectionDef;
+  def: SectionDef<I | 'settings'>;
   status: SectionStatus | null;
   actions?: ReactNode;
   children: ReactNode;
   headingRef: RefObject<HTMLHeadingElement | null>;
-  prev: SectionDef | null;
-  next: SectionDef | null;
-  onNavigate: (id: SectionId) => void;
+  prev: SectionDef<I> | null;
+  next: SectionDef<I> | null;
+  onNavigate: (id: I) => void;
 }) {
   return (
     <div className="@container/section">

@@ -1,0 +1,171 @@
+/*
+ * The renovation proposal, on top of report.css (same paper, header, type and
+ * watermark). Named page "rn" so the printed footer says "Renovation proposal".
+ */
+
+.rn-report {
+  page: rn;
+}
+
+@page rn {
+  size: A4;
+  margin: 14mm 14mm 16mm;
+
+  @bottom-left {
+    content: 'ContracTech — Renovation proposal';
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 8pt;
+    color: #5b6878;
+  }
+  @bottom-right {
+    content: 'Page ' counter(page) ' of ' counter(pages);
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 8pt;
+    color: #5b6878;
+  }
+}
+
+.rn-hero {
+  margin: 0 0 6mm;
+}
+.rn-hero img {
+  display: block;
+  width: 100%;
+  max-height: 95mm;
+  object-fit: cover;
+  border-radius: 2pt;
+}
+.rn-hero figcaption {
+  font-size: 8pt;
+  color: var(--r-ink-3);
+  margin-top: 3pt;
+}
+
+.rn-subject {
+  border-left: 3pt solid var(--r-marginal);
+  background: #fdf0dc;
+  padding: 4pt 8pt;
+  font-weight: 600;
+}
+
+/* Paint chips: the module's signature — colour field above, code tab below. */
+.rn-chips {
+  list-style: none !important;
+  padding: 0 !important;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6pt;
+  margin: 8pt 0;
+}
+.rn-chips li {
+  border: 0.75pt solid var(--r-rule);
+  border-radius: 3pt;
+  overflow: hidden;
+  break-inside: avoid;
+}
+.rn-chip-field {
+  display: block;
+  height: 26mm;
+}
+.rn-chip-tab {
+  display: grid;
+  gap: 1pt;
+  padding: 4pt 6pt;
+  border-top: 3pt solid;
+  font-size: 9pt;
+}
+
+.rn-room {
+  border-top: 1pt solid var(--r-rule);
+  padding-top: 8pt;
+  margin-top: 8pt;
+}
+.rn-room:first-of-type {
+  border-top: 0;
+  margin-top: 0;
+}
+.rn-pair {
+  margin: 4pt 0 8pt;
+  break-inside: avoid;
+}
+.rn-pair-images {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4pt;
+}
+.rn-pair-images > div {
+  position: relative;
+}
+.rn-pair-images img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 2pt;
+}
+.rn-tag {
+  position: absolute;
+  top: 4pt;
+  left: 4pt;
+  background: rgb(255 255 255 / 0.9);
+  color: var(--r-ink);
+  font-size: 7.5pt;
+  font-weight: 700;
+  padding: 1pt 5pt;
+  border-radius: 2pt;
+}
+.rn-tag-after {
+  background: var(--r-accent);
+  color: #fff;
+}
+.rn-pair figcaption {
+  font-size: 8pt;
+  color: var(--r-ink-2);
+  margin-top: 3pt;
+}
+
+.rn-scope {
+  break-inside: avoid;
+  margin-bottom: 6pt;
+}
+
+.rn-group th,
+.rn-group td {
+  background: var(--r-soft);
+  font-weight: 700;
+}
+
+.rn-dot {
+  display: inline-block;
+  width: 9pt;
+  height: 9pt;
+  border: 0.75pt solid rgb(0 0 0 / 0.25);
+  border-radius: 2pt;
+  vertical-align: -1pt;
+  margin-right: 4pt;
+}
+
+.rn-gantt {
+  --gantt-ink: #10151c;
+  --gantt-ink-3: #5b6878;
+  --gantt-grid: #e3e8ef;
+  --gantt-bar: #536ffc;
+  --gantt-milestone: #10151c;
+}
+
+@media screen and (max-width: 639.98px) {
+  .rn-chips {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .rn-pair-images {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* The CCTV spec tables fix the row-header width; the BOQ and schedule here do not. */
+.rn-report .report-table tbody th {
+  width: auto;
+}
+.rn-report .rn-boq td:nth-child(2) {
+  width: 55%;
+}

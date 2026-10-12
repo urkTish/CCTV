@@ -2,8 +2,10 @@
 
 **Audience:** the owner of ContracTech (decisions), and the programmer who will
 build it (detail).
-**Status:** design proposal for review, dated 2026-10-12. Nothing in this
-document has been built yet. No code is included.
+**Status:** design proposal dated 2026-10-12. **Phase 1 (section 12, renovation
+MVP) was built on 2026-10-12** with the owner's decisions recorded in section
+14.1; what was built, and what is still pending, is listed in `TASKS.md`
+("Renovation Phase 1") and `HANDOFF.md`. Phases 2 and 3 are not built.
 **Builds on:** the CCTV portal as described in `README.md`,
 `docs/about-the-portal-services.md` and `docs/uiux-audit-and-ia.md`.
 
@@ -1793,6 +1795,28 @@ automatically.
 | Q12 | **Maintenance SLA commitments** | Fixed tiers (e.g. Gold/Silver/Bronze) or per contract | Two or three fixed tiers you can staff 24/7 realistically; do not publish P1 targets you cannot meet |
 | Q13 | **Use of before/after in marketing** | Never; with consent; anonymised | With separate explicit consent, address removed |
 | Q14 | **Civil scope ceiling** | Up to villas; small buildings too | Up to villas and extensions at first; multi-storey only with a partner structural consultancy named in the proposal |
+
+### 14.1 Decisions recorded for Phase 1
+
+The owner's instruction of 2026-10-12 was to *go with the recommendations*.
+How each was applied in the Phase 1 build:
+
+| # | Decision | Status |
+|---|---|---|
+| Q1 | Offline MVP: no backend, no accounts. The client's answers and photos travel as a file (or a link without photos); the engineer saves and sends files. | Decided (owner: go with recommendations, 2026-10-12) |
+| Q2 | Manual image mode (A/B): the portal exports the brief pack (prompts T0–T5, T8, before photos, swatch sheet) as a ZIP or as copy-able prompts; the engineer runs Claude and an image tool outside the portal; the "after" images are imported back, paired with their before photo by file name, labelled and recorded with provenance. No provider is chosen or integrated yet. | Decided (owner: go with recommendations, 2026-10-12) |
+| Q3 | Consent screen in the client wizard (photo use required to send photos; marketing separate); location (GPS/EXIF) metadata stripped on the phone before anything is saved; nothing uploaded anywhere. Retention period and provider agreements wait for a backend. | Decided (owner: go with recommendations, 2026-10-12) |
+| Q4 | Gulf market defaults, all editable in Settings: currency SAR, VAT 15%, metric; client wizard in English and Arabic with right-to-left layout. These are assumptions to confirm (ASSUMPTIONS 15). | Decided (owner: go with recommendations, 2026-10-12) |
+| Q5 | Rate and colour library editable in Admin (Library) and kept per project, with a per-browser default. Seeded with a small sample library: every seeded rate and material is marked "SAMPLE — replace with your rates" and Unverified; colours are seeded with RAL Classic codes only (a public standard), never invented manufacturer codes. A proposal priced with any sample rate cannot be issued as Final. | Decided (owner: go with recommendations, 2026-10-12) |
+| Q6 | Placeholder legal texts (warranty, terms, visuals disclaimer, exclusions) marked "PLACEHOLDER — to be approved by a lawyer"; Final is blocked until the engineer ticks "approved by a lawyer" and the placeholder line is removed. | Decided (owner: go with recommendations, 2026-10-12) |
+| Q7 | Renovation first. Civil works and maintenance are not built (the client start page shows them as "coming soon"). | Decided (owner: go with recommendations, 2026-10-12) |
+| Q8 | Before the survey confirms every assumed value the client sees a price range only (estimate −10% … +20%, rounded, settings), "subject to survey", with no unit rates; a firm price after the survey. | Decided (owner: go with recommendations, 2026-10-12) |
+| Q9 | 2 free design rounds (setting), printed in the proposal; a counter of rounds used in Visuals. | Decided (owner: go with recommendations, 2026-10-12) |
+| Q10 | Furniture in visuals is captioned "Furniture for illustration, not included" unless the client keeps their own. | Decided (owner: go with recommendations, 2026-10-12) |
+| Q11 | No margin shown to business development. There are no roles yet (one Admin surface), so this is only noted: rates are all-in and no build-up or margin is displayed anywhere. | Decided (owner: go with recommendations, 2026-10-12) |
+| Q12 | Not applicable to Phase 1 (maintenance). | Open |
+| Q13 | Marketing use of before/after images only with a separate, explicit consent, recorded as a flag on the client (default off). | Decided (owner: go with recommendations, 2026-10-12) |
+| Q14 | Not applicable to Phase 1 (civil). | Open |
 
 ---
 

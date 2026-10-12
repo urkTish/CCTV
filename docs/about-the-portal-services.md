@@ -3,7 +3,10 @@
 **Audience:** a business-development agent who needs to know what ContracTech
 offers through this portal, what the portal can and cannot do, and how to talk
 about it accurately.
-**Status:** describes the platform as built on 2026-10-09 (`main` branch).
+**Status:** describes the platform as built on 2026-10-09 (`main` branch), plus
+the **Renovation** service line added on 2026-10-12 (section 3.5). Civil works and
+maintenance are designed (`docs/civil-mep-renovation-portal-spec.md`) but **not
+built** — do not offer them through the portal yet.
 
 ---
 
@@ -122,6 +125,51 @@ How drafts and finals differ:
 - **OpenStreetMap reference view** (optional, needs internet): measure real
   distances on a street map to set the scale.
 
+### 3.5 Renovation (new, Phase 1 — built 2026-10-12)
+
+**What the client gets:** their own rooms shown before and after (illustrative
+pictures), a colour and finishes schedule with real colour codes, a priced bill
+of quantities, a programme in working days, a payment schedule, and a branded
+proposal — the promise *"see it before we build it, and see why it costs what it
+costs"*.
+
+**Services covered in Phase 1:** repainting (walls, ceilings), floor tiling and
+skirting, wall tiling (e.g. bathrooms, splashbacks), gypsum board ceilings,
+removal of old floors and wall tiles, and simple items priced per unit (doors,
+downlights, crack repair). Kitchens, joinery and MEP upgrades can be added as
+simple items; they are not designed by the portal.
+
+**How it works:**
+1. **Client questionnaire** (`#/client`, tile *Renovate*; English or Arabic):
+   the place, what they want done, each room with 2–6 phone photos (with a
+   short "how to take good photos" card), a style quiz (six styles, six colour
+   palettes, how it should feel), budget band, timing and an optional floor
+   plan. The client agrees to the use of their photos (marketing use is a
+   separate, optional tick). **Location data is removed from photos on the
+   phone, and nothing is uploaded** — the client sends a file.
+2. **Engineer survey:** rooms, openings, surfaces and condition, defects (with
+   photos and recommended action) and a **mandatory safety checklist**.
+3. **Specification** of finishes from ContracTech's own library of products,
+   colours and rates.
+4. **Quantities, BOQ and programme** are calculated by the portal with the
+   formula shown for every number (litres of paint and cans, tiles and boxes,
+   adhesive and grout bags, gypsum boards, skips).
+5. **"After" pictures:** the portal prepares a brief pack for an AI image tool;
+   the engineer runs it and brings the pictures back. Every picture is labelled
+   **"Illustrative visual — for guidance only"** and checked by the engineer.
+6. **Proposal:** before the site survey the client sees a **price range,
+   "subject to survey"**; the firm price follows the survey. Two rounds of design
+   changes are included free.
+
+**How to talk about it:**
+- Say "illustrative visuals", never "photos of your finished home". The finishes
+  schedule and the bill of quantities are what is contracted, not the pictures.
+- Furniture in the pictures is "for illustration, not included".
+- Do not quote a price from the questionnaire: it gives the client an estimate
+  of areas and working days only.
+- The rates in the portal today are **sample rates** until ContracTech enters its
+  own; a proposal cannot be issued as Final with sample rates.
+
 ---
 
 ## 4. What the engineering covers
@@ -196,6 +244,14 @@ needs a properly engineered multi-camera system.
   treated as a draft until confirmed.
 - **Runs locally in a browser.** It is not a public website. It works offline
   except for the optional street-map view.
+- **Renovation (Phase 1) limits:** renovation only — no civil works (new
+  rooms, extensions, villas) and no maintenance contracts yet; the "after"
+  pictures are produced outside the portal by the engineer with an image tool
+  and are illustrative only; the portal does not design structure, electrical
+  distribution or fire systems; the engineer's screens and the printed proposal
+  are in English (the client questionnaire is English and Arabic); market
+  defaults (SAR, VAT 15%) and the legal texts must be confirmed by the owner and
+  a lawyer before the first Final proposal.
 
 ---
 

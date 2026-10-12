@@ -229,6 +229,9 @@ export function AdminApp({ intakePayload = null, renovationPayload = null }: { i
   // --- actions ------------------------------------------------------------------
   const navigate = useCallback((id: AdminSection) => {
     focusOnNavigate.current = true;
+    // A section belongs to one line (the Site map and Settings are shared): follow it, e.g. from Ctrl K.
+    if (id.startsWith('rn-')) setLine('renovation');
+    else if (id !== 'map' && id !== 'settings') setLine('cctv');
     setSection(id);
     setDrawerOpen(false);
     if (id === 'locations') setLocationView('list');
@@ -307,10 +310,10 @@ export function AdminApp({ intakePayload = null, renovationPayload = null }: { i
       setExtras(d.extras);
       setLine('renovation');
       setSection('rn-overview');
-      return {
-        ok: true,
-        message: `Opened ${fileName}: the client's renovation intake “${d.project.name}” is now a draft with ${r.intake.photos.length} photo(s). ${d.assumedTotal} values were assumed from the client's answers and are marked “assumed from client intake — please confirm”.`,
-      };
+      const message = `Opened ${fileName}: the client's renovation intake “${d.project.name}” is now a draft with ${r.intake.photos.length} photo(s). ${d.assumedTotal} values were assumed from the client's answers and are marked “assumed from client intake — please confirm”.`;
+      // The section changes, so the file bar that would show the message is replaced: say it in the banner.
+      setBanner({ kind: 'info', text: message });
+      return { ok: true, message };
     }
     if (formatOf(text) === INTAKE_FILE_FORMAT) {
       const r = parseIntakeFile(text);
@@ -330,9 +333,11 @@ export function AdminApp({ intakePayload = null, renovationPayload = null }: { i
     setUnits(r.opened.units);
     setExtras(r.extras);
     const rnOnly = r.extras.portal?.lines.includes('renovation') && !r.extras.portal.lines.includes('cctv');
+    const message = [`Opened ${fileName}.`, ...r.notices, r.extras.portal?.renovation && !rnOnly ? 'It includes a renovation line — switch to it with the service-line switcher.' : ''].filter(Boolean).join(' ');
+    if (line !== (rnOnly ? 'renovation' : 'cctv') || section !== (rnOnly ? 'rn-overview' : 'overview')) setBanner({ kind: 'info', text: message });
     setLine(rnOnly ? 'renovation' : 'cctv');
     setSection(rnOnly ? 'rn-overview' : 'overview');
-    return { ok: true, message: [`Opened ${fileName}.`, ...r.notices, r.extras.portal?.renovation ? 'It includes a renovation line — switch to it with the service-line switcher.' : ''].filter(Boolean).join(' ') };
+    return { ok: true, message };
   };
 
   const jump = (t: JumpTarget) => {

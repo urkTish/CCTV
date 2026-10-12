@@ -1,4 +1,4 @@
-# ContracTech — CCTV Design (Hikvision, phases 1 and 2)
+# ContracTech — CCTV Design (Hikvision, phases 1 and 2) and Renovation (Phase 1)
 
 An internal tool an integrator uses in front of a client. Enter the physical facts
 of a location — mounting height, distance, scene width, environment, and what the
@@ -8,6 +8,13 @@ spec sheet and the engineering numbers that justify the choice.
 Phase 2 sizes the rest of the system for the whole project: storage and drives,
 the recorder (NVR), PoE switches, the CAT6 plan with real box counts, a site-map
 editor to place it all on a floor plan, and a bill of materials function.
+
+Since 2026-10-12 the same portal also carries a **Renovation** service line
+(Phase 1 of `docs/civil-mep-renovation-portal-spec.md`): a phone-first client
+questionnaire in English and Arabic, an engineer survey, a library of
+materials, colours and rates, a traced quantity engine, a bill of quantities and
+programme, a visual brief pack for AI "after" images, and a branded renovation
+proposal. See [Renovation](#renovation-phase-1) below.
 
 Runs offline. No backend, and no runtime network calls unless the engineer turns
 on the optional OpenStreetMap view on the site map (off by default).
@@ -240,7 +247,50 @@ immediately rather than quietly.
 Scraping hikvision.com at runtime is deliberately not done: it would be fragile,
 would block offline use, and may breach their terms.
 
+## Renovation (Phase 1)
+
+Built 2026-10-12 from section 12 of `docs/civil-mep-renovation-portal-spec.md`,
+with the owner's decisions recorded in its section 14.1 and the build's own
+decisions in `ASSUMPTIONS.md` section 15.
+
+- **Client** — `#/client` is a start page with a tile per service (CCTV first;
+  Build and Fix say "coming soon"). `#/client/renovation` (add `?lang=ar` for
+  Arabic) is an 8-step questionnaire: the place, what to do, rooms (size by
+  pictogram, typed or "the engineer will measure", 2–6 photos each with a
+  photo guide, problems), a style quiz (six style vignettes, six paint-chip
+  palettes, moods, floors, love / hate, must stay), budget band, timing, floor
+  plan, and review with consent. Photos have their location data removed on
+  the phone. The client saves a file (answers + photos + plan) or copies a link
+  (answers only). The CCTV wizard is now at `#/client/cctv`.
+- **Admin** — a *Service line* switcher at the top of the navigation (CCTV /
+  Renovation; a CCTV project can add a renovation line and vice versa).
+  *Open project* opens a renovation intake as a draft in which every value the
+  client did not measure is marked "assumed from client intake — please
+  confirm". Sections: Overview · Client & intake · Site map (shared) · Survey ·
+  Specification · Library · Quantities · BOQ & programme · Visuals · Proposal;
+  Settings adds the renovation market, pricing, milestones and legal texts.
+- **Every number traced** — quantities follow spec section 6 (worked examples
+  reproduced by `src/renovation/quantities.test.ts`), each with "How this was
+  calculated"; rules of thumb are Unverified; prices come only from library
+  rates. The seeded library is a **sample**: replace its rates before a Final.
+- **Visuals** — *Export brief pack* writes a ZIP of prompts (T0–T5, T8), the
+  before photos, a portal-drawn swatch sheet, a README and a manifest. Run them
+  in Claude and an image tool, save results as `view-1-v1.jpg` …, and *Import
+  after images*: they pair with their before photo, get a burned-in
+  "Illustrative" label and their provenance, and go through an 8-point QA
+  before approval. Nothing is uploaded anywhere.
+- **Proposal** — A4, same branding as the CCTV report, Draft watermark, Final
+  with the stamp only once the safety checklist, the survey, own rates and the
+  legal texts are done; before the survey the client sees a price range,
+  "subject to survey".
+
+Code: `src/renovation/` (pure modules + tests) and `src/renovation/ui/`.
+
 ## Not built (yet)
+
+- Renovation pending items (Arabic Admin / proposal, editable prompt
+  templates, phasing, drawn openings): see TASKS "Renovation Phase 1".
+- Civil works and maintenance lines (spec Phases 2 and 3).
 
 - PDF floor plans (needs a PDF renderer; export the page as PNG/JPG instead).
 - Sending the client intake to ContracTech automatically (there is no backend;

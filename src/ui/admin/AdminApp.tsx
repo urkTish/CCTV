@@ -67,8 +67,9 @@ import { BomSection } from './BomSection.tsx';
 import { JumpPalette, type JumpTarget } from './JumpPalette.tsx';
 import { LocationDetail, LocationList } from './LocationsSection.tsx';
 import { OverviewSection } from './OverviewSection.tsx';
-import { collectWarnings, SECTIONS, sectionDef, sectionStatuses, SETTINGS_SECTION, type SectionDef, type SectionId, type SectionStatus } from './sections.ts';
+import { collectWarnings, isToolSection, SECTIONS, sectionDef, sectionStatuses, SETTINGS_SECTION, type SectionDef, type SectionId, type SectionStatus } from './sections.ts';
 import { ReportSection } from './ReportSection.tsx';
+import { CameraFinderSection } from './CameraFinderSection.tsx';
 import { SettingsSection } from './SettingsSection.tsx';
 
 const NAV_PREF_KEY = 'contractech-cctv.nav-collapsed';
@@ -355,8 +356,10 @@ export function AdminApp({ intakePayload = null, renovationPayload = null }: { i
   const pos = order.indexOf(section);
   const prev = pos > 0 ? navSections[pos - 1]! : null;
   const next = pos >= 0 && pos < order.length - 1 ? navSections[pos + 1]! : null;
+  // Settings and the camera finder are tools outside either line's workflow: no status, no previous / next.
+  const isTool = !section.startsWith('rn-') && isToolSection(section as SectionId);
   const currentDef: SectionDef<AdminSection | 'settings'> =
-    section === 'settings' ? SETTINGS_SECTION : onRenovation || section.startsWith('rn-') ? rnSectionDef(section as RnSectionId) : sectionDef(section as SectionId);
+    section === 'settings' ? SETTINGS_SECTION : isTool ? sectionDef(section as SectionId) : onRenovation || section.startsWith('rn-') ? rnSectionDef(section as RnSectionId) : sectionDef(section as SectionId);
   const assumedHere = extras.intake?.assumed[location.id];
   const intake = extras.intake;
   const toConfirmTotal = [...assumedByLocation.values()].reduce((a, b) => a + b, 0);
@@ -553,6 +556,9 @@ export function AdminApp({ intakePayload = null, renovationPayload = null }: { i
         />
       );
       break;
+    case 'finder':
+      content = <CameraFinderSection />;
+      break;
     case 'settings':
       content = (
         <SettingsSection profile={profile} onProfile={setProfile}>
@@ -742,7 +748,7 @@ export function AdminApp({ intakePayload = null, renovationPayload = null }: { i
               </Notice>
             </div>
           )}
-          <SectionFrame def={currentDef} status={section === 'settings' ? null : (navStatuses[section] ?? null)} actions={actions} headingRef={headingRef} prev={section === 'settings' ? null : prev} next={section === 'settings' ? null : next} onNavigate={navigate}>
+          <SectionFrame def={currentDef} status={isTool ? null : (navStatuses[section] ?? null)} actions={actions} headingRef={headingRef} prev={isTool ? null : prev} next={isTool ? null : next} onNavigate={navigate}>
             {content}
           </SectionFrame>
           {onRenovation ? (

@@ -10,7 +10,7 @@ import type { SiteMapView } from '../../engine/siteMapView.ts';
 import type { Project } from '../../state/projectTypes.ts';
 import { Icon, type IconName } from '../icons.tsx';
 import { Dialog } from '../primitives.tsx';
-import { SECTIONS, SETTINGS_SECTION, type SectionId } from './sections.ts';
+import { FINDER_SECTION, SECTIONS, SETTINGS_SECTION, type SectionId } from './sections.ts';
 
 export type JumpTarget =
   | { readonly kind: 'section'; readonly id: SectionId }
@@ -43,7 +43,7 @@ export function JumpPalette({
 
   const entries = useMemo<Entry[]>(
     () => [
-      ...[...SECTIONS, SETTINGS_SECTION].map((s) => ({ key: `s-${s.id}`, label: s.label, hint: 'Section', icon: s.icon, target: { kind: 'section' as const, id: s.id } })),
+      ...[...SECTIONS, FINDER_SECTION, SETTINGS_SECTION].map((s) => ({ key: `s-${s.id}`, label: s.label, hint: 'Section', icon: s.icon, target: { kind: 'section' as const, id: s.id } })),
       ...project.locations.map((l) => ({
         key: `l-${l.id}`,
         label: l.name,

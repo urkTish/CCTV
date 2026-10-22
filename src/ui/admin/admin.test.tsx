@@ -144,3 +144,19 @@ describe('Bill of materials', () => {
     expect(screen.getAllByText('120.00').length).toBeGreaterThan(0);
   });
 });
+
+describe('Camera finder', () => {
+  it('lists cameras compatible with a chosen recorder, and the nearest ones when nothing fits', () => {
+    render(<App />);
+    fireEvent.click(within(nav()).getByRole('button', { name: /^Camera finder/ }));
+    expect(screen.getByRole('heading', { level: 2, name: 'Camera finder' })).toBeTruthy();
+    fireEvent.change(screen.getByLabelText('Recorder (NVR)'), { target: { value: 'ds-9632ni-m8' } });
+    fireEvent.change(screen.getByLabelText('Lens'), { target: { value: '4' } });
+    fireEvent.change(screen.getByLabelText('Minimum resolution'), { target: { value: '8' } });
+    expect(screen.getByRole('heading', { name: /compatible camera/ })).toBeTruthy();
+    expect(screen.getAllByText(/8 MP · 4 mm/).length).toBeGreaterThan(0);
+    fireEvent.change(screen.getByLabelText('Minimum resolution'), { target: { value: '12' } });
+    expect(screen.getByRole('heading', { name: 'No camera meets every requirement' })).toBeTruthy();
+    expect(screen.getByText(/highest resolution is 8 MP/)).toBeTruthy();
+  });
+});

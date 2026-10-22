@@ -310,3 +310,14 @@ body {
   --color-plan-paving: #eee8dc;
   --color-plan-hatch: #8794a4;
 }
+
+/* Renovation programme (Gantt) in Admin: theme-aware; the printed proposal sets
+   its own paper colours (renovation/ui/proposal.css). */
+.gantt {
+  --gantt-ink: var(--color-ink);
+  --gantt-ink-3: var(--color-ink-3);
+  --gantt-grid: var(--color-border);
+  --gantt-bar: var(--color-brand);
+  --gantt-milestone: var(--color-ink);
+  max-width: 64rem;
+}

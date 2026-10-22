@@ -28,7 +28,7 @@ const choose = (text: string) => fireEvent.click(screen.getByText(text, { exact:
 
 describe('client intake wizard', () => {
   it('walks six plain-language steps and saves an intake file the engine can read', async () => {
-    window.history.replaceState(null, '', '/#/client');
+    window.history.replaceState(null, '', '/#/client/cctv');
     let saved = '';
     // jsdom has no object URLs; capture what would be downloaded.
     Object.defineProperty(URL, 'createObjectURL', {
@@ -94,7 +94,7 @@ describe('client intake wizard', () => {
   });
 
   it('keeps the answers in this browser if the page is reloaded', () => {
-    window.history.replaceState(null, '', '/#/client');
+    window.history.replaceState(null, '', '/#/client/cctv');
     const first = render(<App />);
     fireEvent.change(screen.getByLabelText('Name of the site'), { target: { value: 'Kept' } });
     first.unmount();

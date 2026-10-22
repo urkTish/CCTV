@@ -1,3 +1,119 @@
+# Handoff — Concept sections and the completion / photo report (cloud session 9, 2026-10-12) — DONE for renovation
+
+Owner request: implement `docs/backlog-concept-and-completion-reports.md` now.
+Tasks PR1–PR7 and pending PR-P1…PR-P4 in TASKS ("Concept sections and photo
+report"); decisions in ASSUMPTIONS 16. **tsc 0, eslint 0, 706 / 706 tests
+(45 files; 30 new in 3 files), vite build ok** (chunk-size advisory only). No
+new dependencies. CCTV engine, data files and `buildBillOfMaterials` untouched.
+
+- **Where the code is:** `src/pictures/` — the reusable block:
+  `pictureSection.ts` (schema + pure helpers, incl. the EXIF date reader and
+  the rich-text parser), `ui/PictureSectionEditor.tsx`,
+  `ui/PictureSectionPrint.tsx` (plate + `ConceptChapter`), `ui/useBurnedLabel.ts`,
+  `ui/pictures.css`. Renovation wiring: `src/renovation/completion.ts`
+  (generate from the proposal, Final blockers, status, report model),
+  `ui/PictureSections.tsx` (Concepts and Completion report sections),
+  `ui/CompletionView.tsx` (the A4 report), `derive.ts` (two new sections and
+  statuses), `proposal.ts` / `ProposalView.tsx` (Concept chapter),
+  `model.ts` (two optional fields), `AdminApp.tsx`, `OverviewSections.tsx`
+  (Completion tile), `icons.tsx` (image, clipboard-check, grip, arrows).
+- **How to use:** Admin → Renovation → **Concepts** → *Add concept section* →
+  upload or drop a picture, title, description, optional room / BOQ link →
+  reorder (drag the handle, arrows, Alt + ↑ / ↓) → **Proposal** shows the
+  Concept chapter. At handover: **Completion report** → *Create completion
+  report from the proposal* → add the after (and during) photos, *Mark done* /
+  *Mark as snag*, who did it, optional per-item sign-off → *Issue as final…*.
+- **Files:** `concepts` and `completion` are optional; earlier files re-save byte
+  for byte (new fixture `src/renovation/fixtures/phase1-renovation-workspace.json`,
+  written by fe10261's own code).
+- **Checked in real Chromium** (Playwright; 1440 px and 380 px; light and
+  dark): the Phase 1 test apartment, proposal returned to draft → 5 concept
+  sections with placeholder renders (one 2-up, one before/after pair, captions,
+  room and BOQ links) → reordered by Alt + ↑ ×4, an arrow button and a mouse
+  drag → proposal printed (Draft, 18 pages; every concept's title, pictures and
+  last description line on one page; labels burned in) → Final again → completion
+  report created (6 items, before photos pre-filled) → 7 after / during photos
+  with EXIF dates and GPS imported (dates read, EXIF gone, ≤ 1600 px) → 5 done,
+  1 snag, per-item sign-off → Draft and Final PDFs (8 pages each, snag table and
+  plate, stamp on Final only) → saved file reopened on a phone (reorder with
+  44 px buttons, upload) and in dark mode; file drop with a synthetic
+  DataTransfer. No console errors, no failed requests, no horizontal scroll.
+- **Fixed from the browser check:** a Phase 1 bug — a renovation Draft's cover
+  printed on page 2 with page 1 holding only the ribbon (ASSUMPTIONS 16.11);
+  the completion screen's controls printed above the report; *Mark done* took
+  today instead of the After photo's date; the snag table showed the first
+  description line instead of the "Snag:" line; on a phone the title sat under
+  the status and buttons.
+- **Not checked:** a real phone, other browsers, files dropped from a real OS
+  file manager, auto-scroll while dragging past the window edge, Arabic text in
+  the editor (labels only), real photos (placeholders drawn by a script).
+- **Owner to confirm:** ASSUMPTIONS 16.7 (what becomes a completion item;
+  allowed from a draft proposal with a warning).
+- **Resume at:** TASKS PR-P1…PR-P4. Scripts, screenshots and PDFs in the session
+  scratchpad (`photoreport/`), not in the repo.
+
+---
+
+# Handoff — Renovation Phase 1 (cloud session 8, 2026-10-12) — COMPLETE, with pending items
+
+Owner request: build Phase 1 ("See your renovated home", renovation only) of
+`docs/civil-mep-renovation-portal-spec.md`, going with the spec's
+recommendations (recorded in its section 14.1). Tasks RN1–RN12 and the pending
+list RN-P1–RN-P7 in TASKS.md; decisions in ASSUMPTIONS 15.
+**tsc 0, eslint 0, 676 / 676 tests (42 files; 74 new renovation tests in 7
+files), vite build ok** (chunk-size advisory only). No new dependencies. CCTV
+engine, data files and `buildBillOfMaterials` untouched.
+
+- **Where the code is:** `src/renovation/` — pure modules with tests
+  (`model.ts` spine + schemas, `library.ts`, `geometry.ts`, `quantities.ts`,
+  `boq.ts`, `programme.ts`, `intake.ts`, `briefs.ts`, `zip.ts`, `photos.ts`,
+  `derive.ts`, `proposal.ts`, `rnState.ts`) and `src/renovation/ui/` (wizard,
+  start page, Admin sections, proposal view). Wiring: `src/App.tsx`,
+  `src/ui/route.ts`, `src/ui/admin/AdminApp.tsx` (line switcher, sections),
+  `AdminChrome.tsx` / `sections.ts` (generic section ids), `SettingsSection.tsx`.
+- **Files:** the spine is an optional `extras.portal` in the workspace
+  envelope. Files written by the previous release open and re-save byte for byte
+  (fixtures in `src/renovation/fixtures/`, generated with a9feecd's own code).
+  The renovation intake is a new file format `contractech-renovation-intake`
+  (answers + photos + plan) or a `#/renovation-intake/…` link (no photos).
+- **Routes changed:** `#/client` is now the start page; the CCTV wizard is
+  `#/client/cctv` (its two tests now open that route, assertions unchanged).
+- **Checked in real Chromium** (Playwright; 1440 px and 380 px; light and dark;
+  English and Arabic): the client fills the questionnaire for a 3-room
+  apartment on a phone (4 photos carrying GPS EXIF, a floor plan) → the saved
+  file has no EXIF and 1600 px photos → Admin opens it as a draft with 15
+  assumed values → the client's plan is calibrated and a 5 × 4 m room drawn
+  over it measures 20.00 m² / 18.00 m and is linked to the living room →
+  survey (confirm, re-measure, a defect, safety checklist with a blocking Yes,
+  then actions) → spec → library → quantities → BOQ (totals checked by hand:
+  rooms sum 18,665.16, + 5% + 15% VAT = 22,538.18 SAR, sample rates) → brief
+  pack ZIP (19 files, `unzip -t` clean) → 4 placeholder after images imported
+  (3 paired by name, 1 by hand), labels burned in, QA, approve, select →
+  narrative pasted and reviewed → draft proposal printed to PDF (15 A4 pages)
+  → own rates, lawyer tick, engineer name → Final with stamp (14 pages) → saved
+  file reopens Final with the stamp and 4 pairs; the previous release's CCTV
+  workspace still opens on the CCTV line. No console errors, no failed
+  requests, no horizontal scroll on the phone.
+- **Fixed from the browser check:** palette chips truncated on a phone (plain
+  chips now); the room editor lacked the photo "taken from" select; room works
+  defaulted to bathroom work in every room; Gantt bar labels clipped and
+  invisible in dark mode; narrative headings ran into paragraphs; proposal BOQ
+  description column squeezed by a CCTV table rule; duplicate assumption lines;
+  the "Opened …" message was lost when opening a renovation file switched
+  section (now a banner); Ctrl K to a CCTV section from the renovation line
+  now switches line.
+- **Not checked:** a real phone (Chromium touch emulation only), other
+  browsers, a real AI image model (placeholder images drawn by a script), a
+  person timing the questionnaire, the Arabic copy by a native speaker.
+- **Owner to confirm (ASSUMPTIONS 15):** SAR / VAT 15% / Riyadh defaults,
+  payment milestones, the −10% … +20% pre-survey range, contingency 5%, the
+  legal texts (placeholders), the Arabic wording, replacing the sample rates.
+- **Resume at:** TASKS "Renovation Phase 1 → Pending" (RN-P1…RN-P7). Browser
+  scripts, screenshots, the sample brief pack and the sample proposal PDFs are
+  in the session scratchpad (`renovation/`), not in the repo.
+
+---
+
 # Handoff — site layout drawing
 
 ## Layout sized from the place (cloud session 7, 2026-10-06) — COMPLETE

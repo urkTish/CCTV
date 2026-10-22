@@ -4,12 +4,12 @@
  * it is made Final.
  */
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import { saveProfile, type EngineerProfile } from '../../state/engineerProfile.ts';
 import { Card, Notice, TextField } from '../primitives.tsx';
 
-export function SettingsSection({ profile, onProfile }: { profile: EngineerProfile; onProfile: (p: EngineerProfile) => void }) {
+export function SettingsSection({ profile, onProfile, children }: { profile: EngineerProfile; onProfile: (p: EngineerProfile) => void; children?: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const set = (patch: Partial<EngineerProfile>) => {
     const next = { ...profile, ...patch };
@@ -17,7 +17,7 @@ export function SettingsSection({ profile, onProfile }: { profile: EngineerProfi
     setError(saveProfile(next));
   };
   return (
-    <div className="grid max-w-2xl gap-4">
+    <div className={`grid gap-4 ${children ? 'max-w-5xl' : 'max-w-2xl'}`}>
       <Card title="Prepared by" subtitle="Printed on the report cover and in the sign-off block.">
         <div className="grid gap-3 sm:grid-cols-2">
           <TextField label="Your name" helper="As it should appear on the report." value={profile.name} autoComplete="name" onChange={(name) => set({ name: name.slice(0, 120) })} />
@@ -36,6 +36,7 @@ export function SettingsSection({ profile, onProfile }: { profile: EngineerProfi
           </div>
         )}
       </Card>
+      {children}
     </div>
   );
 }

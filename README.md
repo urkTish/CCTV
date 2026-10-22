@@ -1,4 +1,4 @@
-# ContracTech — CCTV Design (Hikvision, phases 1 and 2)
+# ContracTech — CCTV Design (Hikvision, phases 1 and 2) and Renovation (Phase 1)
 
 An internal tool an integrator uses in front of a client. Enter the physical facts
 of a location — mounting height, distance, scene width, environment, and what the
@@ -9,10 +9,22 @@ Phase 2 sizes the rest of the system for the whole project: storage and drives,
 the recorder (NVR), PoE switches, the CAT6 plan with real box counts, a site-map
 editor to place it all on a floor plan, and a bill of materials function.
 
+Since 2026-10-12 the same portal also carries a **Renovation** service line
+(Phase 1 of `docs/civil-mep-renovation-portal-spec.md`): a phone-first client
+questionnaire in English and Arabic, an engineer survey, a library of
+materials, colours and rates, a traced quantity engine, a bill of quantities and
+programme, a visual brief pack for AI "after" images, and a branded renovation
+proposal. See [Renovation](#renovation-phase-1) below.
+
 Runs offline. No backend, and no runtime network calls unless the engineer turns
 on the optional OpenStreetMap view on the site map (off by default).
 
 ## Running it
+
+On Windows, double-click `start-app.cmd`. It starts the app and opens
+http://localhost:5173 in the browser; keep its window open while you use the app.
+(In PowerShell, plain `npm` is blocked by the default script policy; use
+`npm.cmd run dev` instead.)
 
 Node 20 or newer.
 
@@ -235,7 +247,72 @@ immediately rather than quietly.
 Scraping hikvision.com at runtime is deliberately not done: it would be fragile,
 would block offline use, and may breach their terms.
 
+## Renovation (Phase 1)
+
+Built 2026-10-12 from section 12 of `docs/civil-mep-renovation-portal-spec.md`,
+with the owner's decisions recorded in its section 14.1 and the build's own
+decisions in `ASSUMPTIONS.md` section 15.
+
+- **Client** — `#/client` is a start page with a tile per service (CCTV first;
+  Build and Fix say "coming soon"). `#/client/renovation` (add `?lang=ar` for
+  Arabic) is an 8-step questionnaire: the place, what to do, rooms (size by
+  pictogram, typed or "the engineer will measure", 2–6 photos each with a
+  photo guide, problems), a style quiz (six style vignettes, six paint-chip
+  palettes, moods, floors, love / hate, must stay), budget band, timing, floor
+  plan, and review with consent. Photos have their location data removed on
+  the phone. The client saves a file (answers + photos + plan) or copies a link
+  (answers only). The CCTV wizard is now at `#/client/cctv`.
+- **Admin** — a *Service line* switcher at the top of the navigation (CCTV /
+  Renovation; a CCTV project can add a renovation line and vice versa).
+  *Open project* opens a renovation intake as a draft in which every value the
+  client did not measure is marked "assumed from client intake — please
+  confirm". Sections: Overview · Client & intake · Site map (shared) · Survey ·
+  Specification · Library · Quantities · BOQ & programme · Visuals · Concepts ·
+  Proposal · Completion report; Settings adds the renovation market, pricing, milestones and legal texts.
+- **Every number traced** — quantities follow spec section 6 (worked examples
+  reproduced by `src/renovation/quantities.test.ts`), each with "How this was
+  calculated"; rules of thumb are Unverified; prices come only from library
+  rates. The seeded library is a **sample**: replace its rates before a Final.
+- **Visuals** — *Export brief pack* writes a ZIP of prompts (T0–T5, T8), the
+  before photos, a portal-drawn swatch sheet, a README and a manifest. Run them
+  in Claude and an image tool, save results as `view-1-v1.jpg` …, and *Import
+  after images*: they pair with their before photo, get a burned-in
+  "Illustrative" label and their provenance, and go through an 8-point QA
+  before approval. Nothing is uploaded anywhere.
+- **Proposal** — A4, same branding as the CCTV report, Draft watermark, Final
+  with the stamp only once the safety checklist, the survey, own rates and the
+  legal texts are done; before the survey the client sees a price range,
+  "subject to survey".
+- **Concepts** (added 2026-10-12, `docs/backlog-concept-and-completion-reports.md`)
+  — the proposal's *Concept* chapter. *Add concept section*, then upload or
+  drop a photo, drawing or render (JPEG / PNG; location data removed and large
+  pictures reduced on import, kept in the project file), give it a title and a
+  description (a blank line = new paragraph, "- " = bullet, or the *Bullets*
+  button), and optionally link a room and a BOQ line. Layouts: 1-up, 2-up or a
+  before / after pair, with a caption under each picture. Reorder by dragging
+  the handle, with the arrow buttons, or Alt + ↑ / ↓; duplicate; delete (with
+  Undo). Each section prints as **title → picture(s) → description**, labelled
+  "Concept / Illustrative", and a page break never separates a title from its
+  picture.
+- **Completion report** — the photo report at handover. *Create completion
+  report from the proposal* makes one item per concept section and one per room
+  with BOQ work no concept covers, pre-filled with the title, description, links
+  and the survey's before photo. Add the actual during / after photos (their
+  date taken is read before the metadata is removed, and printed as "Actual
+  photo · date"), set who did the work, and *Mark done* or *Mark as snag*. It
+  prints a cover, a project summary, the completed items, the outstanding snags
+  and the client acceptance block (and, if ticked, a sign-off line per item).
+  Draft / Final, the stamp and revision letters work as for the proposal; Final
+  needs every item done or snag and every done item to have an After photo.
+
+Code: `src/renovation/` (pure modules + tests) and `src/renovation/ui/`; the
+reusable picture-section block (model, editor, print) is in `src/pictures/`.
+
 ## Not built (yet)
+
+- Renovation pending items (Arabic Admin / proposal, editable prompt
+  templates, phasing, drawn openings): see TASKS "Renovation Phase 1".
+- Civil works and maintenance lines (spec Phases 2 and 3).
 
 - PDF floor plans (needs a PDF renderer; export the page as PNG/JPG instead).
 - Sending the client intake to ContracTech automatically (there is no backend;

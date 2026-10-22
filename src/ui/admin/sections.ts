@@ -18,8 +18,8 @@ import type { StatusKind } from '../uiStyles.ts';
 
 export type SectionId = 'overview' | 'map' | 'locations' | 'recording' | 'network' | 'cabling' | 'bom' | 'report' | 'finder' | 'settings';
 
-export interface SectionDef {
-  readonly id: SectionId;
+export interface SectionDef<I extends string = SectionId> {
+  readonly id: I;
   readonly label: string;
   readonly short: string;
   readonly icon: IconName;

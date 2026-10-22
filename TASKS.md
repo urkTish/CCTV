@@ -174,3 +174,65 @@ add a fence or main gate later. Decisions in ASSUMPTIONS 13.11–13.14.
 | D10 | Grow later: *Canvas and grid* panel (Add margin on every side / one side; Advanced exact size and grid; remove canvas), readout "Canvas W × H m · grid G m" under the map, *Extend canvas to fit* notice when a shape reaches past the edge | jsdom tests | done — explicit button, not auto-extend while dragging (ASSUMPTIONS 13.14) |
 | D11 | Real-browser check: 10 × 6, 3 × 3, 120 × 80 m; fence + gate + car park in the margin; cameras and a drawn route; cable runs by hand; add margin / fit; old file opens unchanged; imperial; autosave; 1440 px and 380 px, light and dark | Screenshots in the session scratchpad (`autosize/`) | done — no console errors, no failed requests, no horizontal scroll; fixed two things it found (place label too small on a phone; margin input too wide) |
 | D12 | Close-out: README, ASSUMPTIONS, HANDOFF, TASKS; lint, test, build | Real output | done — see HANDOFF |
+
+---
+
+## Renovation Phase 1 — "See your renovated home" (2026-10-12)
+
+Brief: Phase 1 of `docs/civil-mep-renovation-portal-spec.md` (section 12), with
+the owner's decisions Q1–Q13 = the spec's recommendations (spec 14.1).
+Decisions in ASSUMPTIONS 15. CCTV engine, data files and
+`buildBillOfMaterials` untouched; no new dependencies.
+
+| # | Task | Verification | Status |
+|---|---|---|---|
+| RN1 | Shared spine: client, site, rooms, photos, service lines; optional `extras.portal` in the workspace envelope; line switcher (CCTV / Renovation) in Admin | Old project + workspace files written by the previous release (a9feecd) re-save byte for byte; round trip with a renovation line; strict-schema tests | done — `src/renovation/model.ts`, `spine.test.ts` (7) |
+| RN2 | Client start page (`#/client`, CCTV first) and the 8-step renovation questionnaire (`#/client/renovation`), phone-first, English + Arabic (RTL), photo guidance, style quiz with portal-drawn vignettes and paint-chip palettes, consent, GPS stripped; file / link handoff; opens in Admin as a draft with every assumed value flagged | jsdom (wizard walk, validation, EXIF gone, Arabic RTL, reload keeps answers); intake mapping unit tests; Chromium at 380 px EN + AR, light + dark | done — `RenovationWizard.tsx`, `ClientStart.tsx`, `intake.ts` (+ `intake.test.ts`, 9) |
+| RN3 | Engineer survey: rooms, geometry with assumed flags, openings, surfaces + condition 1–5, defects (crack banding, moisture, action, fix now, specialist, photo), room photos (tagged, before → view), survey details, mandatory safety checklist; blocking "Yes" without an action blocks Final; "same as previous room" | jsdom + derive tests; Chromium (3-room apartment) | done — `SurveySection.tsx`; room templates that pre-fill typical fields: **pending (RN-P4)** |
+| RN4 | Rooms from the drawn plan: closed shapes listed with area and perimeter; promote to a room or link to one; typed L × W override | Unit test (5 × 4 m rectangle → 20.00 m², 18.00 m); Chromium: drawn over the client's calibrated plan, 20 m² / 18 m matching the typed 5 × 4 m | done — openings / dimension-line tools linked to rooms: **pending (RN-P3)** |
+| RN5 | Library: materials (TDS data, packs, boxes, bags, boards), colours with codes, rates (source, date, validity, "may be out of date"), rule constants, each with source + Unverified; sample seed marked; per-project copy + browser default | Unit tests (no price without a library rate; seed flagged); jsdom; Chromium | done — `library.ts`, `LibrarySection.tsx` |
+| RN6 | Quantity engine: paint (coats, primer, rough factor, waste, pack choice), tiles (+ adhesive, grout formula, layout / cut-out / large-format waste, boxes), skirting, gypsum boards + angle, demolition debris + skips, simple items; traces | Unit tests reproduce every worked example of spec 6.2–6.3 | done — `geometry.ts`, `quantities.ts` (+ `quantities.test.ts`, 26) |
+| RN7 | BOQ by room / by trade, contingency, VAT, totals, payment schedule, pre-survey range (Q8), incomplete reasons; programme from productivities with holds, crew per trade, Gantt | Unit tests (totals reconcile, durations follow the formula); jsdom; Chromium (totals checked by hand) | done — `boq.ts`, `programme.ts`, `QuantitiesBoq.tsx`; room phasing and draggable bars: **pending (RN-P4)** |
+| RN8 | Visual brief pack T0–T5, T8: one-click ZIP (prompts, before photos, QA prompts, swatches.svg, README, manifest) and copy-prompt buttons; import after images, pair by file name or by hand, burned-in Illustrative label, QA checklist with override reason, approve / select, provenance; narrative paste + reviewed; design-round counter | Unit tests (templates, ZIP CRC + round trip, pairing, swatches); Chromium (ZIP checked with `unzip -t`; 4 after images imported, 1 paired by hand) | done — `briefs.ts`, `zip.ts`, `photos.ts`, `VisualsSection.tsx`; importing a results ZIP, admin-editable templates: **pending (RN-P1)** |
+| RN9 | Renovation proposal: A4, same branding, cover hero, summary, narrative, mood board (chips), before/after gallery, survey findings + safety, scope, finishes schedule, BOQ (range-only before survey), programme, exclusions, assumptions, warranty, payment schedule, terms + visuals disclaimer + free rounds, approval with stamp; Draft watermark; Final gates; revisions | Unit tests (honesty rules); jsdom; Chromium print-to-PDF (draft 15 pages, final 14 pages, footer "Renovation proposal · Page n of N") | done — `proposal.ts`, `ProposalView.tsx`, `ProposalSection.tsx`; the trade-view BOQ appendix in print and an Arabic proposal: **pending (RN-P5, RN-P2)** |
+| RN10 | Settings: currency, VAT, contingency, validity, region, AI-brief language, range %, free rounds, milestones, legal texts with the lawyer-approval tick | jsdom + Chromium | done — `RnSettingsCard.tsx` |
+| RN11 | Real-browser check: 3-room apartment end to end (questionnaire → Admin draft → plan → survey → spec → library → quantities → BOQ → brief pack → import → QA → proposal → PDF → Final), 1440 px and 380 px, light and dark, English and Arabic | Screenshots, scripts and PDFs in the session scratchpad (`renovation/`) | done — no console errors, no failed requests, no horizontal scroll; fixes from it listed in HANDOFF |
+| RN12 | Close-out: spec 14.1, README, ASSUMPTIONS 15, HANDOFF, about-the-portal-services; tsc, lint, tests, build | Real output | done — see HANDOFF |
+
+### Pending (with exactly what is left)
+
+| # | What is left | Status |
+|---|---|---|
+| RN-P1 | Admin → Templates: edit the prompt templates as text with a preview and new versions (spec 5.3; today they are versioned in code). Import a results **ZIP** in Visuals (the reader exists in `zip.ts`; the UI takes image files only). | pending |
+| RN-P2 | Arabic for the engineer's Admin and for the printed proposal (the client side is bilingual; the AI briefs and the burned-in label already follow the Arabic setting). Native-speaker review of the Arabic copy. | pending |
+| RN-P3 | Drawing: openings drawn on the plan feed the room's openings list; a room shape with a height property; dimension lines; photo and defect pins on the plan (spec 9.2). | pending |
+| RN-P4 | Survey room templates that pre-fill typical openings and surfaces per room type; programme phasing by room ("Phase A: bedrooms"), rooms unusable per day, draggable bars. | pending |
+| RN-P5 | Proposal: print the by-trade BOQ as an appendix (today: Admin only, the proposal says "on request"); render the T4 mood-board layout (3 × 3 cells) from Claude's answer — today the portal prints its own palette chips and the materials list. | pending |
+| RN-P6 | Ctrl K jump palette: list renovation sections, rooms and defects (it lists the CCTV sections and locations; choosing one switches to the CCTV line). | pending |
+| RN-P7 | Checks not done: a real phone (Chromium touch emulation only), browsers other than Chromium, a real image model's output (placeholder images were used), a real client timing the questionnaire. | pending |
+
+## Concept sections and photo report (2026-10-12)
+
+Brief: `docs/backlog-concept-and-completion-reports.md` (owner: start now).
+Decisions in ASSUMPTIONS 16. CCTV engine, data files and
+`buildBillOfMaterials` untouched; no new dependencies.
+
+| # | Task | Verification | Status |
+|---|---|---|---|
+| PR1 | Reusable picture-section block: strict schema (title, 1–6 pictures with caption / role / date taken, layout 1-up / 2-up / before-after, rich-text description, room and BOQ / scope links, status, done-on / by, sign-off tick), pure helpers (add, move, duplicate, remove, roles, columns, labels, rich text, bullets, EXIF date) | `src/pictures/pictureSection.test.ts` (16) | done |
+| PR2 | Editor: add, reorder (drag handle, up / down buttons, Alt + ↑ / ↓), duplicate, delete with Undo, upload button + drag-and-drop, compression and metadata stripping on import, captions, roles, dates, links, Mark done / snag | jsdom `src/pictures/ui/pictures.test.tsx` (4 editor tests); Chromium 1440 / 380, light / dark | done |
+| PR3 | Proposal Concept chapter (renovation; `ConceptChapter` reusable by civil and maintenance): Title → Picture(s) → Description, "Concept / Illustrative" burned in for print, no section split across pages; Admin → Renovation → Concepts with a status | jsdom (DOM order, label); unit (model carries concepts); Chromium: 5 sections with placeholder renders, reordered by keyboard, buttons and mouse drag, printed (18 pages; every plate on one page) | done |
+| PR4 | Completion / photo report: one-click creation from the proposal (concept items + uncovered rooms + general works, before photos pre-filled), cover, project summary, completed items with before / during / after, dates and who, outstanding snags, client sign-off per item and at the end; Draft / Final with stamp and revisions; Admin → Renovation → Completion report with a status, Overview tile | unit `src/renovation/completion.test.ts`; jsdom (create, mark done / snag, Final blocked); Chromium: Draft and Final PDFs (8 pages each) | done |
+| PR5 | Backward compatibility: optional data; old CCTV project / workspace and a Phase 1 renovation workspace (written by fe10261) re-save byte for byte; round trip with concepts and a completion report; tampered field refused with its path | `completion.test.ts` (4 file tests) | done |
+| PR6 | Draft cover on page 1 (Phase 1 print bug found in this check) | Chromium PDFs: cover on page 1 for draft and final, proposal and completion report | done |
+| PR7 | Close-out: README, ASSUMPTIONS 16, HANDOFF, about-the-portal-services, backlog status; tsc, lint, tests, build | Real output in HANDOFF | done |
+
+### Pending
+
+| # | What is left | Status |
+|---|---|---|
+| PR-P1 | Use the block in the CCTV report and in the civil / maintenance lines when they are built (maintenance service report: fault → repair → result; the renovation before / after gallery). | pending |
+| PR-P2 | Arabic for the editor and the printed chapter / report text (the burned-in labels already follow the proposal language; the rest is English, as for the Phase 1 Admin — RN-P2). | pending |
+| PR-P3 | Checks not done: a real phone (Chromium touch emulation only; drag reorder is desktop-only — phones use the buttons), browsers other than Chromium, dropping files from a real OS file manager (the drop zone was checked in Chromium with a synthetic DataTransfer: highlight on dragover, picture imported on drop), auto-scroll while dragging a section past the window edge (headless Chromium does not auto-scroll; the buttons and Alt + ↑ / ↓ cover long lists). | pending |
+| PR-P4 | Owner to confirm ASSUMPTIONS 16.7 (what becomes a completion item; creating from a draft proposal allowed with a warning). | pending |
+

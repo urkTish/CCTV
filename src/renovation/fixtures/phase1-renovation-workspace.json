@@ -1,0 +1,1454 @@
+{
+  "format": "contractech-cctv-workspace",
+  "v": 1,
+  "project": {
+    "format": "contractech-cctv-project",
+    "v": 1,
+    "name": "Old depot",
+    "units": "metric",
+    "locations": [
+      {
+        "id": "loc-1",
+        "name": "Gate",
+        "purpose": "recognise",
+        "geometry": {
+          "mountHeightMetres": 3,
+          "targetDistanceMetres": 10,
+          "nearestDistanceMetres": null,
+          "widthSource": "width",
+          "sceneWidthMetres": 6,
+          "roomLengthMetres": 12,
+          "roomWidthMetres": 6,
+          "targetHeightMetres": 1.6,
+          "overlapAllowance": 0.15
+        },
+        "environment": {
+          "site": "outdoor",
+          "mountSurface": "wall",
+          "vandalExposure": false,
+          "ambientLight": "low-light",
+          "colourAtNight": false,
+          "strongBacklight": false,
+          "specialConditions": []
+        },
+        "requirements": {
+          "audioRequired": false,
+          "twoWayAudioRequired": false,
+          "requiredCapabilities": [],
+          "budgetTier": "any",
+          "retentionDays": 30,
+          "motionLevel": "moderate",
+          "lensPreference": "any",
+          "ptzAcceptable": false,
+          "cameraCount": 1,
+          "codec": "h265plus",
+          "fps": 25
+        }
+      },
+      {
+        "id": "loc-2",
+        "name": "Yard",
+        "purpose": "recognise",
+        "geometry": {
+          "mountHeightMetres": 3,
+          "targetDistanceMetres": 10,
+          "nearestDistanceMetres": null,
+          "widthSource": "width",
+          "sceneWidthMetres": 6,
+          "roomLengthMetres": 12,
+          "roomWidthMetres": 6,
+          "targetHeightMetres": 1.6,
+          "overlapAllowance": 0.15
+        },
+        "environment": {
+          "site": "outdoor",
+          "mountSurface": "wall",
+          "vandalExposure": false,
+          "ambientLight": "low-light",
+          "colourAtNight": false,
+          "strongBacklight": false,
+          "specialConditions": []
+        },
+        "requirements": {
+          "audioRequired": false,
+          "twoWayAudioRequired": false,
+          "requiredCapabilities": [],
+          "budgetTier": "any",
+          "retentionDays": 30,
+          "motionLevel": "moderate",
+          "lensPreference": "any",
+          "ptzAcceptable": false,
+          "cameraCount": 1,
+          "codec": "h265plus",
+          "fps": 25
+        }
+      }
+    ],
+    "activeLocationId": "loc-1",
+    "settings": {
+      "storage": {
+        "schedule": {
+          "mode": "continuous",
+          "motionDutyPercent": 30,
+          "scheduledHoursPerDay": 12
+        },
+        "raidLevel": "none",
+        "hotSpare": false,
+        "headroomPercent": 20,
+        "formattingOverheadPercent": 5
+      },
+      "recorder": {
+        "channelHeadroomPercent": 25,
+        "monitors": 1,
+        "outputResolution": "1080p",
+        "formFactor": "any",
+        "redundantPsu": false,
+        "poeMode": "auto",
+        "analytics": null,
+        "pinnedNvrId": null
+      },
+      "switches": {
+        "poeHeadroomPercent": 25,
+        "management": "auto",
+        "uplink": "auto",
+        "sparePortsPercent": 20
+      },
+      "cabling": {
+        "rackDropMetres": 3,
+        "serviceLoopMetres": 3,
+        "wastePercent": 10,
+        "boxMetres": 305,
+        "connectorsPerRun": 2,
+        "patchCordsPerRun": 1,
+        "routingFactor": 1.3,
+        "unplacedRunMetres": 40
+      }
+    },
+    "sitePlan": {
+      "image": null,
+      "calibration": {
+        "a": {
+          "x": 0,
+          "y": 0
+        },
+        "b": {
+          "x": 400,
+          "y": 0
+        },
+        "metres": 20
+      },
+      "devices": [],
+      "routes": [],
+      "layout": {
+        "canvas": {
+          "widthMetres": 20,
+          "heightMetres": 16
+        },
+        "gridMetres": 1,
+        "shapes": [
+          {
+            "kind": "rect",
+            "id": "area-1",
+            "cx": 200,
+            "cy": 160,
+            "width": 200,
+            "height": 120,
+            "rotationDeg": 0,
+            "stroke": "wall",
+            "fill": "building"
+          },
+          {
+            "kind": "text",
+            "id": "label-1",
+            "x": 200,
+            "y": 160,
+            "text": "Depot",
+            "sizePx": 10.8,
+            "rotationDeg": 0
+          }
+        ]
+      }
+    }
+  },
+  "extras": {
+    "clientName": "Sara Al-Qahtani",
+    "clientContact": "",
+    "prices": {},
+    "currency": "",
+    "validityDays": 30,
+    "report": {
+      "status": "draft",
+      "finalisedOn": null,
+      "preparedBy": null
+    },
+    "intake": null,
+    "portal": {
+      "v": 1,
+      "lines": [
+        "renovation"
+      ],
+      "client": {
+        "phone": "+966 50 123 4567",
+        "email": "sara@example.com",
+        "language": "en",
+        "consent": {
+          "photoUse": true,
+          "marketing": false,
+          "recordedOn": "2026-10-12"
+        }
+      },
+      "site": {
+        "name": "",
+        "address": "",
+        "city": "",
+        "propertyType": "apartment",
+        "buildingAge": "not-sure",
+        "occupancy": "occupied",
+        "workingRestrictions": ""
+      },
+      "rooms": [
+        {
+          "id": "room-1",
+          "name": "Family living room",
+          "type": "living",
+          "floor": "Ground",
+          "occupiedDuringWorks": false,
+          "lengthM": 5,
+          "widthM": 4,
+          "heightM": 2.8,
+          "planShapeId": null,
+          "openings": [],
+          "surfaces": {
+            "walls": {
+              "substrate": "unknown",
+              "existingFinish": "",
+              "existingColour": "",
+              "condition": null
+            },
+            "floor": {
+              "substrate": "unknown",
+              "existingFinish": "",
+              "existingColour": "",
+              "condition": null
+            },
+            "ceiling": {
+              "substrate": "unknown",
+              "existingFinish": "",
+              "existingColour": "",
+              "condition": null
+            }
+          },
+          "assumed": {},
+          "surveyed": false,
+          "clientNotes": "",
+          "notes": ""
+        },
+        {
+          "id": "room-2",
+          "name": "Master bedroom",
+          "type": "bedroom",
+          "floor": "Ground",
+          "occupiedDuringWorks": false,
+          "lengthM": null,
+          "widthM": null,
+          "heightM": null,
+          "planShapeId": null,
+          "openings": [],
+          "surfaces": {
+            "walls": {
+              "substrate": "unknown",
+              "existingFinish": "",
+              "existingColour": "",
+              "condition": null
+            },
+            "floor": {
+              "substrate": "unknown",
+              "existingFinish": "",
+              "existingColour": "",
+              "condition": null
+            },
+            "ceiling": {
+              "substrate": "unknown",
+              "existingFinish": "",
+              "existingColour": "",
+              "condition": null
+            }
+          },
+          "assumed": {},
+          "surveyed": false,
+          "clientNotes": "",
+          "notes": ""
+        }
+      ],
+      "photos": [
+        {
+          "id": "photo-1",
+          "roomId": "room-1",
+          "purpose": "before",
+          "facing": "From the door",
+          "fileName": "photo-1.jpg",
+          "dataUri": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP////////////////////////////////////////////////////////////////////////////////////8=",
+          "widthPx": 640,
+          "heightPx": 480,
+          "addedOn": "2026-10-12",
+          "metadataStripped": true,
+          "note": ""
+        },
+        {
+          "id": "photo-2",
+          "roomId": "room-1",
+          "purpose": "before",
+          "facing": "From the window",
+          "fileName": "photo-2.jpg",
+          "dataUri": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP////////////////////////////////////////////////////////////////////////////////////8=",
+          "widthPx": 640,
+          "heightPx": 480,
+          "addedOn": "2026-10-12",
+          "metadataStripped": true,
+          "note": ""
+        },
+        {
+          "id": "photo-3",
+          "roomId": "room-2",
+          "purpose": "before",
+          "facing": "From the door",
+          "fileName": "photo-3.jpg",
+          "dataUri": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP////////////////////////////////////////////////////////////////////////////////////8=",
+          "widthPx": 640,
+          "heightPx": 480,
+          "addedOn": "2026-10-12",
+          "metadataStripped": true,
+          "note": ""
+        }
+      ],
+      "renovation": {
+        "intakeAnswers": null,
+        "intakeSubmittedOn": null,
+        "style": {
+          "primaryStyle": null,
+          "secondaryStyle": null,
+          "palette": null,
+          "moods": [],
+          "likes": "",
+          "dislikes": "",
+          "floorsLiked": "",
+          "lightingMood": "warm",
+          "furniture": "suggest",
+          "budgetTier": null,
+          "clientWords": [],
+          "globalMustKeep": [
+            "Window and door positions and sizes"
+          ]
+        },
+        "specs": [
+          {
+            "roomId": "room-1",
+            "wallPaint": {
+              "productId": "x",
+              "colourId": null,
+              "finish": "matt",
+              "coats": 2,
+              "primer": true,
+              "roughSurface": false
+            },
+            "ceilingPaint": null,
+            "floorTiles": null,
+            "wallTiles": null,
+            "skirtingId": null,
+            "gypsumBoardId": null,
+            "removeFloor": false,
+            "removeWallTiles": false,
+            "items": [],
+            "mustKeep": [],
+            "lighting": ""
+          }
+        ],
+        "survey": {
+          "date": null,
+          "engineer": "",
+          "accessNotes": "",
+          "defects": [],
+          "safety": [
+            {
+              "itemId": "live-conductors",
+              "answer": null,
+              "action": "",
+              "photoId": null
+            },
+            {
+              "itemId": "burnt-fittings",
+              "answer": null,
+              "action": "",
+              "photoId": null
+            },
+            {
+              "itemId": "gas",
+              "answer": null,
+              "action": "",
+              "photoId": null
+            },
+            {
+              "itemId": "structural",
+              "answer": null,
+              "action": "",
+              "photoId": null
+            },
+            {
+              "itemId": "asbestos",
+              "answer": null,
+              "action": "",
+              "photoId": null
+            },
+            {
+              "itemId": "height",
+              "answer": null,
+              "action": "",
+              "photoId": null
+            },
+            {
+              "itemId": "fire",
+              "answer": null,
+              "action": "",
+              "photoId": null
+            },
+            {
+              "itemId": "occupants",
+              "answer": null,
+              "action": "",
+              "photoId": null
+            }
+          ]
+        },
+        "library": {
+          "materials": [
+            {
+              "id": "mat-emulsion-matt",
+              "category": "paint",
+              "name": "Interior emulsion, matt (sample)",
+              "manufacturer": "Generic (sample)",
+              "finish": "matt",
+              "spreadingM2PerL": 10,
+              "packSizesL": [
+                18,
+                3.6,
+                1
+              ],
+              "tileLengthMm": null,
+              "tileWidthMm": null,
+              "tileThicknessMm": null,
+              "tilesPerBox": null,
+              "consumptionKgPerM2": null,
+              "densityKgPerDm3": null,
+              "bagKg": null,
+              "boardLengthM": null,
+              "boardWidthM": null,
+              "pieceLengthM": null,
+              "tdsUrl": "",
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "mat-emulsion-eggshell",
+              "category": "paint",
+              "name": "Interior emulsion, eggshell (sample)",
+              "manufacturer": "Generic (sample)",
+              "finish": "eggshell",
+              "spreadingM2PerL": 10,
+              "packSizesL": [
+                18,
+                3.6,
+                1
+              ],
+              "tileLengthMm": null,
+              "tileWidthMm": null,
+              "tileThicknessMm": null,
+              "tilesPerBox": null,
+              "consumptionKgPerM2": null,
+              "densityKgPerDm3": null,
+              "bagKg": null,
+              "boardLengthM": null,
+              "boardWidthM": null,
+              "pieceLengthM": null,
+              "tdsUrl": "",
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "mat-ceiling-white",
+              "category": "paint",
+              "name": "Ceiling emulsion, flat (sample)",
+              "manufacturer": "Generic (sample)",
+              "finish": "matt",
+              "spreadingM2PerL": 10,
+              "packSizesL": [
+                18,
+                3.6
+              ],
+              "tileLengthMm": null,
+              "tileWidthMm": null,
+              "tileThicknessMm": null,
+              "tilesPerBox": null,
+              "consumptionKgPerM2": null,
+              "densityKgPerDm3": null,
+              "bagKg": null,
+              "boardLengthM": null,
+              "boardWidthM": null,
+              "pieceLengthM": null,
+              "tdsUrl": "",
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "mat-primer",
+              "category": "primer",
+              "name": "Primer / sealer, water-based (sample)",
+              "manufacturer": "Generic (sample)",
+              "finish": "",
+              "spreadingM2PerL": 8,
+              "packSizesL": [
+                18,
+                3.6
+              ],
+              "tileLengthMm": null,
+              "tileWidthMm": null,
+              "tileThicknessMm": null,
+              "tilesPerBox": null,
+              "consumptionKgPerM2": null,
+              "densityKgPerDm3": null,
+              "bagKg": null,
+              "boardLengthM": null,
+              "boardWidthM": null,
+              "pieceLengthM": null,
+              "tdsUrl": "",
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "mat-porcelain-6060",
+              "category": "tile",
+              "name": "Porcelain floor tile 60×60, light stone look (sample)",
+              "manufacturer": "Generic (sample)",
+              "finish": "matt",
+              "spreadingM2PerL": null,
+              "packSizesL": [],
+              "tileLengthMm": 600,
+              "tileWidthMm": 600,
+              "tileThicknessMm": 10,
+              "tilesPerBox": 4,
+              "consumptionKgPerM2": null,
+              "densityKgPerDm3": null,
+              "bagKg": null,
+              "boardLengthM": null,
+              "boardWidthM": null,
+              "pieceLengthM": null,
+              "tdsUrl": "",
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "mat-porcelain-60120",
+              "category": "tile",
+              "name": "Porcelain floor tile 60×120, marble look (sample)",
+              "manufacturer": "Generic (sample)",
+              "finish": "polished",
+              "spreadingM2PerL": null,
+              "packSizesL": [],
+              "tileLengthMm": 1200,
+              "tileWidthMm": 600,
+              "tileThicknessMm": 10,
+              "tilesPerBox": 2,
+              "consumptionKgPerM2": null,
+              "densityKgPerDm3": null,
+              "bagKg": null,
+              "boardLengthM": null,
+              "boardWidthM": null,
+              "pieceLengthM": null,
+              "tdsUrl": "",
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "mat-wall-3060",
+              "category": "tile",
+              "name": "Ceramic wall tile 30×60, white gloss (sample)",
+              "manufacturer": "Generic (sample)",
+              "finish": "gloss",
+              "spreadingM2PerL": null,
+              "packSizesL": [],
+              "tileLengthMm": 600,
+              "tileWidthMm": 300,
+              "tileThicknessMm": 8,
+              "tilesPerBox": 8,
+              "consumptionKgPerM2": null,
+              "densityKgPerDm3": null,
+              "bagKg": null,
+              "boardLengthM": null,
+              "boardWidthM": null,
+              "pieceLengthM": null,
+              "tdsUrl": "",
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "mat-adhesive-c2te",
+              "category": "adhesive",
+              "name": "Cementitious tile adhesive C2TE (sample)",
+              "manufacturer": "Generic (sample)",
+              "finish": "",
+              "spreadingM2PerL": null,
+              "packSizesL": [],
+              "tileLengthMm": null,
+              "tileWidthMm": null,
+              "tileThicknessMm": null,
+              "tilesPerBox": null,
+              "consumptionKgPerM2": 5,
+              "densityKgPerDm3": null,
+              "bagKg": 20,
+              "boardLengthM": null,
+              "boardWidthM": null,
+              "pieceLengthM": null,
+              "tdsUrl": "",
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "mat-grout-cg2",
+              "category": "grout",
+              "name": "Cementitious grout CG2, light grey (sample)",
+              "manufacturer": "Generic (sample)",
+              "finish": "",
+              "spreadingM2PerL": null,
+              "packSizesL": [],
+              "tileLengthMm": null,
+              "tileWidthMm": null,
+              "tileThicknessMm": null,
+              "tilesPerBox": null,
+              "consumptionKgPerM2": null,
+              "densityKgPerDm3": 1.6,
+              "bagKg": 5,
+              "boardLengthM": null,
+              "boardWidthM": null,
+              "pieceLengthM": null,
+              "tdsUrl": "",
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "mat-skirting-porcelain",
+              "category": "skirting",
+              "name": "Porcelain skirting 10×60 cm, to match floor (sample)",
+              "manufacturer": "Generic (sample)",
+              "finish": "",
+              "spreadingM2PerL": null,
+              "packSizesL": [],
+              "tileLengthMm": null,
+              "tileWidthMm": null,
+              "tileThicknessMm": null,
+              "tilesPerBox": null,
+              "consumptionKgPerM2": null,
+              "densityKgPerDm3": null,
+              "bagKg": null,
+              "boardLengthM": null,
+              "boardWidthM": null,
+              "pieceLengthM": 0.6,
+              "tdsUrl": "",
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "mat-gypsum-12",
+              "category": "board",
+              "name": "Gypsum board 12.5 mm, 1.2 × 2.4 m (sample)",
+              "manufacturer": "Generic (sample)",
+              "finish": "",
+              "spreadingM2PerL": null,
+              "packSizesL": [],
+              "tileLengthMm": null,
+              "tileWidthMm": null,
+              "tileThicknessMm": null,
+              "tilesPerBox": null,
+              "consumptionKgPerM2": null,
+              "densityKgPerDm3": null,
+              "bagKg": null,
+              "boardLengthM": 2.4,
+              "boardWidthM": 1.2,
+              "pieceLengthM": null,
+              "tdsUrl": "",
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            }
+          ],
+          "colours": [
+            {
+              "id": "col-ral-9010",
+              "manufacturer": "RAL",
+              "collection": "RAL Classic",
+              "name": "Pure white",
+              "code": "RAL 9010",
+              "hex": "#F1ECE1",
+              "lrv": null,
+              "source": "RAL Classic code (public standard); hex is a screen approximation",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "col-ral-9001",
+              "manufacturer": "RAL",
+              "collection": "RAL Classic",
+              "name": "Cream",
+              "code": "RAL 9001",
+              "hex": "#E9E0D2",
+              "lrv": null,
+              "source": "RAL Classic code (public standard); hex is a screen approximation",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "col-ral-1013",
+              "manufacturer": "RAL",
+              "collection": "RAL Classic",
+              "name": "Oyster white",
+              "code": "RAL 1013",
+              "hex": "#E3D9C6",
+              "lrv": null,
+              "source": "RAL Classic code (public standard); hex is a screen approximation",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "col-ral-1015",
+              "manufacturer": "RAL",
+              "collection": "RAL Classic",
+              "name": "Light ivory",
+              "code": "RAL 1015",
+              "hex": "#E6D2B5",
+              "lrv": null,
+              "source": "RAL Classic code (public standard); hex is a screen approximation",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "col-ral-1001",
+              "manufacturer": "RAL",
+              "collection": "RAL Classic",
+              "name": "Beige",
+              "code": "RAL 1001",
+              "hex": "#D0B084",
+              "lrv": null,
+              "source": "RAL Classic code (public standard); hex is a screen approximation",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "col-ral-1019",
+              "manufacturer": "RAL",
+              "collection": "RAL Classic",
+              "name": "Grey beige",
+              "code": "RAL 1019",
+              "hex": "#A48F7A",
+              "lrv": null,
+              "source": "RAL Classic code (public standard); hex is a screen approximation",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "col-ral-8025",
+              "manufacturer": "RAL",
+              "collection": "RAL Classic",
+              "name": "Pale brown",
+              "code": "RAL 8025",
+              "hex": "#755847",
+              "lrv": null,
+              "source": "RAL Classic code (public standard); hex is a screen approximation",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "col-ral-8017",
+              "manufacturer": "RAL",
+              "collection": "RAL Classic",
+              "name": "Chocolate brown",
+              "code": "RAL 8017",
+              "hex": "#45322E",
+              "lrv": null,
+              "source": "RAL Classic code (public standard); hex is a screen approximation",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "col-ral-7035",
+              "manufacturer": "RAL",
+              "collection": "RAL Classic",
+              "name": "Light grey",
+              "code": "RAL 7035",
+              "hex": "#CBD0CC",
+              "lrv": null,
+              "source": "RAL Classic code (public standard); hex is a screen approximation",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "col-ral-7044",
+              "manufacturer": "RAL",
+              "collection": "RAL Classic",
+              "name": "Silk grey",
+              "code": "RAL 7044",
+              "hex": "#B7B3A8",
+              "lrv": null,
+              "source": "RAL Classic code (public standard); hex is a screen approximation",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "col-ral-7016",
+              "manufacturer": "RAL",
+              "collection": "RAL Classic",
+              "name": "Anthracite grey",
+              "code": "RAL 7016",
+              "hex": "#383E42",
+              "lrv": null,
+              "source": "RAL Classic code (public standard); hex is a screen approximation",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "col-ral-6013",
+              "manufacturer": "RAL",
+              "collection": "RAL Classic",
+              "name": "Reed green",
+              "code": "RAL 6013",
+              "hex": "#7B7B5B",
+              "lrv": null,
+              "source": "RAL Classic code (public standard); hex is a screen approximation",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "col-ral-5014",
+              "manufacturer": "RAL",
+              "collection": "RAL Classic",
+              "name": "Pigeon blue",
+              "code": "RAL 5014",
+              "hex": "#637D96",
+              "lrv": null,
+              "source": "RAL Classic code (public standard); hex is a screen approximation",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "col-ral-3012",
+              "manufacturer": "RAL",
+              "collection": "RAL Classic",
+              "name": "Beige red",
+              "code": "RAL 3012",
+              "hex": "#CB8D73",
+              "lrv": null,
+              "source": "RAL Classic code (public standard); hex is a screen approximation",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "id": "col-ral-9005",
+              "manufacturer": "RAL",
+              "collection": "RAL Classic",
+              "name": "Jet black",
+              "code": "RAL 9005",
+              "hex": "#0E0E10",
+              "lrv": null,
+              "source": "RAL Classic code (public standard); hex is a screen approximation",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            }
+          ],
+          "rates": [
+            {
+              "code": "RN-PRL-PROT",
+              "description": "Protection of floors, furniture and fittings; set-up and daily clean-up",
+              "unit": "item",
+              "trade": "prelims",
+              "rate": 1500,
+              "validityDays": 90,
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "code": "RN-DEM-FLR",
+              "description": "Remove existing floor tiles and bed, cart away to skip",
+              "unit": "m²",
+              "trade": "demolition",
+              "rate": 25,
+              "validityDays": 90,
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "code": "RN-DEM-WTL",
+              "description": "Remove existing wall tiles, cart away to skip",
+              "unit": "m²",
+              "trade": "demolition",
+              "rate": 22,
+              "validityDays": 90,
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "code": "RN-DEM-SKIP",
+              "description": "Skip / truck for debris disposal, including tipping",
+              "unit": "no.",
+              "trade": "demolition",
+              "rate": 450,
+              "validityDays": 90,
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "code": "RN-REP-CRACK",
+              "description": "Rake out and fill crack, make good",
+              "unit": "m",
+              "trade": "repairs",
+              "rate": 25,
+              "validityDays": 90,
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "code": "RN-FLR-TILE",
+              "description": "Supply and lay porcelain floor tiles, incl. adhesive and grout",
+              "unit": "m²",
+              "trade": "floor",
+              "rate": 120,
+              "validityDays": 90,
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "code": "RN-FLR-SKRT",
+              "description": "Supply and fix tile skirting, incl. adhesive and grout",
+              "unit": "m",
+              "trade": "floor",
+              "rate": 35,
+              "validityDays": 90,
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "code": "RN-WAL-TILE",
+              "description": "Supply and fix wall tiles, incl. adhesive and grout",
+              "unit": "m²",
+              "trade": "wall",
+              "rate": 130,
+              "validityDays": 90,
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "code": "RN-CLG-GYP",
+              "description": "Gypsum board ceiling on metal framing, taped and jointed, incl. perimeter angle",
+              "unit": "m²",
+              "trade": "ceiling",
+              "rate": 95,
+              "validityDays": 90,
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "code": "RN-PNT-WALL",
+              "description": "Prepare and paint walls: fill, primer where specified, emulsion coats as specified",
+              "unit": "m²",
+              "trade": "painting",
+              "rate": 18,
+              "validityDays": 90,
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "code": "RN-PNT-CLG",
+              "description": "Prepare and paint ceilings: primer where specified, emulsion coats as specified",
+              "unit": "m²",
+              "trade": "painting",
+              "rate": 20,
+              "validityDays": 90,
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "code": "RN-JNR-DOOR",
+              "description": "Supply and fix internal door with frame and ironmongery",
+              "unit": "no.",
+              "trade": "joinery",
+              "rate": 1800,
+              "validityDays": 90,
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "code": "RN-ELE-DOWN",
+              "description": "Supply and fix LED downlight in gypsum ceiling, incl. wiring from existing point",
+              "unit": "no.",
+              "trade": "electrical",
+              "rate": 120,
+              "validityDays": 90,
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            },
+            {
+              "code": "RN-CLN-FINAL",
+              "description": "Final builder’s clean",
+              "unit": "m²",
+              "trade": "cleaning",
+              "rate": 8,
+              "validityDays": 90,
+              "source": "SAMPLE — replace with your rates / the product TDS",
+              "date": "2026-10-12",
+              "unverified": true,
+              "sample": true
+            }
+          ],
+          "rules": [
+            {
+              "key": "heightApartment",
+              "label": "Default ceiling height, apartment",
+              "value": 2.8,
+              "unit": "m",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "heightVilla",
+              "label": "Default ceiling height, villa",
+              "value": 3.2,
+              "unit": "m",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "doorWidth",
+              "label": "Default door width",
+              "value": 0.9,
+              "unit": "m",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "doorHeight",
+              "label": "Default door height",
+              "value": 2.1,
+              "unit": "m",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "windowWidth",
+              "label": "Default window width",
+              "value": 1.5,
+              "unit": "m",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "windowHeight",
+              "label": "Default window height",
+              "value": 1.5,
+              "unit": "m",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "windowSill",
+              "label": "Default window sill height",
+              "value": 0.9,
+              "unit": "m",
+              "source": "Company practice (assumed)",
+              "unverified": true
+            },
+            {
+              "key": "deductOpeningsMin",
+              "label": "Deduct openings at or above",
+              "value": 0.5,
+              "unit": "m²",
+              "source": "Measurement convention setting, spec 6.2",
+              "unverified": true
+            },
+            {
+              "key": "emulsionSpreading",
+              "label": "Emulsion spreading rate (no TDS)",
+              "value": 10,
+              "unit": "m²/L per coat",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "primerSpreading",
+              "label": "Primer spreading rate (no TDS)",
+              "value": 8,
+              "unit": "m²/L",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "roughFactor",
+              "label": "Rough / porous surface factor on spreading rate",
+              "value": 0.8,
+              "unit": "×",
+              "source": "Rule of thumb, spec 6.3",
+              "unverified": true
+            },
+            {
+              "key": "paintWaste",
+              "label": "Paint waste",
+              "value": 5,
+              "unit": "%",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "packAllowance",
+              "label": "Pack-handling allowance when choosing paint packs",
+              "value": 0.5,
+              "unit": "L per pack",
+              "source": "Company rule: each extra pack counts as this much leftover, so fewer, larger packs win small differences",
+              "unverified": true
+            },
+            {
+              "key": "tileWasteStraight",
+              "label": "Tile waste, straight lay",
+              "value": 7,
+              "unit": "%",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "tileWasteOffset",
+              "label": "Tile waste, brick / offset",
+              "value": 10,
+              "unit": "%",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "tileWasteDiagonal",
+              "label": "Tile waste, diagonal",
+              "value": 15,
+              "unit": "%",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "tileWasteHerringbone",
+              "label": "Tile waste, herringbone",
+              "value": 18,
+              "unit": "%",
+              "source": "Rule of thumb, spec Appendix B (15–20%)",
+              "unverified": true
+            },
+            {
+              "key": "tileWasteCutOuts",
+              "label": "Extra tile waste, many cut-outs",
+              "value": 3,
+              "unit": "%",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "tileWasteLargeFormat",
+              "label": "Extra tile waste, large format (≥ 120 cm)",
+              "value": 2,
+              "unit": "%",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "adhesiveKgPerM2",
+              "label": "Tile adhesive, 10 mm notch (no TDS)",
+              "value": 5,
+              "unit": "kg/m²",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "adhesiveBackButter",
+              "label": "Extra adhesive, back-buttering large format",
+              "value": 1.5,
+              "unit": "kg/m²",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "groutDensity",
+              "label": "Grout density ρ (no TDS)",
+              "value": 1.6,
+              "unit": "kg/dm³",
+              "source": "Grout manufacturers’ published formula; product TDS governs",
+              "unverified": true
+            },
+            {
+              "key": "groutWaste",
+              "label": "Grout waste",
+              "value": 10,
+              "unit": "%",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "skirtingWaste",
+              "label": "Skirting waste",
+              "value": 5,
+              "unit": "%",
+              "source": "Rule of thumb, spec 6.3",
+              "unverified": true
+            },
+            {
+              "key": "boardWaste",
+              "label": "Gypsum board waste",
+              "value": 10,
+              "unit": "%",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "debrisBulking",
+              "label": "Debris bulking factor",
+              "value": 1.3,
+              "unit": "×",
+              "source": "Rule of thumb, spec Appendix B",
+              "unverified": true
+            },
+            {
+              "key": "floorStripDepth",
+              "label": "Floor strip-out depth (tile + bed)",
+              "value": 0.05,
+              "unit": "m",
+              "source": "Company practice (assumed)",
+              "unverified": true
+            },
+            {
+              "key": "wallTileStripDepth",
+              "label": "Wall tile strip-out depth (tile + adhesive)",
+              "value": 0.02,
+              "unit": "m",
+              "source": "Company practice (assumed)",
+              "unverified": true
+            },
+            {
+              "key": "skipCapacity",
+              "label": "Skip / truck capacity",
+              "value": 6,
+              "unit": "m³",
+              "source": "Company practice (assumed)",
+              "unverified": true
+            },
+            {
+              "key": "prodPaint",
+              "label": "Productivity: paint, rolled walls, per coat",
+              "value": 35,
+              "unit": "m²/worker-day",
+              "source": "Rule of thumb, spec 6.8 (30–40)",
+              "unverified": true
+            },
+            {
+              "key": "prodPrep",
+              "label": "Productivity: surface preparation and filling",
+              "value": 30,
+              "unit": "m²/worker-day",
+              "source": "Rule of thumb, spec 6.8 (25–40)",
+              "unverified": true
+            },
+            {
+              "key": "prodFloorTile",
+              "label": "Productivity: floor tiling 60×60",
+              "value": 12,
+              "unit": "m²/worker-day",
+              "source": "Rule of thumb, spec 6.8 (10–15)",
+              "unverified": true
+            },
+            {
+              "key": "prodFloorTileLarge",
+              "label": "Productivity: floor tiling ≥ 120 cm",
+              "value": 8,
+              "unit": "m²/worker-day",
+              "source": "Rule of thumb, spec 6.8 (6–10)",
+              "unverified": true
+            },
+            {
+              "key": "prodWallTile",
+              "label": "Productivity: wall tiling",
+              "value": 8,
+              "unit": "m²/worker-day",
+              "source": "Rule of thumb, spec 6.8 (6–10)",
+              "unverified": true
+            },
+            {
+              "key": "prodGypsum",
+              "label": "Productivity: gypsum ceiling, per 2-person team",
+              "value": 15,
+              "unit": "m²/team-day",
+              "source": "Rule of thumb, spec 6.8 (12–18)",
+              "unverified": true
+            },
+            {
+              "key": "prodDemolition",
+              "label": "Productivity: tile strip-out",
+              "value": 15,
+              "unit": "m²/worker-day",
+              "source": "Company practice (assumed; not in spec 6.8)",
+              "unverified": true
+            },
+            {
+              "key": "prodSkirting",
+              "label": "Productivity: skirting",
+              "value": 25,
+              "unit": "m/worker-day",
+              "source": "Company practice (assumed; not in spec 6.8)",
+              "unverified": true
+            },
+            {
+              "key": "holdAdhesiveGrout",
+              "label": "Hold: tile adhesive to grout",
+              "value": 1,
+              "unit": "day",
+              "source": "Rule of thumb, spec 6.8 (24 h); product TDS governs",
+              "unverified": true
+            },
+            {
+              "key": "holdPaintRecoat",
+              "label": "Hold: paint recoat",
+              "value": 0,
+              "unit": "day",
+              "source": "Rule of thumb, spec 6.8 (2–4 h, within the day)",
+              "unverified": true
+            }
+          ]
+        },
+        "settings": {
+          "currency": "SAR",
+          "vatPercent": 15,
+          "locale": "Riyadh, Saudi Arabia",
+          "proposalLanguage": "en",
+          "freeDesignRounds": 2,
+          "contingencyPercent": 5,
+          "rangeLowPercent": 10,
+          "rangeHighPercent": 20,
+          "validityDays": 30,
+          "milestones": [
+            {
+              "id": "ms-1",
+              "label": "Advance on signing",
+              "percent": 25,
+              "trigger": "Contract signed"
+            },
+            {
+              "id": "ms-2",
+              "label": "Strip-out and first fix complete",
+              "percent": 25,
+              "trigger": "End of strip-out"
+            },
+            {
+              "id": "ms-3",
+              "label": "Tiling and ceilings complete",
+              "percent": 25,
+              "trigger": "End of tiling"
+            },
+            {
+              "id": "ms-4",
+              "label": "Handover",
+              "percent": 20,
+              "trigger": "Handover"
+            },
+            {
+              "id": "ms-5",
+              "label": "Retention, released after the defects period",
+              "percent": 5,
+              "trigger": "End of defects period"
+            }
+          ],
+          "warrantyText": "PLACEHOLDER — to be approved by a lawyer before the first Final proposal (owner decision Q6).\nWorkmanship: [period] from handover for painting, tiling and gypsum works, covering defects in workmanship. Manufacturer warranties on materials are passed through to the client.",
+          "termsText": "PLACEHOLDER — to be approved by a lawyer before the first Final proposal (owner decision Q6).\nPrices are based on the quantities in the bill of quantities. Hidden conditions found during the works (damp behind tiles, corroded pipes, weak substrates) are handled by a variation order agreed before the work proceeds.",
+          "visualsDisclaimer": "Illustrative visual — for guidance only. Actual colours, materials and finishes may differ. Refer to the samples and the schedule. Visuals are not contractual; the finishes schedule and the bill of quantities are.",
+          "exclusionsText": "Furniture, curtains and appliances unless listed\nAuthority fees and permit drawings\nStructural alterations\nHidden defects found during the works (handled by a variation order)\nAsbestos removal (specialist only)\nMEP works not listed in the bill of quantities",
+          "legalApproved": false
+        },
+        "views": [],
+        "assets": [],
+        "narrative": {
+          "text": "",
+          "reviewed": false,
+          "provider": "",
+          "modelName": "",
+          "templateVersion": "",
+          "importedOn": null
+        },
+        "crews": {},
+        "designRoundsUsed": 0,
+        "proposal": {
+          "status": "draft",
+          "finalisedOn": null,
+          "revision": "",
+          "preparedBy": null
+        }
+      }
+    }
+  }
+}

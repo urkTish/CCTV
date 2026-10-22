@@ -10,6 +10,21 @@
 
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
+import { todayIso } from '../../client/intakeFile.ts';
+import { deriveRenovation, RN_SECTIONS, rnSectionDef, type RnSectionId } from '../../renovation/derive.ts';
+import { draftFromRenovationIntake, parseRenovationIntake, parseRenovationLink, RN_INTAKE_FORMAT, type RenovationIntake } from '../../renovation/intake.ts';
+import { SERVICE_LINE_LABEL, type ServiceLine } from '../../renovation/model.ts';
+import { addRenovationLine, ensurePortal, loadHouseLibrary } from '../../renovation/rnState.ts';
+import { LibrarySection } from '../../renovation/ui/LibrarySection.tsx';
+import { RnClientSection, RnOverview } from '../../renovation/ui/OverviewSections.tsx';
+import { CompletionSection, ConceptsSection } from '../../renovation/ui/PictureSections.tsx';
+import { ProposalSection } from '../../renovation/ui/ProposalSection.tsx';
+import { BoqSection, QuantitiesSection } from '../../renovation/ui/QuantitiesBoq.tsx';
+import { RnSettingsCard } from '../../renovation/ui/RnSettingsCard.tsx';
+import { SpecSection } from '../../renovation/ui/SpecSection.tsx';
+import { SurveySection } from '../../renovation/ui/SurveySection.tsx';
+import { VisualsSection } from '../../renovation/ui/VisualsSection.tsx';
+
 import { intakeToProject, recorderAnswersInWords } from '../../client/intakeMapping.ts';
 import { INTAKE_FILE_FORMAT, parseIntakeFile, parseIntakeLink, type Intake } from '../../client/intakeFile.ts';
 import { PURPOSES } from '../../domain/dori.ts';
@@ -52,7 +67,7 @@ import { BomSection } from './BomSection.tsx';
 import { JumpPalette, type JumpTarget } from './JumpPalette.tsx';
 import { LocationDetail, LocationList } from './LocationsSection.tsx';
 import { OverviewSection } from './OverviewSection.tsx';
-import { collectWarnings, isToolSection, SECTIONS, sectionDef, sectionStatuses, type SectionId } from './sections.ts';
+import { collectWarnings, isToolSection, SECTIONS, sectionDef, sectionStatuses, SETTINGS_SECTION, type SectionDef, type SectionId, type SectionStatus } from './sections.ts';
 import { ReportSection } from './ReportSection.tsx';
 import { CameraFinderSection } from './CameraFinderSection.tsx';
 import { SettingsSection } from './SettingsSection.tsx';
@@ -75,6 +90,16 @@ function writeNavPref(collapsed: boolean): void {
   }
 }
 
+type AdminSection = SectionId | RnSectionId;
+
+/** A client's renovation intake as a draft: a renovation-only project with every assumed value recorded. */
+function draftFromRenovation(intake: RenovationIntake): { project: Project; extras: ProjectExtras; assumedTotal: number } {
+  const d = draftFromRenovationIntake(intake, loadHouseLibrary());
+  const base = defaultProject();
+  const project = { ...base, name: d.projectName || base.name, sitePlan: intake.planImage ? replaceImage(base.sitePlan, intake.planImage) : base.sitePlan };
+  return { project, extras: { ...DEFAULT_EXTRAS, clientName: d.clientName, clientContact: d.clientContact, portal: d.portal }, assumedTotal: d.assumedTotal };
+}
+
 /** A client's intake as a draft project, with every assumed value recorded. */
 function draftFromIntake(intake: Intake): { project: Project; extras: ProjectExtras; assumedTotal: number } {
   const mapped = intakeToProject(intake.answers);
@@ -90,8 +115,22 @@ function draftFromIntake(intake: Intake): { project: Project; extras: ProjectExt
   return { project, extras, assumedTotal };
 }
 
-export function AdminApp({ intakePayload = null }: { intakePayload?: string | null }) {
+export function AdminApp({ intakePayload = null, renovationPayload = null }: { intakePayload?: string | null; renovationPayload?: string | null }) {
   const initial = useMemo(() => {
+    if (renovationPayload !== null) {
+      const r = parseRenovationLink(renovationPayload);
+      if (r.ok) {
+        const d = draftFromRenovation(r.intake);
+        return {
+          project: d.project,
+          units: 'metric' as UnitSystemState,
+          extras: d.extras,
+          notice: `Opened the client's renovation intake “${d.project.name}” as a draft (from a link, so without photos — ask the client for the file to get them). ${d.assumedTotal} values were assumed and are marked for you to confirm.`,
+          warning: null,
+        };
+      }
+      return { project: defaultProject(), units: 'metric' as UnitSystemState, extras: DEFAULT_EXTRAS, notice: null, warning: `${r.reason} Starting from a new project instead.` };
+    }
     if (intakePayload !== null) {
       const r = parseIntakeLink(intakePayload);
       if (r.ok) {
@@ -108,13 +147,14 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
     }
     const fromHash = readStateFromHash(window.location.hash);
     return { project: fromHash.state.project, units: fromHash.state.units, extras: DEFAULT_EXTRAS, notice: null, warning: fromHash.warning };
-  }, [intakePayload]);
+  }, [intakePayload, renovationPayload]);
 
   const [project, setProject] = useState<Project>(initial.project);
   const [units, setUnits] = useState<UnitSystemState>(initial.units);
   const [extras, setExtras] = useState<ProjectExtras>(initial.extras);
   const [theme, setTheme] = useState<Theme>('system');
-  const [section, setSection] = useState<SectionId>('overview');
+  const [section, setSection] = useState<AdminSection>(() => (initial.extras.portal?.lines.includes('renovation') ? 'rn-overview' : 'overview'));
+  const [line, setLine] = useState<ServiceLine>(() => (initial.extras.portal?.lines.includes('renovation') && !initial.extras.portal.lines.includes('cctv') ? 'renovation' : initial.extras.portal?.lines.includes('renovation') && renovationPayload !== null ? 'renovation' : 'cctv'));
   const [navCollapsed, setNavCollapsed] = useState<boolean>(readNavPref);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -178,16 +218,35 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
   const warnings = useMemo(() => collectWarnings(statusInputs), [project, results, design, mapView, bom, extras]); // eslint-disable-line react-hooks/exhaustive-deps
   const statuses = useMemo(() => sectionStatuses(statusInputs, warnings), [warnings]); // eslint-disable-line react-hooks/exhaustive-deps
   const autosave = useAutosave(project, units, extras);
+  const today = todayIso();
+  const portal = extras.portal;
+  const rn = useMemo(() => deriveRenovation(portal, project.sitePlan, today), [portal, project.sitePlan, today]);
+  const onPortal = useCallback((fn: (p: NonNullable<ProjectExtras['portal']>) => NonNullable<ProjectExtras['portal']>) => setExtras((e) => ({ ...e, portal: fn(ensurePortal(e.portal)) })), []);
+  const lines: readonly ServiceLine[] = portal?.lines ?? ['cctv'];
+  const onRenovation = line === 'renovation' && !!portal?.renovation;
 
-  const navSections = SECTIONS;
+  const navSections: readonly SectionDef<AdminSection>[] = onRenovation ? RN_SECTIONS : SECTIONS;
+  const navStatuses: Readonly<Partial<Record<AdminSection, SectionStatus>>> = onRenovation ? rn.statuses : statuses;
 
   // --- actions ------------------------------------------------------------------
-  const navigate = useCallback((id: SectionId) => {
+  const navigate = useCallback((id: AdminSection) => {
     focusOnNavigate.current = true;
+    // A section belongs to one line (the Site map and Settings are shared): follow it, e.g. from Ctrl K.
+    if (id.startsWith('rn-')) setLine('renovation');
+    else if (id !== 'map' && id !== 'settings') setLine('cctv');
     setSection(id);
     setDrawerOpen(false);
     if (id === 'locations') setLocationView('list');
   }, []);
+
+  const switchLine = (next: ServiceLine) => {
+    if (next === 'renovation' && !extras.portal?.renovation) setExtras((e) => ({ ...e, portal: addRenovationLine(e.portal, loadHouseLibrary()) }));
+    if (next === 'cctv' && extras.portal && !extras.portal.lines.includes('cctv')) setExtras((e) => (e.portal ? { ...e, portal: { ...e.portal, lines: ['cctv', ...e.portal.lines] } } : e));
+    setLine(next);
+    focusOnNavigate.current = true;
+    setSection(next === 'renovation' ? 'rn-overview' : 'overview');
+    setDrawerOpen(false);
+  };
 
   const openLocation = useCallback((id: string) => {
     focusOnNavigate.current = true;
@@ -244,6 +303,20 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
   };
 
   const openText = (text: string, fileName: string): OpenOutcome => {
+    if (formatOf(text) === RN_INTAKE_FORMAT) {
+      const r = parseRenovationIntake(text);
+      if (!r.ok) return { ok: false, message: `${fileName} was not opened. ${r.reason}` };
+      const d = draftFromRenovation(r.intake);
+      setProject(d.project);
+      setUnits('metric');
+      setExtras(d.extras);
+      setLine('renovation');
+      setSection('rn-overview');
+      const message = `Opened ${fileName}: the client's renovation intake “${d.project.name}” is now a draft with ${r.intake.photos.length} photo(s). ${d.assumedTotal} values were assumed from the client's answers and are marked “assumed from client intake — please confirm”.`;
+      // The section changes, so the file bar that would show the message is replaced: say it in the banner.
+      setBanner({ kind: 'info', text: message });
+      return { ok: true, message };
+    }
     if (formatOf(text) === INTAKE_FILE_FORMAT) {
       const r = parseIntakeFile(text);
       if (!r.ok) return { ok: false, message: `${fileName} was not opened. ${r.reason}` };
@@ -261,7 +334,12 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
     setProject(r.opened.project);
     setUnits(r.opened.units);
     setExtras(r.extras);
-    return { ok: true, message: [`Opened ${fileName}.`, ...r.notices].join(' ') };
+    const rnOnly = r.extras.portal?.lines.includes('renovation') && !r.extras.portal.lines.includes('cctv');
+    const message = [`Opened ${fileName}.`, ...r.notices, r.extras.portal?.renovation && !rnOnly ? 'It includes a renovation line — switch to it with the service-line switcher.' : ''].filter(Boolean).join(' ');
+    if (line !== (rnOnly ? 'renovation' : 'cctv') || section !== (rnOnly ? 'rn-overview' : 'overview')) setBanner({ kind: 'info', text: message });
+    setLine(rnOnly ? 'renovation' : 'cctv');
+    setSection(rnOnly ? 'rn-overview' : 'overview');
+    return { ok: true, message };
   };
 
   const jump = (t: JumpTarget) => {
@@ -276,8 +354,12 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
   // --- section content ----------------------------------------------------------
   const order = navSections.map((s) => s.id);
   const pos = order.indexOf(section);
-  const prev = pos > 0 ? sectionDef(order[pos - 1]!) : null;
-  const next = pos >= 0 && pos < order.length - 1 ? sectionDef(order[pos + 1]!) : null;
+  const prev = pos > 0 ? navSections[pos - 1]! : null;
+  const next = pos >= 0 && pos < order.length - 1 ? navSections[pos + 1]! : null;
+  // Settings and the camera finder are tools outside either line's workflow: no status, no previous / next.
+  const isTool = !section.startsWith('rn-') && isToolSection(section as SectionId);
+  const currentDef: SectionDef<AdminSection | 'settings'> =
+    section === 'settings' ? SETTINGS_SECTION : isTool ? sectionDef(section as SectionId) : onRenovation || section.startsWith('rn-') ? rnSectionDef(section as RnSectionId) : sectionDef(section as SectionId);
   const assumedHere = extras.intake?.assumed[location.id];
   const intake = extras.intake;
   const toConfirmTotal = [...assumedByLocation.values()].reduce((a, b) => a + b, 0);
@@ -478,7 +560,95 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
       content = <CameraFinderSection />;
       break;
     case 'settings':
-      content = <SettingsSection profile={profile} onProfile={setProfile} />;
+      content = (
+        <SettingsSection profile={profile} onProfile={setProfile}>
+          {portal?.renovation && <RnSettingsCard portal={portal} onPortal={onPortal} />}
+        </SettingsSection>
+      );
+      break;
+    case 'rn-overview':
+      if (portal?.renovation)
+        content = (
+          <RnOverview
+            portal={portal}
+            onPortal={onPortal}
+            derived={rn}
+            onNavigate={navigate}
+            extras={extras}
+            onExtras={setExtras}
+            projectName={project.name}
+            onProjectName={(name) => setProject((p) => ({ ...p, name }))}
+            projectFile={projectFile}
+          />
+        );
+      break;
+    case 'rn-client':
+      if (portal?.renovation)
+        content = (
+          <RnClientSection
+            portal={portal}
+            onPortal={onPortal}
+            derived={rn}
+            onNavigate={navigate}
+            extras={extras}
+            onExtras={setExtras}
+            onRemoveLine={() => {
+              setLine('cctv');
+              setSection('overview');
+            }}
+          />
+        );
+      break;
+    case 'rn-survey':
+      if (portal?.renovation) content = <SurveySection portal={portal} onPortal={onPortal} derived={rn} onNavigate={navigate} plan={project.sitePlan} />;
+      break;
+    case 'rn-spec':
+      if (portal?.renovation) content = <SpecSection portal={portal} onPortal={onPortal} derived={rn} onNavigate={navigate} />;
+      break;
+    case 'rn-library':
+      if (portal?.renovation) content = <LibrarySection portal={portal} onPortal={onPortal} derived={rn} onNavigate={navigate} />;
+      break;
+    case 'rn-quantities':
+      if (portal?.renovation) content = <QuantitiesSection portal={portal} onPortal={onPortal} derived={rn} onNavigate={navigate} />;
+      break;
+    case 'rn-boq':
+      if (portal?.renovation) content = <BoqSection portal={portal} onPortal={onPortal} derived={rn} onNavigate={navigate} />;
+      break;
+    case 'rn-visuals':
+      if (portal?.renovation) content = <VisualsSection portal={portal} onPortal={onPortal} derived={rn} onNavigate={navigate} projectName={project.name} engineerName={profile.name} />;
+      break;
+    case 'rn-concepts':
+      if (portal?.renovation) content = <ConceptsSection portal={portal} onPortal={onPortal} derived={rn} onNavigate={navigate} />;
+      break;
+    case 'rn-completion':
+      if (portal?.renovation)
+        content = (
+          <CompletionSection
+            portal={portal}
+            onPortal={onPortal}
+            derived={rn}
+            onNavigate={navigate}
+            projectName={project.name}
+            clientName={extras.clientName}
+            clientContact={extras.clientContact}
+            profile={profile}
+          />
+        );
+      break;
+    case 'rn-proposal':
+      if (portal?.renovation)
+        content = (
+          <ProposalSection
+            portal={portal}
+            onPortal={onPortal}
+            derived={rn}
+            onNavigate={navigate}
+            projectName={project.name}
+            clientName={extras.clientName}
+            clientContact={extras.clientContact}
+            profile={profile}
+          />
+        );
       break;
     default:
       content = null;
@@ -497,6 +667,7 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
         Skip to content
       </a>
       <AdminHeader
+        title={onRenovation ? 'Renovation' : 'CCTV Design'}
         projectName={project.name}
         units={units}
         onUnits={setUnits}
@@ -509,7 +680,7 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
       <div className="flex">
         <AdminNav
           active={section}
-          statuses={statuses}
+          statuses={navStatuses}
           onNavigate={navigate}
           collapsed={navCollapsed}
           onToggleCollapsed={() =>
@@ -525,6 +696,41 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
             setPaletteOpen(true);
           }}
           sections={navSections}
+          lineSwitcher={
+            <div role="group" aria-label="Service line" className={`border-b border-[var(--color-border)] p-2 ${navCollapsed ? 'lg:px-1' : ''}`}>
+              <p className={`mb-1 px-1 text-2xs font-semibold tracking-wide text-[var(--color-ink-3)] uppercase ${navCollapsed ? 'lg:sr-only' : ''}`}>Service line</p>
+              <div className={`grid gap-1 ${navCollapsed ? 'lg:grid-cols-1' : 'grid-cols-2'}`}>
+                {(['cctv', 'renovation'] as const).map((l) => {
+                  const present = lines.includes(l) && (l === 'cctv' || !!portal?.renovation);
+                  const activeLine = (l === 'renovation') === onRenovation;
+                  return (
+                    <button
+                      key={l}
+                      type="button"
+                      aria-pressed={activeLine}
+                      onClick={() => switchLine(l)}
+                      title={present ? `${SERVICE_LINE_LABEL[l]} line` : `Add a ${l === 'cctv' ? 'CCTV' : 'renovation'} line to this project`}
+                      className={`flex min-h-9 items-center justify-center gap-1 rounded-control px-2 text-xs font-semibold transition-colors ${
+                        activeLine
+                          ? 'bg-[var(--color-accent)] text-[var(--color-accent-ink)]'
+                          : present
+                            ? 'border border-[var(--color-border-strong)] text-[var(--color-ink-2)] hover:bg-[var(--color-surface-2)]'
+                            : 'border border-dashed border-[var(--color-border-strong)] text-[var(--color-ink-3)] hover:bg-[var(--color-surface-2)]'
+                      }`}
+                    >
+                      {!present && <span aria-hidden="true">+</span>}
+                      <span className={navCollapsed ? 'lg:sr-only' : ''}>{present ? SERVICE_LINE_LABEL[l] : `Add ${l === 'cctv' ? 'CCTV' : 'renovation'}`}</span>
+                      {navCollapsed && (
+                        <span className="hidden lg:inline" aria-hidden="true">
+                          {l === 'cctv' ? 'CC' : 'RN'}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          }
         />
         <main id="main" className="min-w-0 flex-1 px-4 py-5 lg:px-6 print:p-0">
           {banner && (
@@ -542,9 +748,18 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
               </Notice>
             </div>
           )}
-          <SectionFrame def={sectionDef(section)} status={isToolSection(section) ? null : statuses[section]} actions={actions} headingRef={headingRef} prev={isToolSection(section) ? null : prev} next={isToolSection(section) ? null : next} onNavigate={navigate}>
+          <SectionFrame def={currentDef} status={isTool ? null : (navStatuses[section] ?? null)} actions={actions} headingRef={headingRef} prev={isTool ? null : prev} next={isTool ? null : next} onNavigate={navigate}>
             {content}
           </SectionFrame>
+          {onRenovation ? (
+            <footer className="mt-10 border-t print:hidden border-[var(--color-border)] pt-4 text-xs text-[var(--color-ink-3)]">
+              <p>
+                Renovation quantities follow the formulas of the renovation specification (section 6), each shown with its trace; rules of thumb are marked
+                Unverified. Prices come only from the library’s rates, never from the AI. Visuals are illustrative and labelled so. Nothing here replaces a site
+                survey or a licensed engineer’s design.
+              </p>
+            </footer>
+          ) : (
           <footer className="mt-10 border-t print:hidden border-[var(--color-border)] pt-4 text-xs text-[var(--color-ink-3)]">
             <p>
               Pixel-density thresholds from IEC 62676-4:2014 as reproduced in the Axis white paper &ldquo;Pixel density based on IEC
@@ -560,6 +775,7 @@ export function AdminApp({ intakePayload = null }: { intakePayload?: string | nu
               Nothing here is a substitute for a site survey.
             </p>
           </footer>
+          )}
         </main>
       </div>
       <JumpPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} project={project} mapView={mapView} onJump={jump} />

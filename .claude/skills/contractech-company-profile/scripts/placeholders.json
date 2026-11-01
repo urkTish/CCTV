@@ -1,0 +1,13 @@
+{
+  "_note": "Gray photo frames used until real photos are supplied. Sizes are in inches and must match the frames in build_profile.cjs. Regenerate the PNGs with make_placeholders.py after changing a label or size.",
+  "slots": [
+    { "id": "about",       "w": 3.4, "h": 3.85, "ar": "صورة: فريق كونتراكتك في الموقع", "en": "Photo: ContracTech team on site" },
+    { "id": "div_gc",      "w": 4.3, "h": 1.65, "ar": "صورة: مشروع مقاولات",            "en": "Photo: a contracting project" },
+    { "id": "div_tech",    "w": 4.3, "h": 1.65, "ar": "صورة: تركيب كاميرات مراقبة",       "en": "Photo: a CCTV installation" },
+    { "id": "reno_before", "w": 3.2, "h": 1.3,  "ar": "صورة: قبل الترميم",               "en": "Photo: before" },
+    { "id": "reno_after",  "w": 3.2, "h": 1.3,  "ar": "صورة: بعد الترميم",               "en": "Photo: after" },
+    { "id": "proj1",       "w": 2.8, "h": 2.2,  "ar": "صورة المشروع ١",                  "en": "Project photo 1" },
+    { "id": "proj2",       "w": 2.8, "h": 2.2,  "ar": "صورة المشروع ٢",                  "en": "Project photo 2" },
+    { "id": "proj3",       "w": 2.8, "h": 2.2,  "ar": "صورة المشروع ٣",                  "en": "Project photo 3" }
+  ]
+}

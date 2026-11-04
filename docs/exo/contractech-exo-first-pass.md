@@ -3,17 +3,31 @@
 **Area:** Winning work (leads, surveys, designs, BOQs, quotes, tenders, proposals)
 **Date:** 4 November 2026 · **Prepared for:** Eng. Turki AlTurki, General Manager
 **Method:** ExO 3.0 *building-an-exo* skill (OS Outline v25), First-Pass Intake workflow
-**Status:** Draft. Scores use what is known from the portal and the company profile. Every assumption is marked **[confirm]**; the list is at the end.
+**Status:** Draft, updated 4 November 2026 with the GM's answers. Scores use what is known from the portal and the company profile plus those answers. Items still open are marked **[confirm]**; the list is at the end.
+
+**The firm in numbers (from the GM):**
+- **Team:** the GM, one engineer, and a helper by project.
+- **Revenue:** under SAR 100k last year; about SAR 200k expected this year.
+- **Jobs:** CCTV, renovation, maintenance and small construction. The largest so far is under SAR 30k.
+- **Volume:** about 4–5 leads a month, roughly 2 of which become jobs. **[confirm reading]**
+- **Speed:** about one month from first contact to proposal.
+- **Out of scope:** procurement (buy and resell) is a recent side line that may not continue.
 
 ---
 
 ## The answer in five lines
 
-1. ContracTech is a **Direct Mode** firm (1–10 people): the whole company is redesigned directly. There is no separate pilot unit to set up.
-2. Readiness is **40/80, "foundational"**. The engineering work is already strongly codified in the portal. The rest of winning work still runs through you, by hand.
-3. The rule that blocks agents: the four safety basics (a test set, a log, a way to undo, and a review queue) score **1/5 at their weakest**. **No AI agent goes live with clients until all four reach 3.** That takes about two weeks.
-4. **Wave 1 workflow:** *lead to proposal* for CCTV and security jobs. AI drafts everything from the first message to the proposal; an engineer approves every client-facing item.
-5. **Run a 90-day sprint.** Weeks 1–2 build the basics, weeks 3–8 run AI drafts alongside your normal way, and weeks 9–12 hand over the first decisions. Success is measured by **how often you have to correct the AI**, which must fall every week.
+1. ContracTech is a **Direct Mode** firm (Tier 2): with two people, the whole company is redesigned directly.
+2. Readiness is **40/80, "foundational"**. The engineering work is already well codified in the portal. Everything else in winning work runs through the GM, who also does site work, so **the GM's time is the bottleneck**.
+3. **The biggest gap is speed.** A month from first contact to proposal is slow for jobs under SAR 30k. Slow quotes lose jobs to faster competitors, and they cap how many leads two people can handle.
+4. **Wave 1 workflow:** *lead to proposal*. AI drafts everything from the first message to the proposal, and the GM approves anything that goes to a client. **Target:** a preliminary range within 48 hours, and the full proposal within 5 working days of the site survey.
+5. **The four safety basics fit a two-person firm:**
+   - a test set made from past proposals
+   - one jobs list with an ID per job
+   - drafts kept with your corrections
+   - you as the reviewer
+   
+   They take an afternoon to set up, not weeks. The aim is not cost cutting. It is to **grow agency, not headcount**: work like a five-person office while staying two people, and use the freed time for bigger jobs and recurring maintenance contracts.
 
 ---
 
@@ -73,11 +87,11 @@ The ladder runs L0 to L5:
 
 The CCTV design-to-proposal path is a real team workflow (**L2**). Everywhere else AI is personal productivity (**L1**). This matches the 40/80 score, so the two don't conflict.
 
-### 2.4 Dabbling Test: likely FAIL
+### 2.4 Dabbling Test: FAIL (one of two checks passes)
 
 This test asks whether AI has changed how the company is run, not just whether people use it.
-- **Check 1, the 50% time check:** has half of your working time shifted because of AI? You build tools and documents with AI, so this may pass. **[confirm]**
-- **Check 2, the operating-cadence check:** have approvals, the weekly rhythm or how money is allocated changed? Not yet. Everything still routes to the GM. **Fail.**
+- **Check 1, the 50% time check: Pass.** The GM confirms that building the design portal and documents with AI has shifted his time. Site work has not changed, beyond better record keeping.
+- **Check 2, the operating-cadence check: Fail.** How a job moves from enquiry to proposal is still the same: everything is done by hand by the GM, and it takes about a month.
 - **The metric to track from now on:** the number of workflows that AI agents carry out safely under human command. **Today: 0.** The portal is software operated by an engineer; it is not an agent. The goal is to raise this number.
 
 ### 2.5 Third Anchor (team capacity)
@@ -92,7 +106,7 @@ This test checks whether AI is really changing the work or just speeding up the 
 |---|---|---|
 | Leaderboard: rewarding AI usage itself? | No | |
 | Geometry: is AI speeding up the old flow without changing who decides? | **Yes** | AI makes documents faster, but every step still queues for the GM. |
-| Latency: has lead-to-proposal become 5× faster anywhere? | Don't know | Nobody measures it. Start measuring in week 1. |
+| Latency: has lead-to-proposal become 5× faster anywhere? | **No** | About one month today. Fails this check: the portal makes the design fast, but the overall cycle is no faster. |
 
 **Result: below L3.** The book's fix is redesigning who decides what (REWRITE Step 4, section 5), not buying a new tool.
 
@@ -255,7 +269,7 @@ Readiness: 5 = AI can do it now, 3 = pilot it, 1 = stays human.
 
 ## 6. People (SHAPE: Human Architecture)
 
-- **Absorption math:** no reduction is planned. The aim is more proposals and faster responses with the same team. The time freed goes to site surveys, client meetings and maintenance contracts. **[confirm]**
+- **Absorption math:** with two people there is nothing to cut, and that is not the aim. The aim is more and faster proposals with the same two people. The freed time goes to site surveys, client meetings, larger jobs and maintenance contracts.
 - **Transition leader:** Eng. Turki AlTurki. **People budget:** 10–15% of measured savings, spent on training Tawfik and the engineers to supervise agents.
 - **Junior loop:** if AI drafts the designs, juniors must still learn to design. Rule: a junior reviews each AI design and writes one line on what they changed and why. That builds their judgment and gives the AI training data.
 - **Retention:**
@@ -288,7 +302,7 @@ Readiness: 5 = AI can do it now, 3 = pilot it, 1 = stays human.
   - any item still marked assumed or Unverified
   - brand standard not in the catalogue
   - site outside known regions
-  - preliminary value above SAR **[set threshold]**
+  - no value threshold: the GM prepares and approves every proposal himself
 - **Test set (Eval Suite):**
   - replay 10–20 past jobs and compare camera models, counts and BOQ quantities with what the engineer actually chose
   - floor: 90% of design items match
@@ -326,9 +340,11 @@ For 6 weeks, every new security lead goes through both paths: the normal way, an
    - a remote site without power
    - a hotel that requires a specific camera brand
 
+**Volume note:** at 4–5 leads a month, six weeks gives only about 6–8 live jobs. Replaying the 10–20 past proposals (feed 1) supplies most of the learning; live leads confirm it.
+
 **Success criteria:**
 - **Corrections fall every week.** This is the real test. If they don't, it's automation with a chat box, not a working agent.
-- Lead to proposal sent: **5× faster** than the week-1 baseline. **[baseline to measure]**
+- Lead to proposal sent: from about **one month** to a preliminary range within **48 hours**, and the full proposal within **5 working days** of the survey. That is more than 5× faster.
 - Your editing time per proposal: **down 50%**.
 - **Zero** client commitments sent without approval.
 - **Zero** BOQ errors found after sending.
@@ -339,7 +355,7 @@ For 6 weeks, every new security lead goes through both paths: the normal way, an
 
 | Weeks | Work | Done when |
 |---|---|---|
-| 1–2 | **Basics:** jobs log with IDs; review queue (you, 24 h response); test set from 10–20 past jobs; skills in git; purpose rules approved; baselines measured (lead-to-proposal time, editing time) | All four pillars at 3 or above |
+| 1–2 | **Basics (an afternoon of setup, then two weeks of use):** jobs list with an ID per job; you as reviewer with a 24 h response; test set from 10–20 past proposals; skills in git; purpose rules approved; lead-to-proposal time recorded for each new lead | All four pillars at 3 or above |
 | 3–8 | **Shadow run** of CT-A1 on every new security lead; weekly 30-minute review of corrections; fix the skill | Corrections falling for 3 weeks in a row |
 | 9–12 | **Handover Wave 1:** AI drafts become the default first draft; engineers edit and approve. Start a follow-up drafter and the opportunity digest in shadow. | Success criteria in 7.3 met |
 | Month 6 | Retake this scorecard; pick Wave 2 (supplier pricing and tenders) | Score and ladder re-measured |
@@ -351,16 +367,26 @@ For 6 weeks, every new security lead goes through both paths: the normal way, an
 
 ---
 
-## What I need from you to make this final
+## Answers so far, and what is still open
 
-1. Revenue band last year (sets the method's tier; assumed under about SAR 7.5M).
-2. Leads per month, and roughly how many become proposals and wins.
-3. Today's typical time from first contact to proposal sent.
-4. Where client records live today (WhatsApp, Excel, email).
-5. 10–20 past proposals or BOQs, to build the test set.
-6. Has half your working time shifted because of AI? (Dabbling Test check 1)
-7. Approve or rewrite the purpose statement and the five never-rules.
-8. The value threshold above which every proposal escalates to you.
+**Answered (4 November 2026):**
+- **Revenue:** under SAR 100k last year, about SAR 200k this year (Tier 2).
+- **Volume:** about 4–5 leads a month, roughly 2 won. **[confirm reading]**
+- **Speed:** about one month from first contact to proposal.
+- **Time shift:** about half the GM's working time has moved because of AI (Dabbling check 1 passes).
+- **No value threshold:** the GM does every proposal.
+- **Past proposals:** the GM will share 10–20 (CCTV, renovation, maintenance, small construction).
+
+**Still open:**
+1. Where client information ends up today: WhatsApp chats, an Excel sheet, a notebook, email? This decides where the jobs list lives.
+2. What takes the month between first contact and proposal? For example:
+   - waiting for the site visit
+   - waiting for supplier prices
+   - writing the proposal
+   - the client being slow
+   
+   This decides what Wave 1 attacks first.
+3. Approve or rewrite the purpose statement and the five never-rules (section 4.2).
 
 ---
 

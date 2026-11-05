@@ -261,5 +261,5 @@ ASSUMPTIONS 17.
 | JR-P1 | Link a job to its project file (an optional `jobId` in the workspace extras, absent by default so existing files re-save byte for byte), and pre-fill a job from an opened intake | pending |
 | JR-P2 | Merge import (today an import replaces the register after a confirmation), so the follow-up assistant could write drafts back into the register | pending |
 | JR-P3 | Arabic for the Jobs screen (the Admin is English, RN-P2); client names and notes in Arabic already display right-to-left | pending |
-| JR-P4 | Owner to confirm the stage list and labels (ASSUMPTIONS 17.2) and where Jobs sits in the navigation (17.1) | pending |
+| JR-P4 | Owner to confirm the stage list and labels (ASSUMPTIONS 17.2) and where Jobs sits in the navigation (17.1) | done (confirmed 5 Nov 2026) |
 | JR-P5 | Checks not done: a real phone, browsers other than Chromium, a register of thousands of jobs | pending |

@@ -82,6 +82,10 @@ Never invent company facts. A profile goes to clients and tenders.
 - Name a client only with their permission. Renovation pictures are
   "illustrative visuals", never "photos of your finished home".
 
+## Writing rules (from the GM)
+
+- **No clichés** (the GM's rule): never cite Vision 2030, and no location filler such as "across the Kingdom" or "wherever you are". Short and creative; benchmark against strong brands (Bosch "Invented for life", Securitas "We help make your world a safer place").
+
 ## Arabic layout notes
 
 - pptxgenjs only marks single-string text as right-to-left. `build_profile.cjs`

@@ -78,6 +78,7 @@ instructions.
   connection, and say it accurately (e.g. "we spoke a few times when…"). Not "a
   while back" if that is not true.
 - **"We" is fine** when the sender works with ContracTech.
+- **No clichés** (the GM's rule): never cite Vision 2030, and no location filler such as "across the Kingdom" or "wherever you are". Short and creative; benchmark against strong brands (Bosch "Invented for life", Securitas "We help make your world a safer place").
 
 ## Never (the purpose rules, Constraint Layer)
 

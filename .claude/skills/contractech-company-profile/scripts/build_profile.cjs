@@ -137,13 +137,7 @@ async function build(L, key, outDir) {
     const s = page(sec[1]);
     title(s, L.about.title);
     T(s, L.about.paras.map((p, i, a) => ({ text: p, options: { breakLine: i < a.length - 1 } })),
-      0.5, 1.15, 5.4, 2.45, { fontSize: 14, paraSpaceAfter: 8 });
-    const cw = (5.4 - 2 * 0.2) / 3;
-    L.about.highlights.forEach(([head, sub], i) => {
-      const sx = 0.5 + i * (cw + 0.2);
-      T(s, head, sx, 3.8, cw, 0.6, { fontSize: 16, bold: true });
-      T(s, sub, sx, 4.45, cw, 0.6, { fontSize: 13 });
-    });
+      0.5, 1.2, 5.4, 3.85, { fontSize: 14, paraSpaceAfter: 9 });
     photo(s, 'about', 6.1, 1.2);
     s.addNotes(notes.about);
   }

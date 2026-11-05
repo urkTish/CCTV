@@ -6,8 +6,10 @@
  *
  * Fact status (see SKILL.md):
  *  - Confirmed: divisions and services, coverage, core values, contacts
- *    (from the ContracTech brand skill), and the CCTV and renovation methods
- *    (from docs/about-the-portal-services.md).
+ *    (from the ContracTech brand skill and the GM's own 7-slide profile,
+ *    November 2026), and the CCTV and renovation methods (from
+ *    docs/about-the-portal-services.md). ContracTech is brand-neutral: it
+ *    installs whichever camera brand the project specifies.
  *  - Draft for the GM to approve: vision and mission wording.
  *  - Fill in: everything in [square brackets] on the projects slide.
  */
@@ -25,13 +27,10 @@ const ar = {
     title: 'من نحن',
     paras: [
       'كونتراكتك شركة سعودية للخدمات المهنية، تعمل في قطاعين متكاملين: المقاولات العامة والحلول التقنية.',
-      'نجمع تحت إدارة واحدة أعمال الإنشاءات والأنظمة الكهربائية والميكانيكية والترميم، إلى جانب أنظمة كاميرات المراقبة والشبكات وأنظمة الإنذار. يتعامل العميل مع جهة واحدة من التصميم إلى التنفيذ ثم الصيانة.',
-      'نخدم عملاءنا في جميع مناطق المملكة، بما فيها المدن الصغيرة البعيدة والمناطق النائية.',
-    ],
-    highlights: [
-      ['قطاعان متكاملان', 'المقاولات العامة والحلول التقنية'],
-      ['تغطية كامل المملكة', 'بما فيها المناطق النائية'],
-      ['جهة واحدة', 'من التصميم إلى التنفيذ والصيانة'],
+      'يصمّم قطاع الحلول التقنية أنظمة كاميرات المراقبة والبنية الشبكية والأنظمة الأمنية ويركّبها ويصونها وفق متطلبات الامتثال الحكومية.',
+      'ويقدّم قطاع المقاولات أعمال الإنشاء والصيانة، من عقود الصيانة الدورية إلى التنفيذ الكامل لنطاقات إنشائية محددة للمشاريع التجارية والخاصة والصناعية.',
+      'يتعامل العميل مع جهة واحدة مسؤولة عن المبنى وعن الأنظمة التي تشغّله وتحميه.',
+      'نخدم عملاءنا في جميع مناطق المملكة، بما فيها المدن الصغيرة البعيدة والمناطق النائية، وتنتقل فرقنا إلى موقع المشروع أينما كان.',
     ],
   },
   vision: {
@@ -44,40 +43,40 @@ const ar = {
   values: {
     title: 'قيمنا',
     items: [
-      ['الاحترافية', 'فريق هندسي يعمل وفق المواصفات والمعايير المعتمدة.'],
-      ['التنفيذ في الوقت المحدد', 'برنامج زمني واضح نلتزم به من اليوم الأول.'],
-      ['التواصل الفعّال مع العملاء', 'متابعة مستمرة وتقارير مصوّرة طوال المشروع.'],
-      ['جودة الخدمة', 'نتحمّل مسؤولية العمل بعد التسليم من خلال خدمات الصيانة.'],
+      ['الاحترافية', 'فرق مؤهلة وأعمال منفّذة وفق المعايير.'],
+      ['التنفيذ في الوقت المحدد', 'جداول زمنية نلتزم بها ونسلّم في موعدنا.'],
+      ['التواصل الفعّال مع العملاء', 'إطلاع واضح للعميل في كل مرحلة من مراحل العمل.'],
+      ['جودة الخدمة', 'نقف خلف جودة أعمالنا بعد التسليم.'],
     ],
   },
   divisions: {
     title: 'قطاعاتنا',
     cols: [
       { photo: 'div_gc', head: 'المقاولات العامة', items: ['أعمال الإنشاءات', 'الأنظمة الكهربائية والميكانيكية', 'ترميم وتجديد المنشآت والمواقع', 'خدمات الصيانة'] },
-      { photo: 'div_tech', head: 'الحلول التقنية', items: ['تركيب أنظمة كاميرات المراقبة', 'حلول تقنية المعلومات والشبكات', 'أنظمة الإنذار ومكافحة التسلل', 'خدمات الصيانة'] },
+      { photo: 'div_tech', head: 'الحلول التقنية', items: ['أنظمة كاميرات المراقبة', 'حلول تقنية المعلومات والشبكات', 'أنظمة الإنذار ومكافحة التسلل', 'صيانة الأنظمة'] },
     ],
   },
   contracting: {
     title: 'المقاولات العامة',
     items: [
-      ['أعمال الإنشاءات', 'تنفيذ الأعمال الإنشائية وفق المخططات والمواصفات المعتمدة.'],
-      ['الأنظمة الكهربائية والميكانيكية', 'توريد وتركيب وتشغيل الأنظمة الكهربائية والميكانيكية للمباني.'],
-      ['ترميم وتجديد المنشآت والمواقع', 'دهانات، وبلاط أرضيات وجدران، وأسقف جبسية، وإزالة التشطيبات القديمة.'],
-      ['خدمات الصيانة', 'صيانة المباني وأنظمتها، مع تقارير توضّح الملاحظات والتوصيات.'],
+      ['أعمال الإنشاءات', 'تنفيذ نطاقات إنشائية محددة للمشاريع التجارية والخاصة والصناعية.'],
+      ['الأنظمة الكهربائية والميكانيكية', 'تركيب وتحديث وإصلاح الأنظمة الكهربائية والتكييف والسباكة والأنظمة الميكانيكية.'],
+      ['ترميم وتجديد المنشآت والمواقع', 'تجهيز وتجديد وتطوير المباني والمواقع القائمة: دهانات، وبلاط، وأسقف جبسية.'],
+      ['خدمات الصيانة', 'عقود صيانة وقائية وتصحيحية تحافظ على جاهزية المنشآت، مع تقارير بالملاحظات والتوصيات.'],
     ],
   },
   technology: {
     title: 'الحلول التقنية',
     items: [
-      ['أنظمة كاميرات المراقبة', 'تصميم هندسي وتوريد وتركيب أنظمة المراقبة بمعدات Hikvision.'],
-      ['حلول تقنية المعلومات والشبكات', 'شبكات البيانات وتمديدات الكابلات وفق المعايير، وتجهيز البنية الشبكية للمواقع.'],
-      ['أنظمة الإنذار ومكافحة التسلل', 'توريد وتركيب وتشغيل أنظمة إنذار التسلل لحماية المواقع.'],
-      ['خدمات الصيانة', 'صيانة أنظمة المراقبة والشبكات والإنذار بعد التسليم.'],
+      ['أنظمة كاميرات المراقبة', 'تصميم أنظمة المراقبة وتوريدها وتركيبها وفق متطلبات الامتثال، بالعلامة التجارية التي يحددها المشروع.'],
+      ['حلول تقنية المعلومات والشبكات', 'تمديدات الكابلات المنظمة والمحوّلات وشبكات الواي فاي والبنية الشبكية لاتصال موثوق.'],
+      ['أنظمة الإنذار ومكافحة التسلل', 'أنظمة كشف وإنذار تؤمّن المحيط ونقاط الدخول والمناطق الحساسة.'],
+      ['صيانة الأنظمة', 'صيانة وقائية ودعم سريع للحفاظ على جاهزية أنظمة الأمن والشبكات.'],
     ],
   },
   cctv: {
     title: 'منهجيتنا في أنظمة المراقبة',
-    lead: 'نصمّم النظام بناءً على ما تحتاج أن تراه، لا على عدد الكاميرات.',
+    lead: 'نصمّم حسب ما تحتاج أن تراه، لا حسب عدد الكاميرات أو العلامة التجارية.',
     items: [
       'نحدّد المطلوب في كل منطقة: مراقبة عامة، أو تمييز الأشخاص، أو التعرّف على الوجوه، أو قراءة لوحات السيارات، وفق المعيار الدولي IEC 62676-4.',
       'نختار الكاميرا المناسبة لكل منطقة حسب ارتفاع التركيب والمسافة والإضاءة الليلية، مع بدائل وسبب واضح لكل اختيار.',
@@ -136,7 +135,7 @@ const ar = {
     lead: 'يسعدنا تواصلكم',
     people: [
       { name: 'م. تركي التركي', role: 'المدير العام', phone: '+966 555 755 039', email: 'Turki@contractech.sa' },
-      { name: 'م. محمود رشاد', role: 'مدير الإنشاءات', phone: '+966 549 203 907' },
+      { name: 'م. محمود رشاد', role: 'مدير الإنشاءات', phone: '+966 549 203 907', email: 'Mahmoud@contractech.sa' },
     ],
     coverage: 'نخدم جميع مناطق المملكة العربية السعودية، بما فيها المدن الصغيرة البعيدة والمناطق النائية.',
   },
@@ -149,20 +148,17 @@ const en = {
   deckTitle: 'ContracTech — Company Profile',
   cover: {
     title: 'Company Profile',
-    subtitle: 'General Contracting and Technological Solutions',
+    subtitle: 'General Contracting and Technology Solutions',
     line: 'Kingdom of Saudi Arabia · 2026',
   },
   about: {
     title: 'About ContracTech',
     paras: [
-      'ContracTech is a Saudi professional services company working in two complementary divisions: General Contracting and Technological Solutions.',
-      'Under one management we deliver construction, electrical and mechanical systems and renovation, alongside CCTV, IT networks and alarm systems. Clients deal with one partner from design to execution and maintenance.',
-      'We serve clients across the whole Kingdom, including distant minor cities and remote areas.',
-    ],
-    highlights: [
-      ['Two divisions', 'Contracting and technology'],
-      ['Kingdom-wide', 'Including remote areas'],
-      ['One partner', 'From design to maintenance'],
+      'ContracTech is a Saudi professional services company working in two complementary divisions: General Contracting and Technology Solutions.',
+      'Our Technology division designs, installs and maintains CCTV, network infrastructure and security systems that meet government compliance requirements.',
+      'Our Contracting division delivers construction and maintenance works, from routine maintenance contracts to full execution of defined construction scopes for commercial, private and industrial projects.',
+      'Clients get one accountable partner for both the building and the systems that run and protect it.',
+      'We serve the whole Kingdom, including distant minor cities and remote areas. Our teams mobilise to the site wherever the project is.',
     ],
   },
   vision: {
@@ -175,40 +171,40 @@ const en = {
   values: {
     title: 'Our Values',
     items: [
-      ['Professionalism', 'An engineering team that works to recognised specifications and standards.'],
-      ['Timely Execution', 'A clear programme, kept from day one.'],
-      ['Effective Client Communication', 'Regular follow-up and photo reports throughout the project.'],
-      ['Quality of Service', 'We stand behind our work after handover, with maintenance services.'],
+      ['Professionalism', 'Qualified teams and work done to standard.'],
+      ['Timely Execution', 'Committed schedules, delivered on time.'],
+      ['Effective Client Communication', 'Clear updates at every stage of the work.'],
+      ['Quality of Service', 'Workmanship we stand behind after handover.'],
     ],
   },
   divisions: {
     title: 'Our Divisions',
     cols: [
       { photo: 'div_gc', head: 'General Contracting', items: ['Construction works', 'Electrical and mechanical systems', 'Facility and site renovation', 'Maintenance services'] },
-      { photo: 'div_tech', head: 'Technological Solutions', items: ['CCTV systems installation', 'IT and network solutions', 'Intrusion and alarm systems', 'Maintenance services'] },
+      { photo: 'div_tech', head: 'Technology Solutions', items: ['CCTV systems', 'IT and network solutions', 'Intrusion and alarm systems', 'Systems maintenance'] },
     ],
   },
   contracting: {
     title: 'General Contracting',
     items: [
-      ['Construction Works', 'Building works to approved drawings and specifications.'],
-      ['Electrical and Mechanical Systems', 'Supply, installation and commissioning of building electrical and mechanical systems.'],
-      ['Facility and Site Renovation', 'Painting, floor and wall tiling, gypsum ceilings and removal of old finishes.'],
-      ['Maintenance Services', 'Maintenance of buildings and their systems, with reports that set out findings and recommendations.'],
+      ['Construction Works', 'Execution of defined construction scopes for commercial, private and industrial projects.'],
+      ['Electrical and Mechanical Systems', 'Installation, upgrade and repair of electrical, HVAC, plumbing and mechanical systems.'],
+      ['Facility and Site Renovation', 'Fit-out, refurbishment and upgrade of existing buildings and sites: painting, tiling and gypsum ceilings.'],
+      ['Maintenance Services', 'Planned and corrective maintenance contracts that keep facilities running, with reports of findings and recommendations.'],
     ],
   },
   technology: {
-    title: 'Technological Solutions',
+    title: 'Technology Solutions',
     items: [
-      ['CCTV Systems', 'Engineered design, supply and installation of surveillance systems on Hikvision equipment.'],
-      ['IT and Network Solutions', 'Data networks and cabling to standard, and network infrastructure for sites.'],
-      ['Intrusion and Alarm Systems', 'Supply, installation and commissioning of intrusion alarm systems to protect sites.'],
-      ['Maintenance Services', 'Maintenance of surveillance, network and alarm systems after handover.'],
+      ['CCTV Systems', 'Surveillance design, supply and installation to compliance standards, in the brand you specify.'],
+      ['IT and Network Solutions', 'Structured cabling, switching, Wi-Fi and network infrastructure for reliable connectivity.'],
+      ['Intrusion and Alarm Systems', 'Detection and alarm systems that secure perimeters, entry points and critical areas.'],
+      ['Systems Maintenance', 'Preventive maintenance and fast support to keep security and network systems operational.'],
     ],
   },
   cctv: {
     title: 'How We Design CCTV Systems',
-    lead: 'We design around what you need to see, not around a camera count.',
+    lead: 'We design around what you need to see, not around a camera count or one brand.',
     items: [
       'We set what each area must achieve (general watch, recognising people, identifying faces or reading number plates) to the international standard IEC 62676-4.',
       'We choose the right camera for each area from mounting height, distance and night-time lighting, with alternatives and a clear reason for each choice.',
@@ -267,7 +263,7 @@ const en = {
     lead: 'We would be glad to hear from you',
     people: [
       { name: 'Eng. Turki AlTurki', role: 'General Manager', phone: '+966 555 755 039', email: 'Turki@contractech.sa' },
-      { name: 'Eng. Mahmoud Rashad', role: 'Construction Manager', phone: '+966 549 203 907' },
+      { name: 'Eng. Mahmoud Rashad', role: 'Construction Manager', phone: '+966 549 203 907', email: 'Mahmoud@contractech.sa' },
     ],
     coverage: 'We serve every region of the Kingdom of Saudi Arabia, including distant minor cities and remote areas.',
   },
@@ -279,10 +275,10 @@ const notes = {
   cover: 'Cover. Logo, title and year only, per the brand rules.',
   about: 'Photo frame: replace with a real photo of the team on site (right-click the gray frame > Change Picture).',
   vision: 'DRAFT wording for the General Manager to approve or rewrite. Not taken from an existing company document.',
-  values: 'The four values are the company\'s confirmed core values. The one-line explanations are new wording; check them.',
+  values: 'The four values and their one-line explanations are from the GM\'s own profile (November 2026).',
   divisions: 'Photo frames: one contracting project photo and one CCTV installation photo (right-click > Change Picture).',
   contracting: 'Service descriptions are general on purpose. Add a named reference project per service when available.',
-  technology: 'Do not claim a Hikvision partner level here until it is confirmed in writing.',
+  technology: 'Wording from the GM\'s own profile. Brand-neutral on purpose: ContracTech installs whichever camera brand the project or the client\'s standards specify. Do not claim any manufacturer partner level until it is confirmed in writing. Name the compliance requirements met (e.g. which authority) when a client asks.',
   cctv: 'Source: docs/about-the-portal-services.md, section 4. Every point is something the design portal does today.',
   renovation: 'Source: docs/about-the-portal-services.md, section 3.5. Say "illustrative visuals", never "photos of your finished home". Replace the before/after frames with a real job.',
   process: 'Seven steps, read right to left in Arabic.',

@@ -10,9 +10,11 @@ Makes two matching decks from one content file:
 - `ContracTech-Company-Profile-AR.pptx` (Arabic, right-to-left, the main client version)
 - `ContracTech-Company-Profile-EN.pptx` (English)
 
-13 slides each: cover, about, vision and mission, values, divisions, general
-contracting, technological solutions, CCTV design method, renovation, how we
-work, why ContracTech, selected projects, contact.
+18 slides each: cover, about, vision and mission, values, our team, divisions,
+general contracting, electrical works (low voltage), low-current (ELV) systems,
+security systems, communication / TV / audio-visual, networks and computer
+rooms, CCTV design method, renovation, how we work, why ContracTech, selected
+projects, contact.
 
 The brand rules come from the **contractech-brand** skill and are not up for
 redesign: white pages, Tahoma, black text, logo in the top corner of every slide
@@ -54,19 +56,40 @@ Then check, as the brand skill requires, before handing anything over:
 
 Never invent company facts. A profile goes to clients and tenders.
 
-- **Confirmed** (brand skill and `docs/about-the-portal-services.md`): the two
-  divisions and their services, Kingdom-wide coverage including remote areas,
-  the four core values, the contacts, the CCTV design method (Hikvision equipment,
-  IEC 62676-4, storage / NVR / PoE / TIA-568 cabling sizing, traceable numbers,
-  stamped proposals) and the renovation process.
-- **Draft, needs the General Manager's approval**: vision and mission wording, and
-  the one-line explanations under each value.
+- **Confirmed** (brand skill, the GM's own 7-slide English profile of November
+  2026, and `docs/about-the-portal-services.md`): the two divisions and their
+  services (the GM's wording), Kingdom-wide coverage including remote areas, the
+  four core values and their one-line explanations, both contacts with emails,
+  "systems that meet government compliance requirements", Eng. Kamal Asif's
+  low-current and low-voltage electrical services and his 30+ years of
+  experience (from his former company's profile, reworded), the CCTV design method
+  (IEC 62676-4, storage / NVR / PoE / TIA-568 cabling sizing, traceable numbers,
+  stamped proposals) and the renovation process. **ContracTech is brand-neutral:**
+  it installs whichever camera brand the project specifies. The design portal's
+  catalogue happens to be Hikvision; never present the company as tied to it.
+- **Approved by the GM (5 Nov 2026):** the purpose statement ("To be the one team
+  a client trusts with the building and everything that runs and protects it")
+  and the slogan **"Say it once."** (قُلها مرةً واحدة.). The slogan stands alone
+  on the cover; slide 3 explains it. Do not add "consider it done" or any
+  second half.
+- **Draft, needs the General Manager's approval**: Eng. Kamal Asif's title and
+  the Arabic spelling of his name.
+- **Never offered: fire systems.** No fire alarm, fire cabling, fire suppression
+  or fire-alarm integration anywhere in the profile (GM's instruction, Nov 2026).
+- **Never copy another company's identity** into the profile: when a team member
+  brings services from a previous company, reword them as ContracTech's and leave
+  out that company's name, CR, VAT, website, vision and logo.
 - **Unknown, never state until confirmed in writing**: year founded, years of
   experience, number of projects, staff numbers, CR and VAT numbers,
-  classifications, certifications, licences, Hikvision partner level, client
-  names, office address, website.
+  classifications, certifications, licences, which compliance authority or
+  approval applies, manufacturer partner levels, client names, office address,
+  website.
 - Name a client only with their permission. Renovation pictures are
   "illustrative visuals", never "photos of your finished home".
+
+## Writing rules (from the GM)
+
+- **No clichés** (the GM's rule): never cite Vision 2030, and no location filler such as "across the Kingdom" or "wherever you are". Short and creative; benchmark against strong brands (Bosch "Invented for life", Securitas "We help make your world a safer place").
 
 ## Arabic layout notes
 
@@ -75,8 +98,8 @@ Never invent company facts. A profile goes to clients and tenders.
   that when adding new text.
 - Phone numbers and emails go in their own left-to-right paragraph (`LTR()`),
   otherwise `+966 555 755 039` flips to `039 755 555 966+`.
-- Latin terms inside Arabic sentences (IEC 62676-4, TIA-568, NVR, PoE,
-  Hikvision) render correctly; check them in the render anyway.
+- Latin terms inside Arabic sentences (IEC 62676-4, TIA-568, NVR, PoE) render
+  correctly; check them in the render anyway.
 - Spelling: الانتهاء، استهلاك، الالتزام (no hamza on these). Formal Saudi
   business register.
 
@@ -93,10 +116,11 @@ are still open. Ask the owner for the facts; do not fill them in yourself.
 4. Year founded and team size (engineers, technicians).
 5. Contractor classification, certifications (e.g. ISO 9001), and any licences
    or approvals for installing security systems, if held.
-6. Hikvision partner level, only if confirmed in writing.
+6. Which government compliance requirements the systems meet (name the authority
+   or approval), and any manufacturer partner level, only if confirmed in writing.
 7. Client logos slide, only with permission.
 8. Website and office address on the contact slide.
-9. Approve or rewrite the vision and mission.
+9. (Done 5 Nov 2026: purpose and slogan approved.)
 10. Optional: quality and safety (HSE) policy statements, a Vision 2030 line.
 
 After adding a fact, put it in `content.cjs` in both languages, rebuild, check,

@@ -229,6 +229,7 @@ src/
   state/            URL state, project file, workspace extras, IndexedDB autosave, schemas
   client/           client intake: answer types, mapping to engine inputs, wizard, intake file/link
   report/           client report: model (from the BOM), A4 view and print CSS, QR encoder, sign-off
+  jobs/             jobs register: record and file format, updaters, due list and figures, browser store; ui/ is Admin → Jobs
   ui/               components (no maths); ui/admin/ is the Admin shell and its sections
 ```
 
@@ -307,6 +308,28 @@ decisions in `ASSUMPTIONS.md` section 15.
 
 Code: `src/renovation/` (pure modules + tests) and `src/renovation/ui/`; the
 reusable picture-section block (model, editor, print) is in `src/pictures/`.
+
+## Jobs register (2026-11-05)
+
+**Admin → Jobs** is ContracTech's own record of every job, across projects:
+one record per enquiry (`CT-26-001`), its stage (Enquiry → Site survey →
+Waiting for PO → Waiting for payment → Work → Handover → Invoiced → Paid →
+Maintenance, or Lost with a reason), the next step and its date, the client's
+details, payment terms, documents, notes and a history that records every stage
+change by itself.
+
+- **Needs attention** lists overdue and due-today follow-ups, then open jobs with
+  no next step; the navigation shows "N due" beside Jobs.
+- **Figures:** open jobs, waiting for PO (count and value), follow-ups due,
+  average days from proposal to PO and decided proposals won.
+- **Saved in this browser** (its own IndexedDB database). **Backup → Export
+  register** writes a `contractech-jobs` JSON file; Import replaces the register
+  after a confirmation.
+- **Follow-up assistant:** the `contractech-follow-up` skill reads the exported
+  file and drafts the next message for every job that needs one. It never sends.
+
+Code: `src/jobs/` (pure modules + tests) and `src/jobs/ui/`. Decisions in
+ASSUMPTIONS 17; tasks JR1–JR6 and pending JR-P1…P5 in TASKS.
 
 ## Not built (yet)
 

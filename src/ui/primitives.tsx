@@ -11,7 +11,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { Icon, type IconName } from './icons.tsx';
-import { buttonClass, STATUS_STYLE, tabIds, type ButtonSize, type ButtonVariant, type StatusKind } from './uiStyles.ts';
+import { buttonClass, controlClass, STATUS_STYLE, tabIds, type ButtonSize, type ButtonVariant, type StatusKind } from './uiStyles.ts';
 
 export function Card({
   title,
@@ -69,10 +69,6 @@ export function Fieldset({
     </fieldset>
   );
 }
-
-const controlClass =
-  'w-full rounded-control border border-[var(--color-border-strong)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-ink)] ' +
-  'focus:border-[var(--color-accent)] focus:outline-none';
 
 export function NumberField({
   label,

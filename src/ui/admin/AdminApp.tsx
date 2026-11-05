@@ -68,9 +68,16 @@ import { JumpPalette, type JumpTarget } from './JumpPalette.tsx';
 import { LocationDetail, LocationList } from './LocationsSection.tsx';
 import { OverviewSection } from './OverviewSection.tsx';
 import { collectWarnings, isToolSection, SECTIONS, sectionDef, sectionStatuses, SETTINGS_SECTION, type SectionDef, type SectionId, type SectionStatus } from './sections.ts';
+import { attentionList } from '../../jobs/derive.ts';
+import { indexedDbJobsStore } from '../../jobs/store.ts';
+import { JobsSection } from '../../jobs/ui/JobsSection.tsx';
+import { useJobsRegister } from '../../jobs/ui/useJobsRegister.ts';
 import { ReportSection } from './ReportSection.tsx';
 import { CameraFinderSection } from './CameraFinderSection.tsx';
 import { SettingsSection } from './SettingsSection.tsx';
+
+/** The jobs register's home in this browser (null where there is no IndexedDB, e.g. jsdom: the section then says so). */
+const JOBS_STORE = indexedDbJobsStore();
 
 const NAV_PREF_KEY = 'contractech-cctv.nav-collapsed';
 
@@ -222,6 +229,10 @@ export function AdminApp({ intakePayload = null, renovationPayload = null }: { i
   const portal = extras.portal;
   const rn = useMemo(() => deriveRenovation(portal, project.sitePlan, today), [portal, project.sitePlan, today]);
   const onPortal = useCallback((fn: (p: NonNullable<ProjectExtras['portal']>) => NonNullable<ProjectExtras['portal']>) => setExtras((e) => ({ ...e, portal: fn(ensurePortal(e.portal)) })), []);
+  // The jobs register lives here, not in the Jobs section, so it survives moving between sections and the nav can show what is due.
+  const jobsRegister = useJobsRegister(JOBS_STORE);
+  const jobsDue = useMemo(() => attentionList(jobsRegister.jobs, today).filter((a) => a.kind !== 'no-next-step').length, [jobsRegister.jobs, today]);
+  const jobsStatus: SectionStatus | null = jobsDue > 0 ? { kind: 'attention', text: `${jobsDue} due` } : null;
   const lines: readonly ServiceLine[] = portal?.lines ?? ['cctv'];
   const onRenovation = line === 'renovation' && !!portal?.renovation;
 
@@ -231,9 +242,9 @@ export function AdminApp({ intakePayload = null, renovationPayload = null }: { i
   // --- actions ------------------------------------------------------------------
   const navigate = useCallback((id: AdminSection) => {
     focusOnNavigate.current = true;
-    // A section belongs to one line (the Site map and Settings are shared): follow it, e.g. from Ctrl K.
+    // A section belongs to one line (the Site map, Settings and Jobs are shared): follow it, e.g. from Ctrl K.
     if (id.startsWith('rn-')) setLine('renovation');
-    else if (id !== 'map' && id !== 'settings') setLine('cctv');
+    else if (id !== 'map' && id !== 'settings' && id !== 'jobs') setLine('cctv');
     setSection(id);
     setDrawerOpen(false);
     if (id === 'locations') setLocationView('list');
@@ -559,6 +570,9 @@ export function AdminApp({ intakePayload = null, renovationPayload = null }: { i
     case 'finder':
       content = <CameraFinderSection />;
       break;
+    case 'jobs':
+      content = <JobsSection register={jobsRegister} today={today} />;
+      break;
     case 'settings':
       content = (
         <SettingsSection profile={profile} onProfile={setProfile}>
@@ -681,6 +695,7 @@ export function AdminApp({ intakePayload = null, renovationPayload = null }: { i
         <AdminNav
           active={section}
           statuses={navStatuses}
+          jobsStatus={jobsStatus}
           onNavigate={navigate}
           collapsed={navCollapsed}
           onToggleCollapsed={() =>

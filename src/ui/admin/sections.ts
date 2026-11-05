@@ -16,7 +16,7 @@ import type { Project } from '../../state/projectTypes.ts';
 import type { IconName } from '../icons.tsx';
 import type { StatusKind } from '../uiStyles.ts';
 
-export type SectionId = 'overview' | 'map' | 'locations' | 'recording' | 'network' | 'cabling' | 'bom' | 'report' | 'finder' | 'settings';
+export type SectionId = 'overview' | 'map' | 'locations' | 'recording' | 'network' | 'cabling' | 'bom' | 'report' | 'finder' | 'jobs' | 'settings';
 
 export interface SectionDef<I extends string = SectionId> {
   readonly id: I;
@@ -55,13 +55,26 @@ export const FINDER_SECTION: SectionDef = {
   description: 'Pick a recorder (NVR) and what the camera must do; get the catalogue cameras that work with it.',
 };
 
+/**
+ * The jobs register: every enquiry, proposal, PO and payment, across all projects.
+ * Stand-alone like the camera finder: it does not belong to the open project.
+ */
+export const JOBS_SECTION: SectionDef = {
+  id: 'jobs',
+  label: 'Jobs',
+  short: 'Jobs',
+  icon: 'clipboard-check',
+  description: 'Every enquiry from first contact to PO, payment, work and maintenance, with the next step for each. Saved in this browser.',
+};
+
 /** Sections outside the workflow: no status, no previous / next. */
 export function isToolSection(id: SectionId): boolean {
-  return id === 'settings' || id === 'finder';
+  return id === 'settings' || id === 'finder' || id === 'jobs';
 }
 
 export function sectionDef(id: SectionId): SectionDef {
   if (id === 'finder') return FINDER_SECTION;
+  if (id === 'jobs') return JOBS_SECTION;
   return SECTIONS.find((s) => s.id === id) ?? SETTINGS_SECTION;
 }
 
@@ -241,5 +254,5 @@ export function sectionStatuses(inputs: StatusInputs, warnings: readonly Project
 
   const report: SectionStatus = inputs.reportFinal ? { kind: 'complete', text: 'Final' } : { kind: 'in-progress', text: 'Draft' };
 
-  return { overview, map, locations, recording, network, cabling, bom: bomStatus, report, finder: { kind: 'not-started', text: '' }, settings: { kind: 'not-started', text: '' } };
+  return { overview, map, locations, recording, network, cabling, bom: bomStatus, report, finder: { kind: 'not-started', text: '' }, jobs: { kind: 'not-started', text: '' }, settings: { kind: 'not-started', text: '' } };
 }

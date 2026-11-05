@@ -126,8 +126,9 @@ async function build(L, key, outDir) {
     const lw = 4.2, lh = lw / LOGO_ASPECT;
     s.addImage({ path: LOGO, x: (W - lw) / 2, y: 1.15, w: lw, h: lh, altText: 'ContracTech logo' });
     s.addText(L.cover.title, { placeholder: 'title', fontFace: FONT, rtlMode: rtl, lang: L.lang, align: 'center' });
-    T(s, L.cover.subtitle, 0.5, 3.5, 9, 0.45, { fontSize: 18, align: 'center' });
-    T(s, L.cover.line, 0.5, 4.05, 9, 0.4, { fontSize: 14, align: 'center' });
+    T(s, L.cover.slogan, 0.5, 3.5, 9, 0.55, { fontSize: 22, bold: true, align: 'center' });
+    T(s, L.cover.subtitle, 0.5, 4.15, 9, 0.4, { fontSize: 15, align: 'center' });
+    T(s, L.cover.line, 0.5, 4.6, 9, 0.35, { fontSize: 13, align: 'center' });
     s.addNotes(notes.cover);
   }
 
@@ -137,13 +138,7 @@ async function build(L, key, outDir) {
     const s = page(sec[1]);
     title(s, L.about.title);
     T(s, L.about.paras.map((p, i, a) => ({ text: p, options: { breakLine: i < a.length - 1 } })),
-      0.5, 1.15, 5.4, 2.45, { fontSize: 14, paraSpaceAfter: 8 });
-    const cw = (5.4 - 2 * 0.2) / 3;
-    L.about.highlights.forEach(([head, sub], i) => {
-      const sx = 0.5 + i * (cw + 0.2);
-      T(s, head, sx, 3.8, cw, 0.6, { fontSize: 16, bold: true });
-      T(s, sub, sx, 4.45, cw, 0.6, { fontSize: 13 });
-    });
+      0.5, 1.15, 5.4, 3.9, { fontSize: 13, paraSpaceAfter: 7 });
     photo(s, 'about', 6.1, 1.2);
     s.addNotes(notes.about);
   }
@@ -173,7 +168,20 @@ async function build(L, key, outDir) {
     s.addNotes(notes.values);
   }
 
-  // 5. Divisions overview
+  // 5. Our team: one column per person
+  {
+    const s = page(sec[1]);
+    title(s, L.team.title);
+    L.team.people.forEach((p, i) => {
+      const sx = [0.5, 3.55, 6.6][i];
+      T(s, p.name, sx, 1.45, 2.9, 0.45, { fontSize: 17, bold: true });
+      T(s, p.role, sx, 1.95, 2.9, 0.65, { fontSize: 13 });
+      T(s, p.desc, sx, 2.7, 2.9, 2.2, { fontSize: 14 });
+    });
+    s.addNotes(notes.team);
+  }
+
+  // 6. Divisions overview
   pres.addSection({ title: sec[2] });
   {
     const s = page(sec[2]);
@@ -188,17 +196,72 @@ async function build(L, key, outDir) {
     s.addNotes(notes.divisions);
   }
 
-  // 6-7. Division detail: numbered rows of service + description
-  for (const part of ['contracting', 'technology']) {
+  // Numbered rows of service + description, spaced to fit 3 to 5 rows.
+  const serviceRows = (s, items) => {
+    const top = 1.3, n = items.length;
+    const rowH = Math.min(1.25, (5.05 - top) / n);
+    const big = n <= 4;
+    items.forEach(([name, desc], i) => {
+      const y = top + i * rowH;
+      T(s, num(i), 0.5, y - 0.06, 0.5, 0.6, { fontSize: big ? 26 : 22, bold: true });
+      T(s, name, 1.15, y, 3.1, rowH - 0.08, { fontSize: big ? 16 : 15, bold: true });
+      T(s, desc, 4.45, y, 5.05, rowH - 0.08, { fontSize: big ? 15 : 14 });
+    });
+  };
+  // Six items, three per row, each a heading and a line or two.
+  const grid6 = (s, items, o) =>
+    items.forEach(([head, desc], i) => {
+      const sx = [0.5, 3.55, 6.6][i % 3], y = i < 3 ? 1.3 : 3.2;
+      T(s, head, sx, y, 2.9, o.headH, { fontSize: o.headSize, bold: true });
+      T(s, desc, sx, y + o.descOffset, 2.9, 1.85 - o.descOffset, { fontSize: o.descSize });
+    });
+
+  // 7-8. General contracting, then its low-voltage electrical works
+  for (const part of ['contracting', 'electrical']) {
     const s = page(sec[2]);
     title(s, L[part].title);
-    L[part].items.forEach(([name, desc], i) => {
-      const y = 1.3 + i * 0.92;
-      T(s, num(i), 0.5, y - 0.06, 0.5, 0.6, { fontSize: 26, bold: true });
-      T(s, name, 1.15, y, 3.1, 0.8, { fontSize: 16, bold: true });
-      T(s, desc, 4.45, y, 5.05, 0.8, { fontSize: 15 });
-    });
+    serviceRows(s, L[part].items);
     s.addNotes(notes[part]);
+  }
+
+  // 9. Low-current (ELV) systems at a glance: four groups
+  {
+    const s = page(sec[2]);
+    title(s, L.elv.title);
+    T(s, L.elv.lead, 0.5, 1.05, 9, 0.75, { fontSize: 15, bold: true });
+    const gap = 0.25, cw = (9 - 3 * gap) / 4;
+    L.elv.groups.forEach((g, i) => {
+      const sx = 0.5 + i * (cw + gap);
+      // Room for a two-line heading ("TV and audio-visual") so the lists all start level.
+      T(s, g.head, sx, 2.0, cw, 0.6, { fontSize: 16, bold: true });
+      T(s, g.items.map((t, j, a) => ({ text: t, options: { bullet: true, breakLine: j < a.length - 1 } })),
+        sx, 2.7, cw, 2.35, { fontSize: 13, paraSpaceAfter: 6 });
+    });
+    s.addNotes(notes.elv);
+  }
+
+  // 10. Security systems
+  {
+    const s = page(sec[2]);
+    title(s, L.security.title);
+    serviceRows(s, L.security.items);
+    s.addNotes(notes.security);
+  }
+
+  // 11. Communication, TV and audio-visual (3 x 2)
+  {
+    const s = page(sec[2]);
+    title(s, L.comms.title);
+    grid6(s, L.comms.items, { headSize: 15, headH: 0.62, descOffset: 0.66, descSize: 13 });
+    s.addNotes(notes.comms);
+  }
+
+  // 12. Networks and computer rooms
+  {
+    const s = page(sec[2]);
+    title(s, L.networks.title);
+    serviceRows(s, L.networks.items);
+    s.addNotes(notes.networks);
   }
 
   // Numbered list used by the CCTV and renovation slides.
@@ -209,7 +272,7 @@ async function build(L, key, outDir) {
       T(s, t, 1.05, y, width - 0.55, 0.62, { fontSize: 14 });
     });
 
-  // 8. CCTV method
+  // 13. CCTV method
   pres.addSection({ title: sec[3] });
   {
     const s = page(sec[3]);
@@ -219,7 +282,7 @@ async function build(L, key, outDir) {
     s.addNotes(notes.cctv);
   }
 
-  // 9. Renovation, with before / after frames (before first, in reading order)
+  // 14. Renovation, with before / after frames (before first, in reading order)
   {
     const s = page(sec[3]);
     title(s, L.renovation.title);
@@ -232,7 +295,7 @@ async function build(L, key, outDir) {
     s.addNotes(notes.renovation);
   }
 
-  // 10. How we work: seven steps across the slide
+  // 15. How we work: seven steps across the slide
   {
     const s = page(sec[3]);
     title(s, L.process.title);
@@ -247,19 +310,15 @@ async function build(L, key, outDir) {
     s.addNotes(notes.process);
   }
 
-  // 11. Why ContracTech (3 x 2)
+  // 16. Why ContracTech (3 x 2)
   {
     const s = page(sec[3]);
     title(s, L.why.title);
-    L.why.items.forEach(([head, desc], i) => {
-      const sx = [0.5, 3.55, 6.6][i % 3], y = i < 3 ? 1.3 : 3.2;
-      T(s, head, sx, y, 2.9, 0.6, { fontSize: 16, bold: true });
-      T(s, desc, sx, y + 0.5, 2.9, 1.1, { fontSize: 14 });
-    });
+    grid6(s, L.why.items, { headSize: 16, headH: 0.6, descOffset: 0.5, descSize: 14 });
     s.addNotes(notes.why);
   }
 
-  // 12. Selected projects (to fill in)
+  // 17. Selected projects (to fill in)
   pres.addSection({ title: sec[4] });
   {
     const s = page(sec[4]);
@@ -274,7 +333,7 @@ async function build(L, key, outDir) {
     s.addNotes(notes.projects);
   }
 
-  // 13. Contact
+  // 18. Contact
   {
     const s = page(sec[4]);
     title(s, L.contact.title);

@@ -21,6 +21,11 @@ const BUTTON_STYLE: Readonly<Record<ButtonVariant, string>> = {
 
 export type ButtonSize = keyof typeof BUTTON_SIZE;
 
+/** Classes for a text input, select or textarea, shared so every form control looks the same. */
+export const controlClass =
+  'w-full rounded-control border border-[var(--color-border-strong)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-ink)] ' +
+  'focus:border-[var(--color-accent)] focus:outline-none';
+
 /** Classes for something that should look like a button but is not one (a file label, a link). */
 export function buttonClass(variant: ButtonVariant = 'secondary', size: ButtonSize = 'md'): string {
   return `${BUTTON_BASE} ${BUTTON_SIZE[size]} ${BUTTON_STYLE[variant]}`;

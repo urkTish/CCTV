@@ -184,6 +184,19 @@ simple items; they are not designed by the portal.
 
 ---
 
+### 3.6 Jobs register (internal, built 2026-11-05)
+
+Admin → **Jobs** keeps one record per enquiry, from first contact to the PO, the
+payment, the work, the invoice and maintenance, with the next step and its date
+for each. It is ContracTech's own record (saved in the browser, exported as a
+backup file), not something a client sees. A follow-up assistant (a Claude skill)
+reads the exported register and drafts follow-up messages for the GM to send.
+
+**How to talk about it:** it is an internal tool. Use it to answer "where does
+my job stand?" quickly, but do not describe it to clients as a client portal.
+
+---
+
 ## 4. What the engineering covers
 
 These are the technical selling points. They are all calculated, not guessed.

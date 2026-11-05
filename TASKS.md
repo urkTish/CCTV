@@ -236,3 +236,30 @@ Decisions in ASSUMPTIONS 16. CCTV engine, data files and
 | PR-P3 | Checks not done: a real phone (Chromium touch emulation only; drag reorder is desktop-only — phones use the buttons), browsers other than Chromium, dropping files from a real OS file manager (the drop zone was checked in Chromium with a synthetic DataTransfer: highlight on dragover, picture imported on drop), auto-scroll while dragging a section past the window edge (headless Chromium does not auto-scroll; the buttons and Alt + ↑ / ↓ cover long lists). | pending |
 | PR-P4 | Owner to confirm ASSUMPTIONS 16.7 (what becomes a completion item; creating from a draft proposal allowed with a warning). | pending |
 
+---
+
+## Jobs register (2026-11-05)
+
+Owner request (5 Nov 2026): "go ahead" on the ExO first pass's Wave 1, section 7.1:
+ContracTech's own register of every job, from first contact to PO, payment, work
+and maintenance, plus the follow-up assistant (section 7.2). Decisions in
+ASSUMPTIONS 17.
+
+| # | Task | Verification | Status |
+|---|---|---|---|
+| JR1 | Job record and the `contractech-jobs` v1 file: strict zod schema, capped strings and lists, job numbers `CT-YY-NNN`, duplicate numbers refused with the path | `src/jobs/jobs.test.ts`: round trip byte for byte (with history), bad JSON, wrong format, bad field path, extra field, duplicate number, newer version | done |
+| JR2 | Browser store in its own IndexedDB database (`contractech-jobs`), every failure reported, never thrown | Store tests with a failing and a garbled store | done |
+| JR3 | Pure updaters (add, edit, move stage with a log entry, follow-ups and notes, remove, suggested next stage) and figures (attention list, waiting for PO and value, days from proposal to PO, decided proposals won) | Unit tests incl. credit skipping "Waiting for payment", log cap, ordering past CT-26-999 | done |
+| JR4 | Admin → Jobs: a tool section beside Camera finder (status "N due" in the navigation, Ctrl K entry); figures, Needs attention, All jobs (filter, phone-friendly table), job dialog (stage, next step and date, client details, payment terms, documents, notes, history), new-job dialog, export / import with a replace confirmation | `src/jobs/ui/jobs.test.tsx` drives the real app; register hook tested against a fake store (loads before saving, never saves over an unreadable register) | done |
+| JR5 | Follow-up assistant skill (`.claude/skills/contractech-follow-up/`): due list script + drafting rules from the agent spec and the GM's writing style | Script run on a sample register and a wrong file | done |
+| JR6 | Real-browser check (Chromium, 1440 px light, 380 px dark) | Created jobs, overdue step, history entry, reload keeps the register (IndexedDB); no console errors, failed requests or horizontal scroll; two layout fixes with a regression test | done |
+
+### Pending
+
+| # | Task | Status |
+|---|---|---|
+| JR-P1 | Link a job to its project file (an optional `jobId` in the workspace extras, absent by default so existing files re-save byte for byte), and pre-fill a job from an opened intake | pending |
+| JR-P2 | Merge import (today an import replaces the register after a confirmation), so the follow-up assistant could write drafts back into the register | pending |
+| JR-P3 | Arabic for the Jobs screen (the Admin is English, RN-P2); client names and notes in Arabic already display right-to-left | pending |
+| JR-P4 | Owner to confirm the stage list and labels (ASSUMPTIONS 17.2) and where Jobs sits in the navigation (17.1) | pending |
+| JR-P5 | Checks not done: a real phone, browsers other than Chromium, a register of thousands of jobs | pending |

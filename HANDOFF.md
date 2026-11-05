@@ -1,3 +1,56 @@
+# Handoff — Jobs register and follow-up assistant (cloud session, 2026-11-05) — DONE
+
+Owner request: "go ahead" on the ExO first pass's Wave 1 (`docs/exo/contractech-exo-first-pass.md`
+section 7): ContracTech's own register of every job, from first contact to PO,
+payment, work and maintenance, plus the follow-up assistant. Tasks JR1–JR6 and
+pending JR-P1…P5 in TASKS ("Jobs register"); decisions in ASSUMPTIONS 17.
+**tsc 0, eslint 0, 737 / 737 tests (48 files; 22 new in 2 files), vite build ok**
+(chunk-size advisory only). No new dependencies. CCTV engine, data files,
+`buildBillOfMaterials` and the project / workspace formats untouched.
+
+- **Where the code is:** `src/jobs/`:
+  - `model.ts`: record, stages, `contractech-jobs` v1 file, job numbers
+  - `jobsState.ts`: pure updaters
+  - `derive.ts`: attention list, figures, filter
+  - `store.ts`: IndexedDB `contractech-jobs`
+  - `ui/useJobsRegister.ts`: load and save rules
+  - `ui/JobsSection.tsx`, `ui/JobDialog.tsx`, `ui/fields.tsx`: date, text area, optional amount
+
+  Wiring: `sections.ts` (`JOBS_SECTION`, a tool section), `AdminChrome.tsx`
+  (nav item with "N due"), `AdminApp.tsx` (holds the register so it survives
+  section changes), `JumpPalette.tsx`. `controlClass` moved to `uiStyles.ts`.
+  The assistant is the skill `.claude/skills/contractech-follow-up/`
+  (`SKILL.md`, `scripts/due.py`).
+- **How to use:**
+  1. Admin → **Jobs** → *New job* (client, job, service).
+  2. In the job: set the stage, the next step and its date, and the payment terms (credit skips "Waiting for payment").
+  3. Add follow-ups to the history as they happen.
+  4. **Needs attention** lists what is overdue or due today.
+  5. *Backup → Export register* writes the file. Give that file to Claude ("what is due?") and the follow-up skill drafts the messages.
+- **Files:** new `contractech-jobs` v1 (strict schema, capped). It re-saves
+  byte for byte (tested, including history). No change to any existing format.
+- **Checked in real Chromium** (Playwright; 1440 px light and 380 px dark):
+  - created two jobs (one with an Arabic client name)
+  - moved one to Waiting for PO with an overdue next step and a history entry
+  - the navigation showed "1 due", and the attention list was ordered right
+  - reloaded the page: the register came back from IndexedDB
+  - no console errors, no failed requests, no horizontal scroll
+- **Fixed from the browser check** (regression test added):
+  - on a phone, the client and job in the table sat side by side instead of stacking
+  - in the job dialog, *Delete…* sat next to *Done* instead of at the left
+  - the list card's heading duplicated the section's "Jobs" heading (renamed "All jobs"; found by a UI test)
+- **Not checked:** a real phone, browsers other than Chromium, a register of
+  thousands of jobs, the IndexedDB failure paths in a real browser (they are
+  tested with fake stores).
+- **Owner to confirm:** the stage list and labels (17.2), where Jobs sits in the
+  navigation (17.1).
+- **Resume at:** TASKS JR-P1 (link a job to its project file), JR-P2 (merge
+  import). Tooling as below. In this container the Linux native builds of
+  rollup, esbuild, lightningcss and the Tailwind oxide are not in the repo's
+  `node_modules` (it was installed on Windows). Install them outside the repo
+  and run with `NODE_PATH` pointing there, plus `ESBUILD_BINARY_PATH` for
+  esbuild. Do not add them to the repo.
+
 # Handoff — Concept sections and the completion / photo report (cloud session 9, 2026-10-12) — DONE for renovation
 
 Owner request: implement `docs/backlog-concept-and-completion-reports.md` now.

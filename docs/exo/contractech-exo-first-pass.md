@@ -421,7 +421,7 @@ Readiness: 5 = AI can do it now, 3 = pilot it, 1 = stays human.
 - **Past proposals:** the GM will share 10–20 (CCTV, renovation, maintenance, small construction).
 
 - **The month before the PO:** each company has its own approval process. For jobs not on credit, ContracTech then waits for the client's bank transfer. So the assistant follows up on two things: the PO, then the payment.
-- **Jobs section:** go-ahead given on 5 November 2026; the build has started.
+- **Jobs section:** built on 5 November 2026 (Admin → Jobs in the portal), with the Follow-up Assistant as the `contractech-follow-up` skill. Weeks 1–2 of the sprint can start: load the past proposals and set a next step on every open job.
 
 **Still open:**
 1. Choose one of the five purpose statements (section 4.2). The never-rules stay as drafted.

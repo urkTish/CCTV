@@ -180,8 +180,22 @@ The GOVERN cap (13/25 maximum without basic controls) doesn't bind here, because
 
 ### 4.2 Purpose as rules (MTP protocol), draft for your approval
 
-**Purpose statement, draft:** *"Every site in the Kingdom, however remote, built right and kept safe."*
-"Built right" covers contracting, "kept safe" covers security systems and maintenance, and "however remote" is your coverage promise. **[confirm or rewrite]**
+**Purpose statement: five options for the GM to choose from.** The first draft was rejected. These are benchmarked against companies in the sector:
+- **Global leaders** state the outcome for the client in a few words. Securitas: *"We help make your world a safer place."* Convergint: protecting people is its purpose. Muheel: *"Helping clients to create better places to work and live."*
+- **Saudi players** favour "trusted partner" and Vision 2030. SAFE: *"To be the trusted security partner leading the transformation of the security ecosystem."* Abdulrahman Al-Shareef Group: leaders in advanced technology solutions *"aligned with Saudi Arabia's Vision 2030"*.
+- **Facility firms** join safety and the built environment (Seder).
+
+| # | English | Arabic | Pattern |
+|---|---|---|---|
+| 1 | One trusted partner for the building and the systems that protect it. | شريك واحد موثوق للمبنى وللأنظمة التي تحميه. | Trusted partner, built on the GM's own profile line. **Recommended.** |
+| 2 | Safer, better-run buildings across the Kingdom. | مبانٍ أكثر أماناً وأفضل تشغيلاً في جميع أنحاء المملكة. | Outcome for the client (Securitas, Muheel) |
+| 3 | Protecting what our clients build, wherever they are in the Kingdom. | نحمي ما يبنيه عملاؤنا، في أي مكان من المملكة. | Protection purpose (Convergint) |
+| 4 | Engineered safety and quality, on every site, wherever it is. | أمان وجودة بمعايير هندسية، في كل موقع أينما كان. | Engineering-led; matches the traceable-proposal method |
+| 5 | To be the Kingdom's trusted partner for contracting and security systems, in support of Vision 2030. | أن نكون الشريك الموثوق في المملكة لحلول المقاولات والأنظمة الأمنية، دعماً لرؤية المملكة 2030. | Formal Saudi vision style (SAFE, AAG); suits tenders |
+
+**[GM to choose]**
+
+The five never-rules below apply whichever statement is chosen.
 
 **Constraint Layer: what agents must never do** (on detection: refuse, log, escalate to the GM)
 1. Send a price, date or commitment to a client without the GM's approval.
@@ -312,7 +326,9 @@ Readiness: 5 = AI can do it now, 3 = pilot it, 1 = stays human.
 - the next step and its date
 - the outcome and the reason
 
-**Stages:** enquiry → survey → proposal sent → follow-up → PO received → work → handover → invoice → paid → maintenance.
+**Stages:** enquiry → survey → proposal sent → waiting for PO → waiting for payment → work → handover → invoiced → paid → maintenance.
+
+"Waiting for payment" applies to jobs that are not on credit: work starts once the client's transfer arrives.
 
 **What it is not:** accounting, HR or stock. Those can come later, and invoices can be exported to an accountant.
 
@@ -404,16 +420,11 @@ Readiness: 5 = AI can do it now, 3 = pilot it, 1 = stays human.
 - **No value threshold:** the GM does every proposal.
 - **Past proposals:** the GM will share 10–20 (CCTV, renovation, maintenance, small construction).
 
+- **The month before the PO:** each company has its own approval process. For jobs not on credit, ContracTech then waits for the client's bank transfer. So the assistant follows up on two things: the PO, then the payment.
+- **Jobs section:** go-ahead given on 5 November 2026; the build has started.
+
 **Still open:**
-1. What happens during the month before the PO? For example:
-   - the client's internal approvals
-   - registering ContracTech as a vendor
-   - negotiation
-   - waiting for budget
-   
-   This decides what the assistant prepares first.
-2. Approve or rewrite the purpose statement and the five never-rules (section 4.2).
-3. Go-ahead to build the Jobs section in the portal.
+1. Choose one of the five purpose statements (section 4.2). The never-rules stay as drafted.
 
 ---
 

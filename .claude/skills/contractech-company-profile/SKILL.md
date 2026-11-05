@@ -72,8 +72,9 @@ Never invent company facts. A profile goes to clients and tenders.
   and the slogan **"Say it once."** (قُلها مرةً واحدة.). The slogan stands alone
   on the cover; slide 3 explains it. Do not add "consider it done" or any
   second half.
-- **Draft, needs the General Manager's approval**: Eng. Kamal Asif's title and
-  the Arabic spelling of his name.
+- **Approved by the GM (5 Nov 2026):** Eng. Kamal Asif's title ("Low-Current and
+  Electrical Systems Lead") and the Arabic spelling of his name (كمال آصف), and
+  Eng. Mahmoud Rashad's 10+ years in construction.
 - **Never offered: fire systems.** No fire alarm, fire cabling, fire suppression
   or fire-alarm integration anywhere in the profile (GM's instruction, Nov 2026).
 - **Never copy another company's identity** into the profile: when a team member

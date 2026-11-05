@@ -126,8 +126,9 @@ async function build(L, key, outDir) {
     const lw = 4.2, lh = lw / LOGO_ASPECT;
     s.addImage({ path: LOGO, x: (W - lw) / 2, y: 1.15, w: lw, h: lh, altText: 'ContracTech logo' });
     s.addText(L.cover.title, { placeholder: 'title', fontFace: FONT, rtlMode: rtl, lang: L.lang, align: 'center' });
-    T(s, L.cover.subtitle, 0.5, 3.5, 9, 0.45, { fontSize: 18, align: 'center' });
-    T(s, L.cover.line, 0.5, 4.05, 9, 0.4, { fontSize: 14, align: 'center' });
+    T(s, L.cover.slogan, 0.5, 3.5, 9, 0.55, { fontSize: 22, bold: true, align: 'center' });
+    T(s, L.cover.subtitle, 0.5, 4.15, 9, 0.4, { fontSize: 15, align: 'center' });
+    T(s, L.cover.line, 0.5, 4.6, 9, 0.35, { fontSize: 13, align: 'center' });
     s.addNotes(notes.cover);
   }
 

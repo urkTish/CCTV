@@ -67,8 +67,13 @@ Never invent company facts. A profile goes to clients and tenders.
   stamped proposals) and the renovation process. **ContracTech is brand-neutral:**
   it installs whichever camera brand the project specifies. The design portal's
   catalogue happens to be Hikvision; never present the company as tied to it.
-- **Draft, needs the General Manager's approval**: vision and mission wording;
-  Eng. Kamal Asif's title and the Arabic spelling of his name.
+- **Approved by the GM (5 Nov 2026):** the purpose statement ("To be the one team
+  a client trusts with the building and everything that runs and protects it")
+  and the slogan **"Say it once."** (قُلها مرةً واحدة.). The slogan stands alone
+  on the cover; slide 3 explains it. Do not add "consider it done" or any
+  second half.
+- **Draft, needs the General Manager's approval**: Eng. Kamal Asif's title and
+  the Arabic spelling of his name.
 - **Never offered: fire systems.** No fire alarm, fire cabling, fire suppression
   or fire-alarm integration anywhere in the profile (GM's instruction, Nov 2026).
 - **Never copy another company's identity** into the profile: when a team member
@@ -115,7 +120,7 @@ are still open. Ask the owner for the facts; do not fill them in yourself.
    or approval), and any manufacturer partner level, only if confirmed in writing.
 7. Client logos slide, only with permission.
 8. Website and office address on the contact slide.
-9. Approve or rewrite the vision and mission.
+9. (Done 5 Nov 2026: purpose and slogan approved.)
 10. Optional: quality and safety (HSE) policy statements, a Vision 2030 line.
 
 After adding a fact, put it in `content.cjs` in both languages, rebuild, check,

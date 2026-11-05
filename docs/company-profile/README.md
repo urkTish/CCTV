@@ -17,7 +17,7 @@ few company facts still need to be added (list below).
 
 1. Cover
 2. About ContracTech: two divisions, one partner from design to maintenance, 30+ years of team experience, Kingdom-wide coverage
-3. Vision and mission (draft wording, see below)
+3. Our purpose, and the slogan "Say it once." explained (approved 5 Nov 2026)
 4. Values: the four core values, each with a one-line explanation
 5. Our team: Eng. Turki AlTurki, Eng. Kamal Asif (30+ years in security, low-current and electrical systems), Eng. Mahmoud Rashad
 6. Our divisions: General Contracting and Technology Solutions
@@ -76,7 +76,7 @@ English name of the division is now "Technology Solutions". What this version ad
 
 | # | Item | Where it goes |
 |---|---|---|
-| 1 | **Approve or rewrite the vision and mission** (draft wording on slide 3) | Slide 3 |
+| 1 | ~~Approve the vision and mission~~ Done: purpose and slogan approved 5 Nov 2026 | Slide 3 |
 | 2 | **Three to six reference projects**: photo, client (with their permission), city, year, scope. This is the biggest gap. Eng. Kamal's past low-current projects count if he can name them. | Slide 17 |
 | 3 | Eight real photos: team on site, a contracting project, a CCTV installation, renovation before and after, three project photos | Slides 2, 6, 14, 17 |
 | 4 | CR number, VAT number, Chamber of Commerce membership, national address | Cover or contact slide |

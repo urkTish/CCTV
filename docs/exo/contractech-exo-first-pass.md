@@ -180,20 +180,9 @@ The GOVERN cap (13/25 maximum without basic controls) doesn't bind here, because
 
 ### 4.2 Purpose as rules (MTP protocol), draft for your approval
 
-**Purpose statement: five options for the GM to choose from.** The first draft was rejected. These are benchmarked against companies in the sector:
-- **Global leaders** state the outcome for the client in a few words. Securitas: *"We help make your world a safer place."* Convergint: protecting people is its purpose. Muheel: *"Helping clients to create better places to work and live."*
-- **Saudi players** favour "trusted partner" and Vision 2030. SAFE: *"To be the trusted security partner leading the transformation of the security ecosystem."* Abdulrahman Al-Shareef Group: leaders in advanced technology solutions *"aligned with Saudi Arabia's Vision 2030"*.
-- **Facility firms** join safety and the built environment (Seder).
+**Purpose statement (approved by the GM, 5 November 2026):** *"To be the one team a client trusts with the building and everything that runs and protects it."* · «أن نكون الفريق الواحد الذي يأتمنه العميل على المبنى وكل ما يشغّله ويحميه.»
 
-| # | English | Arabic | Pattern |
-|---|---|---|---|
-| 1 | One trusted partner for the building and the systems that protect it. | شريك واحد موثوق للمبنى وللأنظمة التي تحميه. | Trusted partner, built on the GM's own profile line. **Recommended.** |
-| 2 | Safer, better-run buildings across the Kingdom. | مبانٍ أكثر أماناً وأفضل تشغيلاً في جميع أنحاء المملكة. | Outcome for the client (Securitas, Muheel) |
-| 3 | Protecting what our clients build, wherever they are in the Kingdom. | نحمي ما يبنيه عملاؤنا، في أي مكان من المملكة. | Protection purpose (Convergint) |
-| 4 | Engineered safety and quality, on every site, wherever it is. | أمان وجودة بمعايير هندسية، في كل موقع أينما كان. | Engineering-led; matches the traceable-proposal method |
-| 5 | To be the Kingdom's trusted partner for contracting and security systems, in support of Vision 2030. | أن نكون الشريك الموثوق في المملكة لحلول المقاولات والأنظمة الأمنية، دعماً لرؤية المملكة 2030. | Formal Saudi vision style (SAFE, AAG); suits tenders |
-
-**[GM to choose]**
+This is the PURPOSE layer the agents read. It is not the slogan: the client-facing line, also approved, is **"Say it once."** (قُلها مرةً واحدة.), and it lives on the profile's cover. The GM's writing rules for both: no Vision 2030, no location filler, no lists of three, nothing worn out.
 
 The five never-rules below apply whichever statement is chosen.
 
@@ -229,7 +218,7 @@ The five never-rules below apply whichever statement is chosen.
 **Litmus tests**
 - **Endorsement test: pass (expected).** Scenario: a client hasn't replied for 10 days. The agent should draft a follow-up that adds something useful (an answer to an open question, or the vendor-registration documents they'll need) and suggest a date. It should not offer a discount. You would endorse that.
 - **Refusal test: pass (expected).** The agent should refuse "Auto-answer every tender" (a fit-over-volume rule) and "WhatsApp blast to a bought list" (constraint 5).
-- **Identity test:** the layer above answers why people stay, what is visible, and who it is not for. **[confirm wording]**
+- **Identity test:** the layer above answers why people stay, what is visible, and who it is not for.
 
 ### 4.3 Five Design Conditions (binding gate before Step 1 ends)
 
@@ -423,8 +412,7 @@ Readiness: 5 = AI can do it now, 3 = pilot it, 1 = stays human.
 - **The month before the PO:** each company has its own approval process. For jobs not on credit, ContracTech then waits for the client's bank transfer. So the assistant follows up on two things: the PO, then the payment.
 - **Jobs section:** built on 5 November 2026 (Admin → Jobs in the portal), with the Follow-up Assistant as the `contractech-follow-up` skill. Weeks 1–2 of the sprint can start: load the past proposals and set a next step on every open job.
 
-**Still open:**
-1. Choose one of the five purpose statements (section 4.2). The never-rules stay as drafted.
+**Still open:** nothing on the purpose; it and the slogan were approved on 5 November 2026. The never-rules stay as drafted.
 
 ---
 

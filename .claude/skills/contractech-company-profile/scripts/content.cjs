@@ -13,8 +13,10 @@
  *  - Confirmed (November 2026): Eng. Kamal Asif's low-current and electrical
  *    service list (the profile of his former company, reworded; fire alarm
  *    removed on the GM's instruction) and his 30+ years of experience.
- *  - Draft for the GM to approve: vision and mission wording; Eng. Kamal's
- *    title and the Arabic spelling of his name.
+ *  - Approved by the GM (5 November 2026): the purpose statement and the slogan
+ *    "Say it once." (slide 3 and the cover).
+ *  - Draft for the GM to approve: Eng. Kamal's title and the Arabic spelling of
+ *    his name.
  *  - Fill in: everything in [square brackets] on the projects slide.
  */
 
@@ -24,8 +26,9 @@ const ar = {
   deckTitle: 'كونتراكتك — الملف التعريفي',
   cover: {
     title: 'الملف التعريفي',
+    slogan: 'قُلها مرةً واحدة.',
     subtitle: 'المقاولات العامة والحلول التقنية',
-    line: 'المملكة العربية السعودية · 2026',
+    line: '2026',
   },
   about: {
     title: 'من نحن',
@@ -38,10 +41,10 @@ const ar = {
     ],
   },
   vision: {
-    title: 'رؤيتنا ورسالتنا',
+    title: 'غايتنا',
     items: [
-      ['رؤيتنا', 'أن نكون الشريك الموثوق للمقاولات والحلول التقنية في كل مناطق المملكة.'],
-      ['رسالتنا', 'نقدّم أعمال مقاولات وحلولاً تقنية مصمَّمة هندسياً، ننفّذها في موعدها، بتواصل واضح مع عملائنا، وبجودة نلتزم بها من التصميم حتى الصيانة.'],
+      ['غايتنا', 'أن نكون الفريق الواحد الذي يأتمنه العميل على المبنى وكل ما يشغّله ويحميه.'],
+      ['شعارنا', 'قُلها مرةً واحدة. تصف احتياجك مرة واحدة، لجهة واحدة، فتتولى المبنى وأنظمته من التصميم إلى الصيانة.'],
     ],
   },
   values: {
@@ -199,8 +202,9 @@ const en = {
   deckTitle: 'ContracTech — Company Profile',
   cover: {
     title: 'Company Profile',
+    slogan: 'Say it once.',
     subtitle: 'General Contracting and Technology Solutions',
-    line: 'Kingdom of Saudi Arabia · 2026',
+    line: '2026',
   },
   about: {
     title: 'About ContracTech',
@@ -213,10 +217,10 @@ const en = {
     ],
   },
   vision: {
-    title: 'Vision and Mission',
+    title: 'Our Purpose',
     items: [
-      ['Vision', 'To be the trusted partner for contracting and technology solutions in every region of the Kingdom.'],
-      ['Mission', 'We deliver engineered contracting and technology solutions, on time, with clear communication and quality we stand behind from design to maintenance.'],
+      ['Purpose', 'To be the one team a client trusts with the building and everything that runs and protects it.'],
+      ['Our line', 'Say it once. You describe what you need once, to one partner, and we take the building and its systems from design to maintenance.'],
     ],
   },
   values: {
@@ -370,9 +374,9 @@ const en = {
 
 /** Speaker notes, shared by both languages (written in English for the team). */
 const notes = {
-  cover: 'Cover. Logo, title and year only, per the brand rules.',
+  cover: 'Cover. Logo, title, the slogan "Say it once." and the year, per the brand rules.',
   about: 'Photo frame: replace with a real photo of the team on site (right-click the gray frame > Change Picture).',
-  vision: 'DRAFT wording for the General Manager to approve or rewrite. Not taken from an existing company document.',
+  vision: 'Purpose statement and the slogan "Say it once." approved by the GM on 5 November 2026. The slogan stands alone on the cover; this slide is where it is explained.',
   values: 'The four values and their one-line explanations are from the GM\'s own profile (November 2026).',
   divisions: 'Photo frames: one contracting project photo and one CCTV installation photo (right-click > Change Picture).',
   team: 'Eng. Kamal Asif\'s title and the Arabic spelling of his name are proposed: confirm both. Years of experience as stated by the GM (November 2026). Keep a short CV for each person ready; clients and tenders ask for them. Add the construction lead (10+ years) once confirmed.',

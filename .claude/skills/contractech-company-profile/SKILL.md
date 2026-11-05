@@ -10,9 +10,11 @@ Makes two matching decks from one content file:
 - `ContracTech-Company-Profile-AR.pptx` (Arabic, right-to-left, the main client version)
 - `ContracTech-Company-Profile-EN.pptx` (English)
 
-13 slides each: cover, about, vision and mission, values, divisions, general
-contracting, technological solutions, CCTV design method, renovation, how we
-work, why ContracTech, selected projects, contact.
+18 slides each: cover, about, vision and mission, values, our team, divisions,
+general contracting, electrical works (low voltage), low-current (ELV) systems,
+security systems, communication / TV / audio-visual, networks and computer
+rooms, CCTV design method, renovation, how we work, why ContracTech, selected
+projects, contact.
 
 The brand rules come from the **contractech-brand** skill and are not up for
 redesign: white pages, Tahoma, black text, logo in the top corner of every slide
@@ -58,12 +60,20 @@ Never invent company facts. A profile goes to clients and tenders.
   2026, and `docs/about-the-portal-services.md`): the two divisions and their
   services (the GM's wording), Kingdom-wide coverage including remote areas, the
   four core values and their one-line explanations, both contacts with emails,
-  "systems that meet government compliance requirements", the CCTV design method
+  "systems that meet government compliance requirements", Eng. Kamal Asif's
+  low-current and low-voltage electrical services and his 30+ years of
+  experience (from his former company's profile, reworded), the CCTV design method
   (IEC 62676-4, storage / NVR / PoE / TIA-568 cabling sizing, traceable numbers,
   stamped proposals) and the renovation process. **ContracTech is brand-neutral:**
   it installs whichever camera brand the project specifies. The design portal's
   catalogue happens to be Hikvision; never present the company as tied to it.
-- **Draft, needs the General Manager's approval**: vision and mission wording.
+- **Draft, needs the General Manager's approval**: vision and mission wording;
+  Eng. Kamal Asif's title and the Arabic spelling of his name.
+- **Never offered: fire systems.** No fire alarm, fire cabling, fire suppression
+  or fire-alarm integration anywhere in the profile (GM's instruction, Nov 2026).
+- **Never copy another company's identity** into the profile: when a team member
+  brings services from a previous company, reword them as ContracTech's and leave
+  out that company's name, CR, VAT, website, vision and logo.
 - **Unknown, never state until confirmed in writing**: year founded, years of
   experience, number of projects, staff numbers, CR and VAT numbers,
   classifications, certifications, licences, which compliance authority or

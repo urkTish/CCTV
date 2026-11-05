@@ -15,7 +15,7 @@ import type { UnitSystemState } from '../../state/projectTypes.ts';
 import { Icon } from '../icons.tsx';
 import { StatusBadge } from '../primitives.tsx';
 import { STATUS_STYLE } from '../uiStyles.ts';
-import { FINDER_SECTION, SETTINGS_SECTION, type SectionDef, type SectionId, type SectionStatus } from './sections.ts';
+import { FINDER_SECTION, JOBS_SECTION, SETTINGS_SECTION, type SectionDef, type SectionId, type SectionStatus } from './sections.ts';
 
 export type Theme = 'system' | 'light' | 'dark';
 
@@ -194,10 +194,11 @@ export function AdminNav<I extends string = SectionId>({
   onOpenPalette,
   sections,
   lineSwitcher,
+  jobsStatus = null,
 }: {
-  active: I | 'settings' | 'finder';
+  active: I | 'settings' | 'finder' | 'jobs';
   statuses: Readonly<Partial<Record<I, SectionStatus>>>;
-  onNavigate: (id: I | 'settings' | 'finder') => void;
+  onNavigate: (id: I | 'settings' | 'finder' | 'jobs') => void;
   collapsed: boolean;
   onToggleCollapsed: () => void;
   drawerOpen: boolean;
@@ -206,6 +207,8 @@ export function AdminNav<I extends string = SectionId>({
   sections: readonly SectionDef<I>[];
   /** The service-line switcher (CCTV / Renovation), shown above the sections. */
   lineSwitcher?: ReactNode;
+  /** Shown beside Jobs when follow-ups are due, e.g. "2 due". */
+  jobsStatus?: SectionStatus | null;
 }) {
   const ref = useRef<HTMLElement | null>(null);
   useEffect(() => {
@@ -255,6 +258,7 @@ export function AdminNav<I extends string = SectionId>({
           ))}
         </ol>
         <ul className="grid gap-0.5 border-t border-[var(--color-border)] p-2">
+          <NavItem def={JOBS_SECTION} status={jobsStatus} active={active === 'jobs'} collapsed={collapsed} onClick={() => onNavigate('jobs')} />
           <NavItem def={FINDER_SECTION} status={null} active={active === 'finder'} collapsed={collapsed} onClick={() => onNavigate('finder')} />
           <NavItem def={SETTINGS_SECTION} status={null} active={active === 'settings'} collapsed={collapsed} onClick={() => onNavigate('settings')} />
           <li className="hidden lg:block">

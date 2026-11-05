@@ -85,7 +85,7 @@ English name of the division is now "Technology Solutions". What this version ad
 | 7 | Which government compliance requirements the systems meet (name the authority or approval); any manufacturer partner level, only if confirmed in writing | Slides 2, 9, 10 |
 | 8 | Client logos, only with permission. Can the Ministry of Media be listed as a client? | New slide after 12 |
 | 9 | Website (is there one at contractech.sa?) | Slide 18 |
-| 10 | Eng. Kamal Asif's title (proposed: "Low-Current and Electrical Systems Lead") and the Arabic spelling of his name (proposed: كمال آصف) | Slide 5 |
+| 10 | ~~Eng. Kamal Asif's title and Arabic name~~ Done: confirmed 5 Nov 2026 | Slide 5 |
 | 11 | ~~The construction lead with 10+ years~~ Done: Eng. Mahmoud, confirmed 5 Nov 2026 | Slide 5 |
 
 ## How to update

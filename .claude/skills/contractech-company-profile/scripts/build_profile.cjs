@@ -336,17 +336,24 @@ async function build(L, key, outDir) {
     s.addNotes(notes.why);
   }
 
-  // 17. Selected projects: one row per client, logo at the reading start, then name and scope.
+  // 17. Selected projects: logo tiles across the slide, three to a row and each row centred,
+  // with the client's name and the scope of work under its logo.
   pres.addSection({ title: sec[4] });
   {
     const s = page(sec[4]);
     title(s, L.projects.title);
-    const LW = 1.7, LH = 0.72, pitch = 0.8, y0 = 1.12;
-    L.projects.items.forEach((p, i) => {
-      const y = y0 + i * pitch;
-      clientLogo(s, p, 0.5, y, LW, LH);
-      T(s, p.client, 2.5, y + 0.02, 7.0, 0.36, { fontSize: 16, bold: true });
-      T(s, p.scope, 2.5, y + 0.38, 7.0, 0.34, { fontSize: 13 });
+    const PER_ROW = 3, COL = 2.9, GAP = 0.25, LW = 2.3, LH = 0.9, ROW_H = 2.05;
+    const rows = [];
+    for (let i = 0; i < L.projects.items.length; i += PER_ROW) rows.push(L.projects.items.slice(i, i + PER_ROW));
+    rows.forEach((row, r) => {
+      const y = 1.15 + r * ROW_H;
+      const x0 = (W - (row.length * COL + (row.length - 1) * GAP)) / 2;
+      row.forEach((p, i) => {
+        const sx = x0 + i * (COL + GAP);
+        clientLogo(s, p, sx + (COL - LW) / 2, y, LW, LH);
+        T(s, p.client, sx, y + LH + 0.1, COL, 0.35, { fontSize: 14, bold: true, align: 'center' });
+        T(s, p.scope, sx, y + LH + 0.45, COL, 0.6, { fontSize: 12, align: 'center' });
+      });
     });
     s.addNotes(notes.projects);
   }

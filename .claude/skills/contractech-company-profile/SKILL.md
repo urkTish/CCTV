@@ -119,8 +119,8 @@ When asked to improve the profile, work through this list and report which items
 are still open. Ask the owner for the facts; do not fill them in yourself.
 
 1. Real photos for all eight frames.
-2. Reference projects: five clients are named with their scope (11 Nov 2026). Still
-   missing: a photo, city and year for each, and the AJEX logo file.
+2. Reference projects: five clients are named with their scope and logo (11 Nov 2026).
+   Still missing: a photo, city and year for each.
 3. Company registration block: CR number, VAT number, Chamber of Commerce
    membership, national address.
 4. Year founded and team size (engineers, technicians).

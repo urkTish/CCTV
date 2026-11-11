@@ -395,7 +395,7 @@ const notes = {
   renovation: 'Source: docs/about-the-portal-services.md, section 3.5. Say "illustrative visuals", never "photos of your finished home". Replace the before/after frames with a real job.',
   process: 'Seven steps, read right to left in Arabic.',
   why: 'Each claim here is backed by the portal, the brand facts or the team (30+ years confirmed by the GM, November 2026). Do not add other numbers (years in business, project counts) until confirmed.',
-  projects: 'Source: the GM\'s list of past works (11 November 2026): client and scope only. No cities, years or values until the GM confirms them. Ministry of Media is the current name of the former Ministry of Information. Logos: Swissôtel, Umm Al-Qura University and Ministry of Media from Wikimedia Commons, JD Logistics from Wikipedia; a client without a logo file shows its name instead. Check with each client before the deck goes into a tender.',
+  projects: 'Source: the GM\'s list of past works (11 November 2026): client and scope only. No cities, years or values until the GM confirms them. Ministry of Media is the current name of the former Ministry of Information. Logos: Swissôtel, Umm Al-Qura University and Ministry of Media from Wikimedia Commons, JD Logistics from Wikipedia, AJEX supplied by the GM (11 Nov 2026); a client without a logo file shows its name instead. Check with each client before the deck goes into a tender.',
   contact: 'Phone numbers are written left-to-right inside the Arabic layout so they do not flip.',
 };
 

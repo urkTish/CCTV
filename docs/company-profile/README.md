@@ -78,7 +78,7 @@ English name of the division is now "Technology Solutions". What this version ad
 | # | Item | Where it goes |
 |---|---|---|
 | 1 | ~~Approve the vision and mission~~ Done: purpose and slogan approved 5 Nov 2026 | Slide 3 |
-| 2 | Reference projects: five clients and scopes are in (11 Nov 2026). Still open: the AJEX logo file, and a photo, city and year for each project if you want them shown. | Slide 17 |
+| 2 | Reference projects: five clients with logos and scopes are in (11 Nov 2026). Still open: a photo, city and year for each project if you want them shown. | Slide 17 |
 | 3 | Five real photos: team on site, a contracting project, a CCTV installation, renovation before and after | Slides 2, 6, 14 |
 | 4 | CR number, VAT number, Chamber of Commerce membership, national address | Cover or contact slide |
 | 5 | Year founded and team size (engineers, technicians) | Slides 2, 5 |

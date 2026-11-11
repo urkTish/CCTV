@@ -76,23 +76,22 @@ async function build(L, key, outDir) {
   // Left-to-right text (phone numbers, emails) that must not flip inside an Arabic layout.
   const LTR = (slide, text, s, y, w, h, o = {}) =>
     T(slide, text, s, y, w, h, Object.assign({ rtlMode: false, lang: 'en-US' }, o));
-  // A real photo at assets/photos/<id>.jpg|.jpeg|.png replaces the gray frame, cropped to fill it.
+  // The real photo for a frame, at assets/photos/<id>.jpg|.jpeg|.png, or undefined.
+  const photoFile = (id) => ['jpg', 'jpeg', 'png']
+    .map((ext) => path.join(ASSETS, 'photos', `${id}.${ext}`))
+    .find((f) => fs.existsSync(f));
+  // A real photo cropped to fill its frame. Without a photo nothing is drawn: each slide
+  // checks photoFile() first and lays out without the frame (no gray placeholders go to clients).
   const photo = (slide, id, s, y) => {
     const p = SLOTS[id];
-    const real = ['jpg', 'jpeg', 'png']
-      .map((ext) => path.join(ASSETS, 'photos', `${id}.${ext}`))
-      .find((f) => fs.existsSync(f));
-    const frame = { x: X(s, p.w), y, w: p.w, h: p.h };
-    if (!real) {
-      slide.addImage(Object.assign({ path: path.join(ASSETS, 'placeholders', `${id}-${key}.png`), altText: p[key], objectName: `Photo placeholder ${id}` }, frame));
-      return;
-    }
+    const real = photoFile(id);
+    if (!real) return;
     // pptxgenjs crops for 'cover' from the w/h it is given, so pass the photo's true proportions.
     const px = imageSize(real);
-    slide.addImage(Object.assign(frame, {
-      path: real, w: p.w, h: (p.w * px.h) / px.w, sizing: { type: 'cover', w: p.w, h: p.h },
+    slide.addImage({
+      x: X(s, p.w), y, path: real, w: p.w, h: (p.w * px.h) / px.w, sizing: { type: 'cover', w: p.w, h: p.h },
       altText: p[key].replace(/^[^:]*:\s*/, ''), objectName: `Photo ${id}`,
-    }));
+    });
   };
   // A client logo at assets/clients/<id>.png|.jpg, fitted inside a bw x bh box at reading-start s;
   // when there is no file, the client's short name stands in its place.
@@ -155,9 +154,10 @@ async function build(L, key, outDir) {
   {
     const s = page(sec[1]);
     title(s, L.about.title);
+    const withPhoto = Boolean(photoFile('about'));
     T(s, L.about.paras.map((p, i, a) => ({ text: p, options: { breakLine: i < a.length - 1 } })),
-      0.5, 1.15, 5.4, 3.9, { fontSize: 13, paraSpaceAfter: 7 });
-    photo(s, 'about', 6.1, 1.2);
+      0.5, 1.15, withPhoto ? 5.4 : 9.0, 3.9, { fontSize: withPhoto ? 13 : 15, paraSpaceAfter: withPhoto ? 7 : 10 });
+    if (withPhoto) photo(s, 'about', 6.1, 1.2);
     s.addNotes(notes.about);
   }
 
@@ -204,19 +204,21 @@ async function build(L, key, outDir) {
   {
     const s = page(sec[2]);
     title(s, L.divisions.title);
+    const withPhotos = L.divisions.cols.every((col) => photoFile(col.photo));
     L.divisions.cols.forEach((col, i) => {
       const sx = i === 0 ? 0.5 : 5.2;
-      photo(s, col.photo, sx, 1.15);
-      T(s, col.head, sx, 2.98, 4.3, 0.45, { fontSize: 18, bold: true });
+      if (withPhotos) photo(s, col.photo, sx, 1.15);
+      const top = withPhotos ? 2.98 : 1.35;
+      T(s, col.head, sx, top, 4.3, 0.45, { fontSize: 18, bold: true });
       T(s, col.items.map((t, j, a) => ({ text: t, options: { bullet: true, breakLine: j < a.length - 1 } })),
-        sx, 3.5, 4.3, 1.55, { fontSize: 15, paraSpaceAfter: 4 });
+        sx, top + 0.55, 4.3, withPhotos ? 1.55 : 3.2, { fontSize: withPhotos ? 15 : 18, paraSpaceAfter: withPhotos ? 4 : 14 });
     });
     s.addNotes(notes.divisions);
   }
 
   // Numbered rows of service + description, spaced to fit 3 to 5 rows.
-  const serviceRows = (s, items) => {
-    const top = 1.3, n = items.length;
+  const serviceRows = (s, items, top = 1.3) => {
+    const n = items.length;
     const rowH = Math.min(1.25, (5.05 - top) / n);
     const big = n <= 4;
     items.forEach(([name, desc], i) => {
@@ -296,7 +298,7 @@ async function build(L, key, outDir) {
     const s = page(sec[3]);
     title(s, L.cctv.title);
     T(s, L.cctv.lead, 0.5, 1.1, 9, 0.45, { fontSize: 16, bold: true });
-    rows(s, L.cctv.items, 9.0);
+    serviceRows(s, L.cctv.items, 1.75);
     s.addNotes(notes.cctv);
   }
 
@@ -305,11 +307,14 @@ async function build(L, key, outDir) {
     const s = page(sec[3]);
     title(s, L.renovation.title);
     T(s, L.renovation.lead, 0.5, 1.1, 9, 0.45, { fontSize: 16, bold: true });
-    rows(s, L.renovation.items, 5.5);
-    T(s, L.renovation.before, 6.3, 1.68, 3.2, 0.3, { fontSize: 13, bold: true });
-    photo(s, 'reno_before', 6.3, 2.0);
-    T(s, L.renovation.after, 6.3, 3.43, 3.2, 0.3, { fontSize: 13, bold: true });
-    photo(s, 'reno_after', 6.3, 3.75);
+    const withPhotos = Boolean(photoFile('reno_before') && photoFile('reno_after'));
+    rows(s, L.renovation.items, withPhotos ? 5.5 : 9.0);
+    if (withPhotos) {
+      T(s, L.renovation.before, 6.3, 1.68, 3.2, 0.3, { fontSize: 13, bold: true });
+      photo(s, 'reno_before', 6.3, 2.0);
+      T(s, L.renovation.after, 6.3, 3.43, 3.2, 0.3, { fontSize: 13, bold: true });
+      photo(s, 'reno_after', 6.3, 3.75);
+    }
     s.addNotes(notes.renovation);
   }
 

@@ -130,13 +130,13 @@ const ar = {
   },
   cctv: {
     title: 'منهجيتنا في أنظمة المراقبة',
-    lead: 'نصمّم حسب ما تحتاج أن تراه، لا حسب عدد الكاميرات أو العلامة التجارية.',
+    lead: 'نصمّم حسب ما تحتاج أن تراه.',
     items: [
-      'نحدّد المطلوب في كل منطقة: مراقبة عامة، أو تمييز الأشخاص، أو التعرّف على الوجوه، أو قراءة لوحات السيارات، وفق المعيار الدولي IEC 62676-4.',
-      'نختار الكاميرا المناسبة لكل منطقة حسب ارتفاع التركيب والمسافة والإضاءة الليلية، مع بدائل وسبب واضح لكل اختيار.',
-      'نحسب سعة التخزين ومسجّل الفيديو (NVR) والأقراص حسب مدة الاحتفاظ بالتسجيل.',
-      'نصمّم شبكة PoE وتمديدات الكابلات ضمن حدود معيار TIA-568، مع حصر دقيق للكابلات والملحقات.',
-      'نسلّم عرضاً فنياً يتضمن مخطط الموقع وجدول المواد وروابط النشرات الفنية للمصنّع، ويُختم عند اعتماده.',
+      ['الغرض أولاً', 'نحدّد لكل منطقة ما يجب أن تُظهره: مراقبة، أو تمييز، أو تعرّف، أو قراءة لوحة، وفق IEC\u00a062676\u20114.'],
+      ['الكاميرا المناسبة', 'تُختار حسب ارتفاع التركيب والمسافة والإضاءة الليلية، مع سبب لكل اختيار.'],
+      ['تخزين بالقدر المطلوب', 'المسجّل والأقراص بحسب أيام التسجيل التي تحتاجها.'],
+      ['الشبكة والكابلات', 'شبكة PoE وتمديدات ضمن حدود TIA-568، بحصر دقيق.'],
+      ['عرض يمكنك مراجعته', 'مخطط الموقع وجدول المواد ونشرات المصنّع، ويُختم عند الاعتماد.'],
     ],
   },
   renovation: {
@@ -309,13 +309,13 @@ const en = {
   },
   cctv: {
     title: 'How We Design CCTV Systems',
-    lead: 'We design around what you need to see, not around a camera count or one brand.',
+    lead: 'We design around what you need to see.',
     items: [
-      'We set what each area must achieve (general watch, recognising people, identifying faces or reading number plates) to the international standard IEC 62676-4.',
-      'We choose the right camera for each area from mounting height, distance and night-time lighting, with alternatives and a clear reason for each choice.',
-      'We size storage, the video recorder (NVR) and drives to the retention period required.',
-      'We design the PoE network and cabling within TIA-568 limits, with an exact count of cable and accessories.',
-      "We deliver a technical proposal with a site map, bill of materials and links to the manufacturer's datasheets, stamped once approved.",
+      ['Purpose first', 'Each area is set to what it must show: observe, recognise, identify or read a plate (IEC\u00a062676\u20114).'],
+      ['The right camera', 'Chosen for mounting height, distance and night lighting, with the reason for each choice.'],
+      ['Storage that fits', 'Recorder and drives sized to the days of recording you need.'],
+      ['Network and cabling', 'PoE and cable runs within TIA-568 limits, counted exactly.'],
+      ['A proposal you can check', "Site plan, bill of materials and the manufacturer's datasheets, stamped on approval."],
     ],
   },
   renovation: {

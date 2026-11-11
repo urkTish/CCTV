@@ -217,8 +217,8 @@ async function build(L, key, outDir) {
   }
 
   // Numbered rows of service + description, spaced to fit 3 to 5 rows.
-  const serviceRows = (s, items) => {
-    const top = 1.3, n = items.length;
+  const serviceRows = (s, items, top = 1.3) => {
+    const n = items.length;
     const rowH = Math.min(1.25, (5.05 - top) / n);
     const big = n <= 4;
     items.forEach(([name, desc], i) => {
@@ -298,7 +298,7 @@ async function build(L, key, outDir) {
     const s = page(sec[3]);
     title(s, L.cctv.title);
     T(s, L.cctv.lead, 0.5, 1.1, 9, 0.45, { fontSize: 16, bold: true });
-    rows(s, L.cctv.items, 9.0);
+    serviceRows(s, L.cctv.items, 1.75);
     s.addNotes(notes.cctv);
   }
 

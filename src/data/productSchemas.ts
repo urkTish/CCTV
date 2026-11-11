@@ -75,6 +75,8 @@ export const nvrSchema = z
     /** True only when the chassis is 19-inch rack width (about 440 mm). */
     rackWidth19in: z.boolean(),
     redundantPsu: z.boolean(),
+    /** Off sale. Listed so an existing site's recorder can be matched; never recommended for a new design. */
+    discontinued: z.boolean().optional(),
 
     alarmInputs: nullableNonNegativeInt,
     alarmOutputs: nullableNonNegativeInt,

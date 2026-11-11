@@ -419,7 +419,8 @@ const FIX_FOR: Readonly<Record<NvrCheckId, string>> = {
 
 export function recommendNvr(req: NvrRequirement, nvrs: readonly Nvr[], drives: readonly Hdd[]): NvrResult {
   const need = channelsNeeded(req.cameraCount, req.channelHeadroomPercent);
-  const evaluations = nvrs.map((n) => evaluateNvr(n, req, drives));
+  // A discontinued recorder is only ever evaluated when the engineer pinned it.
+  const evaluations = nvrs.filter((n) => !n.discontinued || n.id === req.pinnedNvrId).map((n) => evaluateNvr(n, req, drives));
   const passing = evaluations.filter((e) => e.failed.length === 0).sort((a, b) => b.score - a.score || a.nvr.channels - b.nvr.channels);
   const rejections = evaluations
     .filter((e) => e.failed.length > 0)

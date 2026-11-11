@@ -10,8 +10,9 @@ ContracTech's brand: white pages, Tahoma, black text, logo on every slide.
 | `ContracTech-Company-Profile-AR.pdf`, `-EN.pdf` | Previews. They were rendered without Tahoma installed, so the font is a substitute. For the PDF you send out, open the `.pptx` in PowerPoint and use File > Export > PDF. |
 | `contractech-company-profile.skill` | The generator as a Claude skill. Upload it in the Claude app (Customize > Skills > Upload a skill) to use it in any chat, not only in this repository. |
 
-**Status: draft.** The text is ready to use. Photos, reference projects and a
-few company facts still need to be added (list below).
+**Status: draft.** The text is ready to use. Five reference clients with their
+logos were added on 11 Nov 2026. Photos and a few company facts still need to be
+added (list below).
 
 ## What is in it
 
@@ -31,7 +32,7 @@ few company facts still need to be added (list below).
 14. Renovation: "see it before we build it, and see why it costs what it costs"
 15. How we work: seven steps from first call to aftercare
 16. Why ContracTech: six reasons, each backed by something we do today
-17. Selected projects (to fill in)
+17. Selected projects: Swissôtel Living Jeddah, Umm Al-Qura University, Ministry of Media, JD Logistics and AJEX, each with its logo and scope of work
 18. Contact
 
 Slides 5 and 8–12 bring in Eng. Kamal Asif's services and experience (November 2026), reworded in ContracTech's brand. **Fire systems are not offered** (fire alarm, fire cabling, fire suppression, fire-alarm integration were all left out on the GM's instruction).
@@ -77,15 +78,15 @@ English name of the division is now "Technology Solutions". What this version ad
 | # | Item | Where it goes |
 |---|---|---|
 | 1 | ~~Approve the vision and mission~~ Done: purpose and slogan approved 5 Nov 2026 | Slide 3 |
-| 2 | **Three to six reference projects**: photo, client (with their permission), city, year, scope. This is the biggest gap. Eng. Kamal's past low-current projects count if he can name them. | Slide 17 |
-| 3 | Eight real photos: team on site, a contracting project, a CCTV installation, renovation before and after, three project photos | Slides 2, 6, 14, 17 |
+| 2 | Reference projects: five clients with logos and scopes are in (11 Nov 2026). Still open: a photo, city and year for each project if you want them shown. | Slide 17 |
+| 3 | Five real photos: team on site, a contracting project, a CCTV installation, renovation before and after | Slides 2, 6, 14 |
 | 4 | CR number, VAT number, Chamber of Commerce membership, national address | Cover or contact slide |
 | 5 | Year founded and team size (engineers, technicians) | Slides 2, 5 |
 | 6 | Contractor classification, certifications (e.g. ISO 9001), licences or approvals for security-system installation, if held | New slide after 7 |
 | 7 | Which government compliance requirements the systems meet (name the authority or approval); any manufacturer partner level, only if confirmed in writing | Slides 2, 9, 10 |
-| 8 | Client logos, only with permission. Can the Ministry of Media be listed as a client? | New slide after 12 |
+| 8 | ~~Client logos~~ Done for the five clients on slide 17. Confirm each client has no objection before the deck goes into a tender. | Slide 17 |
 | 9 | Website (is there one at contractech.sa?) | Slide 18 |
-| 10 | Eng. Kamal Asif's title (proposed: "Low-Current and Electrical Systems Lead") and the Arabic spelling of his name (proposed: كمال آصف) | Slide 5 |
+| 10 | ~~Eng. Kamal Asif's title and Arabic name~~ Done: confirmed 5 Nov 2026 | Slide 5 |
 | 11 | ~~The construction lead with 10+ years~~ Done: Eng. Mahmoud, confirmed 5 Nov 2026 | Slide 5 |
 
 ## How to update
@@ -99,7 +100,8 @@ right-click it and choose Change Picture.
 1. Change the wording in `scripts/content.cjs`.
 2. Put real photos in `assets/photos/` named by frame id
    (`about.jpg`, `div_gc.jpg`, `div_tech.jpg`, `reno_before.jpg`,
-   `reno_after.jpg`, `proj1.jpg`, `proj2.jpg`, `proj3.jpg`).
+   `reno_after.jpg`), and client logos in `assets/clients/` named by
+   logo id (`swissotel.png`, `uqu.png`, `media.png`, `jd.png`, `ajex.png`).
 3. Ask Claude to "rebuild the company profile", or run (macOS / Linux shell):
 
 ```bash

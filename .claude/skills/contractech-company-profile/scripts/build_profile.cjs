@@ -94,6 +94,24 @@ async function build(L, key, outDir) {
       altText: p[key].replace(/^[^:]*:\s*/, ''), objectName: `Photo ${id}`,
     }));
   };
+  // A client logo at assets/clients/<id>.png|.jpg, fitted inside a bw x bh box at reading-start s;
+  // when there is no file, the client's short name stands in its place.
+  const clientLogo = (slide, p, s, y, bw, bh) => {
+    const file = ['png', 'jpg', 'jpeg']
+      .map((ext) => path.join(ASSETS, 'clients', `${p.logo}.${ext}`))
+      .find((f) => fs.existsSync(f));
+    if (!file) {
+      T(slide, p.mark, s, y, bw, bh, { fontSize: 18, bold: true, align: 'center', valign: 'middle' });
+      return;
+    }
+    const px = imageSize(file);
+    const k = Math.min(bw / px.w, bh / px.h);
+    const w = px.w * k, h = px.h * k;
+    slide.addImage({
+      path: file, x: X(s + (bw - w) / 2, w), y: y + (bh - h) / 2, w, h,
+      altText: `${p.client} logo`, objectName: `Client logo ${p.logo}`,
+    });
+  };
   const title = (slide, text) =>
     slide.addText(text, { placeholder: 'title', fontFace: FONT, rtlMode: rtl, lang: L.lang, align: start });
   const num = (i) => L.numerals[i];
@@ -318,17 +336,24 @@ async function build(L, key, outDir) {
     s.addNotes(notes.why);
   }
 
-  // 17. Selected projects (to fill in)
+  // 17. Selected projects: logo tiles across the slide, three to a row and each row centred,
+  // with the client's name and the scope of work under its logo.
   pres.addSection({ title: sec[4] });
   {
     const s = page(sec[4]);
     title(s, L.projects.title);
-    L.projects.items.forEach((p, i) => {
-      const sx = [0.5, 3.6, 6.7][i];
-      photo(s, p.photo, sx, 1.2);
-      T(s, p.name, sx, 3.55, 2.8, 0.4, { fontSize: 15, bold: true });
-      T(s, p.meta, sx, 3.95, 2.8, 0.4, { fontSize: 13 });
-      T(s, p.scope, sx, 4.35, 2.8, 0.6, { fontSize: 13 });
+    const PER_ROW = 3, COL = 2.9, GAP = 0.25, LW = 2.3, LH = 0.9, ROW_H = 2.05;
+    const rows = [];
+    for (let i = 0; i < L.projects.items.length; i += PER_ROW) rows.push(L.projects.items.slice(i, i + PER_ROW));
+    rows.forEach((row, r) => {
+      const y = 1.15 + r * ROW_H;
+      const x0 = (W - (row.length * COL + (row.length - 1) * GAP)) / 2;
+      row.forEach((p, i) => {
+        const sx = x0 + i * (COL + GAP);
+        clientLogo(s, p, sx + (COL - LW) / 2, y, LW, LH);
+        T(s, p.client, sx, y + LH + 0.1, COL, 0.35, { fontSize: 14, bold: true, align: 'center' });
+        T(s, p.scope, sx, y + LH + 0.45, COL, 0.6, { fontSize: 12, align: 'center' });
+      });
     });
     s.addNotes(notes.projects);
   }

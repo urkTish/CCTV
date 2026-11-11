@@ -15,9 +15,9 @@
  *    removed on the GM's instruction) and his 30+ years of experience.
  *  - Approved by the GM (5 November 2026): the purpose statement and the slogan
  *    "Say it once." (slide 3 and the cover).
- *  - Draft for the GM to approve: Eng. Kamal's title and the Arabic spelling of
- *    his name.
- *  - Fill in: everything in [square brackets] on the projects slide.
+ *  - Approved by the GM (5 November 2026): Eng. Kamal Asif's title and the
+ *    Arabic spelling of his name (كمال آصف).
+ *  - Projects: edit the five clients and scopes under `projects`; logos live in assets/clients/.
  */
 
 const ar = {
@@ -177,11 +177,14 @@ const ar = {
     ],
   },
   projects: {
-    title: 'من أعمالنا',
+    title: 'مشاريع مختارة',
+    // logo: file at assets/clients/<logo>.png; mark: the name shown in its place when there is no file.
     items: [
-      { photo: 'proj1', name: '[اسم المشروع]', meta: '[الجهة] · [المدينة] · [السنة]', scope: '[نطاق العمل]' },
-      { photo: 'proj2', name: '[اسم المشروع]', meta: '[الجهة] · [المدينة] · [السنة]', scope: '[نطاق العمل]' },
-      { photo: 'proj3', name: '[اسم المشروع]', meta: '[الجهة] · [المدينة] · [السنة]', scope: '[نطاق العمل]' },
+      { logo: 'swissotel', mark: 'Swissôtel', client: 'سويسوتيل ليفينج جدة', scope: 'أعمال كهربائية للجهد المنخفض' },
+      { logo: 'uqu', mark: 'جامعة أم القرى', client: 'جامعة أم القرى', scope: 'أنظمة الجهد المنخفض والتيار الخفيف' },
+      { logo: 'media', mark: 'وزارة الإعلام', client: 'وزارة الإعلام', scope: 'أعمال ميكانيكية وكهربائية وتكييف في عدة عقود' },
+      { logo: 'jd', mark: 'JD Logistics', client: 'جي دي لوجستكس', scope: 'كاميرات مراقبة وأعمال صيانة وترميم' },
+      { logo: 'ajex', mark: 'AJEX', client: 'أجيكس للخدمات اللوجستية', scope: 'كاميرات مراقبة وأعمال صيانة مدنية' },
     ],
   },
   contact: {
@@ -355,9 +358,11 @@ const en = {
   projects: {
     title: 'Selected Projects',
     items: [
-      { photo: 'proj1', name: '[Project name]', meta: '[Client] · [City] · [Year]', scope: '[Scope of work]' },
-      { photo: 'proj2', name: '[Project name]', meta: '[Client] · [City] · [Year]', scope: '[Scope of work]' },
-      { photo: 'proj3', name: '[Project name]', meta: '[Client] · [City] · [Year]', scope: '[Scope of work]' },
+      { logo: 'swissotel', mark: 'Swissôtel', client: 'Swissôtel Living Jeddah', scope: 'Low-voltage electrical works' },
+      { logo: 'uqu', mark: 'UQU', client: 'Umm Al-Qura University', scope: 'Low-voltage and low-current systems' },
+      { logo: 'media', mark: 'Ministry of Media', client: 'Ministry of Media', scope: 'MEP and HVAC works across several contracts' },
+      { logo: 'jd', mark: 'JD Logistics', client: 'JD Logistics', scope: 'CCTV, maintenance and renovation works' },
+      { logo: 'ajex', mark: 'AJEX', client: 'AJEX Logistics Services', scope: 'CCTV and civil maintenance works' },
     ],
   },
   contact: {
@@ -379,7 +384,7 @@ const notes = {
   vision: 'Purpose statement and the slogan "Say it once." approved by the GM on 5 November 2026. The slogan stands alone on the cover; this slide is where it is explained.',
   values: 'The four values and their one-line explanations are from the GM\'s own profile (November 2026).',
   divisions: 'Photo frames: one contracting project photo and one CCTV installation photo (right-click > Change Picture).',
-  team: 'Eng. Kamal Asif\'s title and the Arabic spelling of his name are proposed: confirm both. Years of experience as stated by the GM (November 2026). Keep a short CV for each person ready; clients and tenders ask for them. Eng. Mahmoud\'s 10+ years confirmed by the GM (5 Nov 2026).',
+  team: 'Eng. Kamal Asif\'s title and the Arabic spelling of his name were confirmed by the GM (5 Nov 2026). Years of experience as stated by the GM (November 2026). Keep a short CV for each person ready; clients and tenders ask for them. Eng. Mahmoud\'s 10+ years confirmed by the GM (5 Nov 2026).',
   contracting: 'Service descriptions are general on purpose. Add a named reference project per service when available.',
   electrical: 'From Eng. Kamal Asif\'s service list (November 2026), reworded. Fire systems (alarm, cabling, suppression) are not offered.',
   elv: 'From Eng. Kamal Asif\'s service list (November 2026), reworded. Fire alarm is not offered. Brand-neutral: ContracTech installs the brands the project specifies; claim no manufacturer partner level until confirmed in writing.',
@@ -390,7 +395,7 @@ const notes = {
   renovation: 'Source: docs/about-the-portal-services.md, section 3.5. Say "illustrative visuals", never "photos of your finished home". Replace the before/after frames with a real job.',
   process: 'Seven steps, read right to left in Arabic.',
   why: 'Each claim here is backed by the portal, the brand facts or the team (30+ years confirmed by the GM, November 2026). Do not add other numbers (years in business, project counts) until confirmed.',
-  projects: 'FILL IN: three real projects with photo, client (only if they agreed to be named), city, year and scope. Duplicate the slide for more, or delete it if none can be shown yet.',
+  projects: 'Source: the GM\'s list of past works (11 November 2026): client and scope only. No cities, years or values until the GM confirms them. Ministry of Media is the current name of the former Ministry of Information. Logos: Swissôtel, Umm Al-Qura University and Ministry of Media from Wikimedia Commons, JD Logistics from Wikipedia, AJEX supplied by the GM (11 Nov 2026); a client without a logo file shows its name instead. Check with each client before the deck goes into a tender.',
   contact: 'Phone numbers are written left-to-right inside the Arabic layout so they do not flip.',
 };
 

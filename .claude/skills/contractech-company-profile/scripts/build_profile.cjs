@@ -94,6 +94,24 @@ async function build(L, key, outDir) {
       altText: p[key].replace(/^[^:]*:\s*/, ''), objectName: `Photo ${id}`,
     }));
   };
+  // A client logo at assets/clients/<id>.png|.jpg, fitted inside a bw x bh box at reading-start s;
+  // when there is no file, the client's short name stands in its place.
+  const clientLogo = (slide, p, s, y, bw, bh) => {
+    const file = ['png', 'jpg', 'jpeg']
+      .map((ext) => path.join(ASSETS, 'clients', `${p.logo}.${ext}`))
+      .find((f) => fs.existsSync(f));
+    if (!file) {
+      T(slide, p.mark, s, y, bw, bh, { fontSize: 18, bold: true, align: 'center', valign: 'middle' });
+      return;
+    }
+    const px = imageSize(file);
+    const k = Math.min(bw / px.w, bh / px.h);
+    const w = px.w * k, h = px.h * k;
+    slide.addImage({
+      path: file, x: X(s + (bw - w) / 2, w), y: y + (bh - h) / 2, w, h,
+      altText: `${p.client} logo`, objectName: `Client logo ${p.logo}`,
+    });
+  };
   const title = (slide, text) =>
     slide.addText(text, { placeholder: 'title', fontFace: FONT, rtlMode: rtl, lang: L.lang, align: start });
   const num = (i) => L.numerals[i];
@@ -318,17 +336,17 @@ async function build(L, key, outDir) {
     s.addNotes(notes.why);
   }
 
-  // 17. Selected projects (to fill in)
+  // 17. Selected projects: one row per client, logo at the reading start, then name and scope.
   pres.addSection({ title: sec[4] });
   {
     const s = page(sec[4]);
     title(s, L.projects.title);
+    const LW = 1.7, LH = 0.72, pitch = 0.8, y0 = 1.12;
     L.projects.items.forEach((p, i) => {
-      const sx = [0.5, 3.6, 6.7][i];
-      photo(s, p.photo, sx, 1.2);
-      T(s, p.name, sx, 3.55, 2.8, 0.4, { fontSize: 15, bold: true });
-      T(s, p.meta, sx, 3.95, 2.8, 0.4, { fontSize: 13 });
-      T(s, p.scope, sx, 4.35, 2.8, 0.6, { fontSize: 13 });
+      const y = y0 + i * pitch;
+      clientLogo(s, p, 0.5, y, LW, LH);
+      T(s, p.client, 2.5, y + 0.02, 7.0, 0.36, { fontSize: 16, bold: true });
+      T(s, p.scope, 2.5, y + 0.38, 7.0, 0.34, { fontSize: 13 });
     });
     s.addNotes(notes.projects);
   }

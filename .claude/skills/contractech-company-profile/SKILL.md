@@ -31,8 +31,10 @@ only colour besides the logo comes from photos.
 | `scripts/make_placeholders.py` | Redraws the gray frames after a label or size change. |
 | `assets/contractech-logo.png` | The real logo (from `src/assets/brand/contractech-logo-light.png`). |
 | `assets/photos/<id>.jpg` | Optional real photos. When one exists it replaces that gray frame, cropped to fill it. |
+| `assets/clients/<logo>.png` | Client logos for the projects slide, trimmed of blank margins. A client without a file shows its name in text instead. |
 
-Photo ids: `about`, `div_gc`, `div_tech`, `reno_before`, `reno_after`, `proj1`, `proj2`, `proj3`.
+Photo ids: `about`, `div_gc`, `div_tech`, `reno_before`, `reno_after`.
+Logo ids: `swissotel`, `uqu`, `media`, `jd`, `ajex` (the `logo` field of each project in `content.cjs`).
 Rotate phone photos upright before adding them.
 
 ## Build
@@ -75,6 +77,13 @@ Never invent company facts. A profile goes to clients and tenders.
 - **Approved by the GM (5 Nov 2026):** Eng. Kamal Asif's title ("Low-Current and
   Electrical Systems Lead") and the Arabic spelling of his name (كمال آصف), and
   Eng. Mahmoud Rashad's 10+ years in construction.
+- **Selected projects (the GM's list, 11 Nov 2026):** Swissôtel Living Jeddah (low-voltage
+  electrical works), Umm Al-Qura University (low-voltage and low-current systems),
+  Ministry of Media (MEP and HVAC works, several contracts; this is the current name of
+  the former Ministry of Information), JD Logistics (CCTV, maintenance and renovation),
+  AJEX Logistics Services (CCTV and civil maintenance). Client and scope only: no city,
+  year, value or photo until the GM confirms it. Check with each client before the deck
+  goes into a tender.
 - **Never offered: fire systems.** No fire alarm, fire cabling, fire suppression
   or fire-alarm integration anywhere in the profile (GM's instruction, Nov 2026).
 - **Never copy another company's identity** into the profile: when a team member
@@ -110,8 +119,8 @@ When asked to improve the profile, work through this list and report which items
 are still open. Ask the owner for the facts; do not fill them in yourself.
 
 1. Real photos for all eight frames.
-2. Three to six reference projects: photo, client (with permission), city, year,
-   scope. This is the biggest gap in the current version.
+2. Reference projects: five clients are named with their scope (11 Nov 2026). Still
+   missing: a photo, city and year for each, and the AJEX logo file.
 3. Company registration block: CR number, VAT number, Chamber of Commerce
    membership, national address.
 4. Year founded and team size (engineers, technicians).
@@ -119,7 +128,8 @@ are still open. Ask the owner for the facts; do not fill them in yourself.
    or approvals for installing security systems, if held.
 6. Which government compliance requirements the systems meet (name the authority
    or approval), and any manufacturer partner level, only if confirmed in writing.
-7. Client logos slide, only with permission.
+7. Client logos: on the projects slide for the five named clients. Add others only
+   with permission.
 8. Website and office address on the contact slide.
 9. (Done 5 Nov 2026: purpose and slogan approved.)
 10. Optional: quality and safety (HSE) policy statements, a Vision 2030 line.

@@ -50,8 +50,8 @@ English name of the division is now "Technology Solutions". What this version ad
   seven-step process and "why ContracTech" give a client a reason to choose
   ContracTech, not just a list of services.
 - **Brand-neutral CCTV.** "In the brand you specify."
-- **Places for photos and reference projects.** Neither version has these yet;
-  they are the biggest gap.
+- **Reference projects with client logos**, and room for photos: a slide makes
+  space for a photo only once the file exists, so no gray frames go to clients.
 - **The brand rules.** The 7-slide version uses coloured icons and a green
   circuit-board map. The brand guide asks for plain black text with colour only
   from photos and the logo, so this version leaves them out. If you prefer the
@@ -91,8 +91,8 @@ English name of the division is now "Technology Solutions". What this version ad
 
 ## How to update
 
-**Small edits:** edit the `.pptx` in PowerPoint. To swap a gray photo frame,
-right-click it and choose Change Picture.
+**Small edits:** edit the `.pptx` in PowerPoint. Photos are added by rebuilding
+(step 2 below); each slide makes room for a photo only when its file exists.
 
 **Rebuilding** (keeps Arabic and English in step): the generator is the
 `contractech-company-profile` skill in `.claude/skills/contractech-company-profile/`.

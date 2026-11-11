@@ -130,7 +130,7 @@ const ar = {
   },
   cctv: {
     title: 'منهجيتنا في أنظمة المراقبة',
-    lead: 'نصمّم حسب ما تحتاج أن تراه، لا حسب عدد الكاميرات أو العلامة التجارية.',
+    lead: 'يُصمَّم كل نظام انطلاقاً من المتطلب التشغيلي لكل منطقة، لا من عدد الكاميرات أو العلامة التجارية.',
     items: [
       'نحدّد المطلوب في كل منطقة: مراقبة عامة، أو تمييز الأشخاص، أو التعرّف على الوجوه، أو قراءة لوحات السيارات، وفق المعيار الدولي IEC 62676-4.',
       'نختار الكاميرا المناسبة لكل منطقة حسب ارتفاع التركيب والمسافة والإضاءة الليلية، مع بدائل وسبب واضح لكل اختيار.',
@@ -309,9 +309,9 @@ const en = {
   },
   cctv: {
     title: 'How We Design CCTV Systems',
-    lead: 'We design around what you need to see, not around a camera count or one brand.',
+    lead: 'Each system is engineered from the operational requirement of every area, not from a camera count or a brand.',
     items: [
-      'We set what each area must achieve (general watch, recognising people, identifying faces or reading number plates) to the international standard IEC 62676-4.',
+      'We define the level of detail each area must deliver (observation, recognition, identification or number-plate reading) to the international standard IEC 62676-4.',
       'We choose the right camera for each area from mounting height, distance and night-time lighting, with alternatives and a clear reason for each choice.',
       'We size storage, the video recorder (NVR) and drives to the retention period required.',
       'We design the PoE network and cabling within TIA-568 limits, with an exact count of cable and accessories.',

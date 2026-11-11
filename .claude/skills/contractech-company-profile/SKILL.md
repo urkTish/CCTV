@@ -27,10 +27,9 @@ only colour besides the logo comes from photos.
 |---|---|
 | `scripts/content.cjs` | Every word on every slide, Arabic and English side by side, plus speaker notes. **Edit wording here only.** |
 | `scripts/build_profile.cjs` | Builds both decks. Layout is written once and mirrored for Arabic. |
-| `scripts/placeholders.json` | The photo frames: id, size, label. |
-| `scripts/make_placeholders.py` | Redraws the gray frames after a label or size change. |
+| `scripts/placeholders.json` | The photo frames: id, size and alt text. |
 | `assets/contractech-logo.png` | The real logo (from `src/assets/brand/contractech-logo-light.png`). |
-| `assets/photos/<id>.jpg` | Optional real photos. When one exists it replaces that gray frame, cropped to fill it. |
+| `assets/photos/<id>.jpg` | Optional real photos, cropped to fill their frame. Without a photo the slide lays out without the frame: no gray placeholders go to clients. |
 | `assets/clients/<logo>.png` | Client logos for the projects slide, trimmed of blank margins. A client without a file shows its name in text instead. |
 
 Photo ids: `about`, `div_gc`, `div_tech`, `reno_before`, `reno_after`.
@@ -118,7 +117,7 @@ Never invent company facts. A profile goes to clients and tenders.
 When asked to improve the profile, work through this list and report which items
 are still open. Ask the owner for the facts; do not fill them in yourself.
 
-1. Real photos for all eight frames.
+1. Real photos for the five frames: team on site, a contracting project, a CCTV installation, renovation before and after.
 2. Reference projects: five clients are named with their scope and logo (11 Nov 2026).
    Still missing: a photo, city and year for each.
 3. Company registration block: CR number, VAT number, Chamber of Commerce

@@ -1,5 +1,5 @@
 {
-  "_note": "Gray photo frames used until real photos are supplied. Sizes are in inches and must match the frames in build_profile.cjs. Regenerate the PNGs with make_placeholders.py after changing a label or size.",
+  "_note": "Photo frames, in inches, filled by a real photo at assets/photos/<id>.jpg|.png. Without a photo the slide lays out without the frame. The labels are the alt text.",
   "slots": [
     { "id": "about",       "w": 3.4, "h": 3.85, "ar": "صورة: فريق كونتراكتك في الموقع", "en": "Photo: ContracTech team on site" },
     { "id": "div_gc",      "w": 4.3, "h": 1.65, "ar": "صورة: مشروع مقاولات",            "en": "Photo: a contracting project" },
